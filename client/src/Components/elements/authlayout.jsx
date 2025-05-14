@@ -43,8 +43,9 @@ const AuthLayout = ({ children, title, subtitle, illustration }) => {
                     </div>
 
                     <div className="mb-6">
-                        <h1 className="text-3xl font-bold text-navy-900">{title}</h1>
-                        {subtitle && <p className="mt-2 text-slate-600">{subtitle}</p>}
+                        <h1 className="text-3xl sm:text-4xl font-bold text-navy-900 text-center sm:text-left">{title}</h1>
+                        {subtitle && <p className="mt-2 text-slate-600 text-center sm:text-left">{subtitle}</p>}
+
                     </div>
 
                     {children}

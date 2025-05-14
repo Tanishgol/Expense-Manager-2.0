@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MailIcon, LockIcon, Eye, EyeOff } from 'lucide-react';
+import { MailIcon, LockIcon, LogIn, Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '../Components/elements/authlayout';
 import Input from '../Components/elements/input';
 import Button from '../Components/elements/button';
@@ -19,7 +19,7 @@ const Login = () => {
             illustration={
                 <div className="flex flex-col items-center">
                     <div className="mb-4">
-                        <img src={savingmoney} alt="Icon of Saving Money" width={152} />
+                        <img src={savingmoney} alt="Icon of Saving Money" width={150} />
                     </div>
                     <h2 className="mb-2 text-2xl font-bold">Secure Access</h2>
                     <p className="text-center text-emerald-50">
@@ -69,7 +69,11 @@ const Login = () => {
                     </Link>
                 </div>
 
-                <Button fullWidth>Sign in</Button>
+                <Button fullWidth className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
+                    <LogIn className="h-5 w-5" />
+                    <span className="text-sm font-semibold">Sign in</span>
+                </Button>
+
 
                 <div className="text-center text-sm">
                     Don't have an account?{' '}
