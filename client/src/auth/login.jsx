@@ -64,7 +64,7 @@ const Login = () => {
 
                 <div className="mt-4 flex items-center justify-between">
                     <Checkbox label="Remember me" id="remember-me" />
-                    <Link to="/forgot-password" className="text-sm font-medium text-emerald-600 hover:text-emerald-700">
+                    <Link to="/email-verification" className="text-sm font-medium text-emerald-600 hover:text-emerald-700">
                         Forgot password?
                     </Link>
                 </div>

@@ -13,15 +13,33 @@ const OTPVerify = () => {
     const navigate = useNavigate()
 
     const handleChange = (e, index) => {
-        const value = e.target.value
-        if (value.length > 1) return
-        const newOtp = [...otp]
-        newOtp[index] = value
-        setOtp(newOtp)
-        if (value && index < 5) {
-            inputRefs.current[index + 1].focus()
+        const value = e.target.value.replace(/\D/g, ''); // Allow only digits
+        if (!value) return;
+
+        const newOtp = [...otp];
+        let filled = 0;
+
+        for (let i = 0; i < newOtp.length; i++) {
+            if (newOtp[i]) filled++;
         }
-    }
+
+        for (let i = 0; i < newOtp.length; i++) {
+            if (!newOtp[i]) {
+                newOtp[i] = value[0];
+                break;
+            }
+        }
+
+        setOtp(newOtp);
+
+        const nextEmptyIndex = newOtp.findIndex((d) => d === '');
+        if (nextEmptyIndex !== -1) {
+            inputRefs.current[nextEmptyIndex].focus();
+        } else {
+            inputRefs.current[newOtp.length - 1].blur();
+        }
+    };
+
 
     const handleKeyDown = (e, index) => {
         if (e.key === 'Backspace') {
@@ -32,20 +50,14 @@ const OTPVerify = () => {
     }
 
     const handlePaste = (e) => {
-        e.preventDefault()
-        const pastedData = e.clipboardData.getData('text/plain').trim()
-        if (/^\d+$/.test(pastedData)) {
-            const digits = pastedData.split('').slice(0, 6)
-            const newOtp = [...otp]
-            digits.forEach((digit, index) => {
-                if (index < 6) newOtp[index] = digit
-            })
-            setOtp(newOtp)
-            if (digits.length < 6) {
-                inputRefs.current[digits.length].focus()
-            }
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text/plain').trim();
+        if (/^\d{6}$/.test(pastedData)) {
+            const digits = pastedData.split('');
+            setOtp(digits);
+            inputRefs.current[5].focus();
         }
-    }
+    };
 
     useEffect(() => {
         if (timer > 0) {
@@ -112,7 +124,7 @@ const OTPVerify = () => {
                             value={digit}
                             onChange={(e) => handleChange(e, index)}
                             onKeyDown={(e) => handleKeyDown(e, index)}
-                            onPaste={index === 0 ? handlePaste : undefined}
+                            onPaste={handlePaste}
                         />
                     ))}
                     </div>
