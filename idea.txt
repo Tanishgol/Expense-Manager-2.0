@@ -1,0 +1,3 @@
+https://ipapi.co/103.107.61.104/currency/
+
+https://ipapi.co/json/
