@@ -6,8 +6,6 @@ import Transaction from '../Components/transactions/transaction';
 const Transactions = () => {
     return (
         <>
-            <TransactionItem />
-            <RecentTransactions />
             <Transaction />
         </>
     )

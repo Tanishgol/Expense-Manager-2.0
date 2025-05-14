@@ -10,6 +10,11 @@ import {
 } from 'lucide-react';
 
 const TransactionItem = ({ transaction }) => {
+    // Early return if transaction is missing
+    if (!transaction || typeof transaction !== 'object') {
+        return null;
+    }
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -50,7 +55,7 @@ const TransactionItem = ({ transaction }) => {
         <tr className="border-b hover:bg-gray-50 transition-colors">
             <td className="py-4 px-2">
                 <div className="flex items-center gap-3">
-                    {getCategoryIcon(transaction.category)}
+                    {getCategoryIcon(transaction.category || '')}
                     <div>
                         <p className="font-medium text-gray-800">{transaction.title || 'N/A'}</p>
                         <p className="text-xs text-gray-500">{transaction.vendor || '-'}</p>
@@ -69,7 +74,7 @@ const TransactionItem = ({ transaction }) => {
                 className={`py-4 px-2 text-right font-medium ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}
             >
-                {formatAmount(transaction.amount)}
+                {formatAmount(transaction.amount || 0)}
             </td>
         </tr>
     );
