@@ -1,11 +1,27 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserIcon, MailIcon, LockIcon, CheckIcon, EyeIcon, EyeOffIcon, UserPlus } from 'lucide-react';
+import { UserIcon, MailIcon, CircleX, CheckIcon, EyeIcon, EyeOffIcon, UserPlus } from 'lucide-react';
+import axios from 'axios';
 import AuthLayout from '../Components/elements/authlayout';
 import Input from '../Components/elements/input';
 import Button from '../Components/elements/button';
 import Checkbox from '../Components/elements/checkbox';
 import savingmoney from '../Assets/save-money-register.png';
+
+function getStrengthColor(strength) {
+    switch (strength) {
+        case 1:
+            return 'bg-red-500';
+        case 2:
+            return 'bg-orange-500';
+        case 3:
+            return 'bg-yellow-500';
+        case 4:
+            return 'bg-green-500';
+        default:
+            return 'bg-gray-300';
+    }
+}
 
 export function Register() {
     const [password, setPassword] = useState('');
@@ -15,16 +31,27 @@ export function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
         setPassword(value);
 
         let strength = 0;
-        if (value.length > 6) strength += 1;
-        if (/[A-Z]/.test(value)) strength += 1;
-        if (/[0-9]/.test(value)) strength += 1;
-        if (/[^A-Za-z0-9]/.test(value)) strength += 1;
+
+        const hasLower = /[a-z]/.test(value);
+        const hasUpper = /[A-Z]/.test(value);
+        const hasSpecial = /[^A-Za-z0-9]/.test(value);
+        const hasNumber = /\d/.test(value);
+
+        if (hasLower) strength = 1;
+        if (hasLower && hasUpper) strength = 2;
+        if (hasLower && hasUpper && hasSpecial) strength = 3;
+        if (hasLower && hasUpper && hasSpecial && hasNumber) strength = 4;
+
         setPasswordStrength(strength);
 
         if (confirmPassword) {
@@ -32,15 +59,55 @@ export function Register() {
         }
     };
 
+
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
         setConfirmPassword(value);
         setPasswordsMatch(password === value);
     };
 
-    const getStrengthColor = (index) => {
-        const colors = ['bg-red-500', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-500'];
-        return index < passwordStrength ? colors[passwordStrength - 1] : 'bg-slate-200';
+    const handleFullNameChange = (e) => {
+        const value = e.target.value;
+        if (/^[a-zA-Z\s]*$/.test(value)) {
+            setFullName(value);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!acceptedTerms || !passwordsMatch || passwordStrength < 2) {
+            setError('Please complete all fields correctly.');
+            return;
+        }
+
+        const userData = {
+            fullName,
+            email,
+            password, // Only send password, no need to send confirmPassword
+        };
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await axios.post('http://localhost:9000/api/register', userData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            console.log(response.data.message);
+            // Optionally, do something on success like redirect or show message
+        } catch (err) {
+            if (err.response) {
+                setError(err.response.data.message);
+            } else {
+                setError('An error occurred while registering. Please try again.');
+            }
+            console.error('Error:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -59,13 +126,15 @@ export function Register() {
                 </div>
             }
         >
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
                 <Input
                     label="Full Name"
                     type="text"
-                    placeholder="John Smith"
+                    placeholder="Tanish gol"
                     required
                     icon={<UserIcon className="h-5 w-5" />}
+                    value={fullName}
+                    onChange={handleFullNameChange}
                 />
                 <Input
                     label="Email"
@@ -73,7 +142,10 @@ export function Register() {
                     placeholder="name@example.com"
                     required
                     icon={<MailIcon className="h-5 w-5" />}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                 />
+
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
                     <div className="relative">
@@ -84,6 +156,7 @@ export function Register() {
                             value={password}
                             onChange={handlePasswordChange}
                             className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:outline-none ${passwordStrength >= 3 ? 'border-emerald-500 focus:ring-emerald-500' : 'border-slate-300 focus:ring-slate-300'}`}
+                            aria-describedby="passwordStrength"
                         />
                         <span
                             onClick={() => setShowPassword(!showPassword)}
@@ -98,14 +171,15 @@ export function Register() {
                                 {[...Array(4)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className={`h-1.5 w-full rounded ${getStrengthColor(i)}`}
+                                        className={`h-1.5 w-full rounded ${i < passwordStrength ? getStrengthColor(passwordStrength) : 'bg-gray-300'}`}
                                     />
                                 ))}
                             </div>
-                            <p className="text-xs text-slate-600">
-                                {passwordStrength < 2 && 'Add uppercase, numbers or special characters'}
-                                {passwordStrength >= 2 && passwordStrength < 3 && 'Getting better...'}
-                                {passwordStrength >= 3 && (
+                            <p className="text-xs text-slate-600" id="passwordStrength">
+                                {passwordStrength === 1 && 'Weak password: add uppercase letters'}
+                                {passwordStrength === 2 && 'Getting better: add special characters'}
+                                {passwordStrength === 3 && 'Almost there: add a number'}
+                                {passwordStrength === 4 && (
                                     <span className="flex items-center text-emerald-600">
                                         <CheckIcon className="mr-1 h-3 w-3" /> Strong password
                                     </span>
@@ -113,6 +187,7 @@ export function Register() {
                             </p>
                         </div>
                     )}
+
                 </div>
 
                 <div>
@@ -125,6 +200,7 @@ export function Register() {
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
                             className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:outline-none ${confirmPassword && !passwordsMatch ? 'border-red-500 focus:ring-red-400' : 'border-slate-300 focus:ring-emerald-500'}`}
+                            aria-describedby="confirmPasswordError"
                         />
                         <span
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -134,7 +210,21 @@ export function Register() {
                         </span>
                     </div>
                     {confirmPassword && !passwordsMatch && (
-                        <p className="text-xs text-red-600 mt-1">Passwords don't match</p>
+                        <p className="text-xs text-red-600 mt-1" id="confirmPasswordError">
+                            <span className="flex items-center">
+                                <CircleX className="mr-1 h-3 w-3" />
+                                Passwords don't match
+                            </span>
+                        </p>
+                    )}
+
+                    {confirmPassword && passwordsMatch && (
+                        <p className="text-xs text-emerald-600 mt-1">
+                            <span className="flex items-center">
+                                <CheckIcon className="mr-1 h-3 w-3" />
+                                Passwords match
+                            </span>
+                        </p>
                     )}
                 </div>
 
@@ -158,11 +248,17 @@ export function Register() {
                     />
                 </div>
 
-                <Button fullWidth className="flex items-center justify-center gap-2"
-                    disabled={!acceptedTerms || !passwordsMatch || passwordStrength < 2}>
-                    <UserPlus className="h-5 w-5" />
+                {error && <p className="text-red-500 text-center">{error}</p>}
+
+                <Button
+                    fullWidth
+                    className="flex items-center justify-center gap-2"
+                    disabled={!acceptedTerms || !passwordsMatch || passwordStrength < 2 || loading || !fullName || !email}
+                >
+                    {loading ? 'Registering...' : <UserPlus className="h-5 w-5" />}
                     <span>Create Account</span>
                 </Button>
+
                 <div className="text-center text-sm">
                     Already have an account?{' '}
                     <Link to="/login" className="font-medium text-emerald-600 hover:text-emerald-700">

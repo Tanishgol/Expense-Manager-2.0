@@ -17,7 +17,8 @@ export function Checkbox({ label, className = '', ...props }) {
 }
 
 export default Checkbox;
+
 Checkbox.propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.node.isRequired,
     className: PropTypes.string,
 };

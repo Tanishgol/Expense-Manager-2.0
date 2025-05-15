@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CheckIcon, LockKeyhole, EyeIcon, EyeOffIcon } from 'lucide-react'
+import { CheckIcon, LockKeyhole, EyeIcon, EyeOffIcon, CircleX } from 'lucide-react'
 import AuthLayout from '../Components/elements/authlayout'
 import Button from '../Components/elements/button'
 import resetPasswordImage from '../Assets/reset-password-icon.png'
@@ -115,7 +115,6 @@ const ResetPassword = () => {
                     )}
                 </div>
 
-                {/* Confirm Password */}
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                         Confirm New Password
@@ -140,11 +139,21 @@ const ResetPassword = () => {
                         </span>
                     </div>
                     {confirmPassword && !passwordsMatch && (
-                        <p className="text-xs text-red-600 mt-1">Passwords don't match</p>
+                        <p className="text-xs text-red-600 mt-1">
+                            <span className="flex items-center text-red-600">
+                                <CircleX className='mr-1 h-3 w-3' />  Passwords do not match.
+                            </span>
+                        </p>
+                    )}
+                    {confirmPassword && passwordsMatch && (
+                        <p className="text-xs text-green-600 mt-1">
+                            <span className="flex items-center text-emerald-600">
+                                <CheckIcon className="mr-1 h-3 w-3" />Passwords match.
+                            </span>
+                        </p>
                     )}
                 </div>
 
-                {/* Submit Button */}
                 <Button
                     type="submit"
                     fullWidth

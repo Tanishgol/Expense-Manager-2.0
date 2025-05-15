@@ -13,41 +13,30 @@ const OTPVerify = () => {
     const navigate = useNavigate()
 
     const handleChange = (e, index) => {
-        const value = e.target.value.replace(/\D/g, ''); // Allow only digits
-        if (!value) return;
+        const value = e.target.value.replace(/\D/g, '');
+        if (value.length > 1) return;
 
         const newOtp = [...otp];
-        let filled = 0;
-
-        for (let i = 0; i < newOtp.length; i++) {
-            if (newOtp[i]) filled++;
-        }
-
-        for (let i = 0; i < newOtp.length; i++) {
-            if (!newOtp[i]) {
-                newOtp[i] = value[0];
-                break;
-            }
-        }
-
+        newOtp[index] = value;
         setOtp(newOtp);
 
-        const nextEmptyIndex = newOtp.findIndex((d) => d === '');
-        if (nextEmptyIndex !== -1) {
-            inputRefs.current[nextEmptyIndex].focus();
-        } else {
-            inputRefs.current[newOtp.length - 1].blur();
+        if (value && index < otp.length - 1) {
+            inputRefs.current[index + 1].focus();
         }
     };
 
-
     const handleKeyDown = (e, index) => {
         if (e.key === 'Backspace') {
-            if (!otp[index] && index > 0) {
-                inputRefs.current[index - 1].focus()
+            if (otp[index]) {
+                const newOtp = [...otp];
+                newOtp[index] = '';
+                setOtp(newOtp);
+            } else if (index > 0) {
+                inputRefs.current[index - 1].focus();
             }
         }
-    }
+    };
+
 
     const handlePaste = (e) => {
         e.preventDefault();
@@ -82,7 +71,6 @@ const OTPVerify = () => {
     const handleVerify = () => {
         const enteredOtp = otp.join('')
         if (enteredOtp.length === 6) {
-            // Here you can add OTP verification logic (e.g., API call)
             navigate('/reset-password')
         } else {
             alert('Please enter the complete 6-digit OTP')
