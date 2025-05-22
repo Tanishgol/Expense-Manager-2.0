@@ -12,6 +12,7 @@ export const Transactions = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilter, setShowFilter] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [editingTransaction, setEditingTransaction] = useState(null);
     const { token } = useAuth();
 
     // Get unique categories from transactions
@@ -38,14 +39,82 @@ export const Transactions = () => {
         );
     };
 
-    // Handle CSV download
+    const handleEditTransaction = (transaction) => {
+        setEditingTransaction(transaction);
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteTransaction = async (transactionId) => {
+        try {
+            const response = await fetch(`http://localhost:9000/api/transactions/${transactionId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete transaction');
+            }
+
+            setTransactions(prev => prev.filter(t => t._id !== transactionId));
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            setError(error.message || 'Failed to delete transaction');
+        }
+    };
+
+    const handleAddTransaction = async (transactionData) => {
+        try {
+            const method = editingTransaction ? 'PUT' : 'POST';
+            const url = editingTransaction 
+                ? `http://localhost:9000/api/transactions/${editingTransaction._id}`
+                : 'http://localhost:9000/api/transactions';
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(transactionData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save transaction');
+            }
+
+            const savedTransaction = await response.json();
+
+            if (editingTransaction) {
+                setTransactions(prev => 
+                    prev.map(t => t._id === savedTransaction._id ? savedTransaction : t)
+                );
+            } else {
+                setTransactions(prev => [...prev, savedTransaction]);
+            }
+
+            setEditingTransaction(null);
+        } catch (error) {
+            console.error('Error saving transaction:', error);
+            setError(error.message || 'Failed to save transaction');
+        }
+    };
+
     const handleDownload = () => {
-        const headers = ['Description', 'Category', 'Amount', 'Date'];
-        const csvData = filteredTransactions.map(t => [
+        // Implement CSV download functionality
+        const headers = ['Title', 'Description', 'Category', 'Date', 'Amount'];
+        const csvData = transactions.map(t => [
             t.title,
+            t.description || '',
             t.category,
-            Math.abs(t.amount).toFixed(2),
-            new Date(t.date).toLocaleDateString()
+            new Date(t.date).toLocaleDateString(),
+            t.amount
         ]);
 
         const csvContent = [
@@ -56,85 +125,48 @@ export const Transactions = () => {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-
         link.setAttribute('href', url);
-        link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', 'transactions.csv');
         link.style.visibility = 'hidden';
-
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     useEffect(() => {
-        if (token) {
-            fetchTransactions();
-        } else {
-            setLoading(false);
-            setError('Please log in to view transactions');
-        }
+        const fetchTransactions = async () => {
+            try {
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+
+                const response = await fetch('http://localhost:9000/api/transactions', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch transactions');
+                }
+
+                const data = await response.json();
+                setTransactions(data);
+                setError(null);
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+                setError(error.message || 'Failed to load transactions');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTransactions();
     }, [token]);
-
-    const fetchTransactions = async () => {
-        try {
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            const response = await fetch('http://localhost:9000/api/transactions', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to fetch transactions');
-            }
-
-            const data = await response.json();
-            setTransactions(data);
-            setLoading(false);
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching transactions:', err);
-            setError(err.message);
-            setLoading(false);
-        }
-    };
-
-    const handleAddTransaction = async (transactionData) => {
-        try {
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            const response = await fetch('http://localhost:9000/api/transactions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                credentials: 'include',
-                body: JSON.stringify(transactionData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to add transaction');
-            }
-
-            const newTransaction = await response.json();
-            setTransactions([newTransaction, ...transactions]);
-            setError(null);
-        } catch (err) {
-            console.error('Error adding transaction:', err);
-            setError(err.message);
-        }
-    };
 
     if (loading) {
         return (
@@ -154,7 +186,7 @@ export const Transactions = () => {
                     <div className="text-red-600 text-xl mb-2">Error</div>
                     <p className="text-gray-600">{error}</p>
                     <button
-                        onClick={fetchTransactions}
+                        onClick={() => window.location.reload()}
                         className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                     >
                         Try Again
@@ -166,56 +198,29 @@ export const Transactions = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header Row: Transactions title + right side buttons */}
-            <div className="flex justify-between items-center flex-wrap gap-4">
-                <h1 className="text-2xl font-bold text-gray-800">Transactions</h1>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    {/* Search Box */}
+                <div className="flex items-center gap-4">
+                    {/* Search Bar */}
                     <div className="relative">
+                        <SearchIcon size={18} className="absolute left-3 top-2.5 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search transactions..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 pr-3 py-2 w-64 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
-                        <SearchIcon size={18} className="text-gray-400 absolute left-3 top-2.5" />
                     </div>
 
                     {/* Filter Button */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowFilter(!showFilter)}
-                            className={`p-2 border rounded-md transition ${showFilter
-                                ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
-                                : 'border-gray-300 hover:bg-gray-50 text-gray-600'
-                                }`}
-                        >
-                            <FilterIcon size={18} />
-                        </button>
-
-                        {showFilter && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                                <div className="p-2">
-                                    <h3 className="text-sm font-medium text-gray-700 mb-2">Filter by Category</h3>
-                                    <div className="space-y-1">
-                                        {categories.map((category) => (
-                                            <label key={category} className="flex items-center space-x-2 text-sm">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedCategories.includes(category)}
-                                                    onChange={() => toggleCategory(category)}
-                                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                />
-                                                <span>{category}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    <button
+                        onClick={() => setShowFilter(!showFilter)}
+                        className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                    >
+                        <FilterIcon size={18} className="text-gray-600" />
+                    </button>
 
                     {/* Download Button */}
                     <button
@@ -227,7 +232,10 @@ export const Transactions = () => {
 
                     {/* Add Transaction Button */}
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            setEditingTransaction(null);
+                            setIsModalOpen(true);
+                        }}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center shadow-sm transition"
                     >
                         <PlusIcon size={18} className="mr-1" />
@@ -235,6 +243,28 @@ export const Transactions = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Category Filters */}
+            {showFilter && (
+                <div className="bg-white p-4 rounded-lg shadow">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Category</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {categories.map(category => (
+                            <button
+                                key={category}
+                                onClick={() => toggleCategory(category)}
+                                className={`px-3 py-1 rounded-full text-sm ${
+                                    selectedCategories.includes(category)
+                                        ? 'bg-indigo-100 text-indigo-800'
+                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                }`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Transactions Table */}
             <div className="bg-white rounded-lg shadow p-4 md:p-6">
@@ -253,7 +283,12 @@ export const Transactions = () => {
                         <tbody>
                             {filteredTransactions.length > 0 ? (
                                 filteredTransactions.map((transaction) => (
-                                    <TransactionItem key={transaction._id} transaction={transaction} />
+                                    <TransactionItem 
+                                        key={transaction._id} 
+                                        transaction={transaction}
+                                        onEdit={handleEditTransaction}
+                                        onDelete={handleDeleteTransaction}
+                                    />
                                 ))
                             ) : (
                                 <tr>
@@ -267,11 +302,15 @@ export const Transactions = () => {
                 </div>
             </div>
 
-            {/* Modal for Adding Transactions */}
+            {/* Modal for Adding/Editing Transactions */}
             <AddTransactionModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditingTransaction(null);
+                }}
                 onAdd={handleAddTransaction}
+                editTransaction={editingTransaction}
             />
         </div>
     );

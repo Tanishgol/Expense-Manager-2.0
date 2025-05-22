@@ -13,7 +13,7 @@ import {
     Trash2,
 } from 'lucide-react';
 
-const TransactionItem = ({ transaction }) => {
+const TransactionItem = ({ transaction, onEdit, onDelete }) => {
     const { title, description, category, date, amount } = transaction;
     const isIncome = amount > 0;
 
@@ -64,10 +64,16 @@ const TransactionItem = ({ transaction }) => {
             </td>
             <td className="py-4 text-right">
                 <div className="flex justify-end gap-2">
-                    <button className="p-1 text-gray-500 hover:text-indigo-600 transition-colors">
+                    <button 
+                        onClick={() => onEdit(transaction)}
+                        className="p-1 text-gray-500 hover:text-indigo-600 transition-colors"
+                    >
                         <Edit size={16} />
                     </button>
-                    <button className="p-1 text-gray-500 hover:text-red-600 transition-colors">
+                    <button 
+                        onClick={() => onDelete(transaction._id)}
+                        className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                    >
                         <Trash2 size={16} />
                     </button>
                 </div>

@@ -80,9 +80,7 @@ const Budgets = () => {
     }
 
     const handleUpdateBudget = (updatedBudget) => {
-        // Here you would typically make an API call to update the budget
         console.log('Updating budget:', updatedBudget)
-        // For now, we'll just close the modal
         setShowEditModal(false)
         setSelectedBudget(null)
     }
@@ -209,7 +207,6 @@ const Budgets = () => {
                 </div>
             </div>
 
-            {/* Edit Budget Modal */}
             {selectedBudget && (
                 <EditBudgetModal
                     isOpen={showEditModal}
@@ -222,7 +219,6 @@ const Budgets = () => {
                 />
             )}
 
-            {/* View Budget Details Modal */}
             {selectedBudget && (
                 <ViewBudgetDetailsModal
                     isOpen={showDetailsModal}
