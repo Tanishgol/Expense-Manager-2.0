@@ -17,24 +17,26 @@ const CategoryBudget = ({ budget }) => {
     };
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium text-gray-700">
-                    {budget.category}
-                </span>
-                <span className={`text-sm font-medium ${getStatusColor(budget.percentage)}`}>
-                    {formatAmount(budget.spent)} / {formatAmount(budget.limit)}
-                </span>
+        <>
+            <div className="space-y-1.5">
+                <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-sm font-medium text-gray-700">
+                        {budget.category}
+                    </span>
+                    <span className={`text-sm font-medium ${getStatusColor(budget.percentage)}`}>
+                        {formatAmount(budget.spent)} / {formatAmount(budget.limit)}
+                    </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                        className={`${budget.color} h-2 rounded-full`}
+                        style={{
+                            width: `${Math.min(budget.percentage, 100)}%`,
+                        }}
+                    ></div>
+                </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                    className={`${budget.color} h-2 rounded-full`}
-                    style={{
-                        width: `${Math.min(budget.percentage, 100)}%`,
-                    }}
-                ></div>
-            </div>
-        </div>
+        </>
     );
 };
 

@@ -1,16 +1,47 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MailIcon, LockIcon, LogIn, Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '../Components/elements/authlayout';
 import Input from '../Components/elements/input';
 import Button from '../Components/elements/button';
 import Checkbox from '../Components/elements/checkbox';
-import savingmoney from '../Assets/save-money-login.png'
+import savingmoney from '../Assets/save-money-login.png';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:9000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                login(data.user, data.token);
+                navigate('/dashboard');
+            } else {
+                setError(data.message || 'Login failed');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Something went wrong. Please try again.');
+        }
+    };
 
     return (
         <AuthLayout
@@ -29,7 +60,8 @@ const Login = () => {
                 </div>
             }
         >
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && <div className="text-red-500 text-sm">{error}</div>}
                 <Input
                     label="Email"
                     type="email"
@@ -69,11 +101,14 @@ const Login = () => {
                     </Link>
                 </div>
 
-                <Button fullWidth className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
+                <Button
+                    type="submit"
+                    fullWidth
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
+                >
                     <LogIn className="h-5 w-5" />
                     <span className="text-sm font-semibold">Sign in</span>
                 </Button>
-
 
                 <div className="text-center text-sm">
                     Don't have an account?{' '}

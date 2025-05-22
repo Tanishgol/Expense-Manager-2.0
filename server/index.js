@@ -1,55 +1,118 @@
-const cors = require("cors");
-const express = require("express");
-const mongoose = require("mongoose");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./DBconnection');
 const bcrypt = require("bcryptjs");
 const User = require("./model/register");
-const dotenv = require("dotenv");
+const jwt = require('jsonwebtoken');
 
-dotenv.config();
+// Import API routes
+const transactionApi = require('./api/transactionApi');
 
 const app = express();
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Enable CORS for all routes
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Allow only requests from this frontend
-    methods: "GET,POST,PUT,DELETE", // Allow these HTTP methods
-    allowedHeaders: "Content-Type,Authorization", // Allow these headers in requests
-  })
-);
+// API Routes
+app.use('/api/transactions', transactionApi);
 
-mongoose
-  .connect("mongodb://localhost:27017/expence-manager")
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Error connecting to MongoDB", err));
-
+// Register route
 app.post("/api/register", async (req, res) => {
-  const { fullName, email, password } = req.body;
-
   try {
+    const { fullName, email, password } = req.body;
+
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({
+    // Create new user
+    const user = new User({
       fullName,
       email,
       password: hashedPassword,
     });
 
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    await user.save();
+
+    // Create token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
-app.listen(9000, () => {
-  console.log("Server is running on http://localhost:9000");
+// Login route
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Create token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
+});
+
+const PORT = process.env.PORT || 9000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

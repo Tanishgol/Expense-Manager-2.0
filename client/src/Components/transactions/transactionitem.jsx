@@ -1,4 +1,5 @@
 import React from 'react';
+import { format } from 'date-fns';
 import {
     ShoppingBag,
     Home,
@@ -7,28 +8,13 @@ import {
     Wifi,
     Heart,
     Briefcase,
+    Edit,
+    Trash2,
 } from 'lucide-react';
 
 const TransactionItem = ({ transaction }) => {
-    // Early return if transaction is missing
-    if (!transaction || typeof transaction !== 'object') {
-        return null;
-    }
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
-    const formatAmount = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(amount);
-    };
+    const { title, description, category, date, amount } = transaction;
+    const isIncome = amount > 0;
 
     const getCategoryIcon = (category = '') => {
         switch (category.toLowerCase()) {
@@ -52,29 +38,38 @@ const TransactionItem = ({ transaction }) => {
     };
 
     return (
-        <tr className="border-b hover:bg-gray-50 transition-colors">
-            <td className="py-4 px-2">
-                <div className="flex items-center gap-3">
-                    {getCategoryIcon(transaction.category || '')}
-                    <div>
-                        <p className="font-medium text-gray-800">{transaction.title || 'N/A'}</p>
-                        <p className="text-xs text-gray-500">{transaction.vendor || '-'}</p>
-                    </div>
+        <tr className="border-b hover:bg-gray-50">
+            <td className="py-4">
+                <div className="flex items-center gap-2">
+                    {getCategoryIcon(category)}
+                    <span className="font-medium text-gray-800">{title}</span>
                 </div>
             </td>
-            <td className="py-4 px-2">
-                <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 capitalize">
-                    {transaction.category || 'Other'}
+            <td className="py-4">
+                <span className="text-gray-600">{description || 'NA'}</span>
+            </td>
+            <td className="py-4">
+                <span className="px-2 py-1 text-sm rounded-full bg-gray-100 text-gray-600">
+                    {category}
                 </span>
             </td>
-            <td className="py-4 px-2 text-gray-600">
-                {transaction.date ? formatDate(transaction.date) : '—'}
+            <td className="py-4 text-gray-600">
+                {format(new Date(date), 'MMM dd, yyyy')}
             </td>
-            <td
-                className={`py-4 px-2 text-right font-medium ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}
-            >
-                {formatAmount(transaction.amount || 0)}
+            <td className="py-4 text-right">
+                <span className={`font-medium ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                    {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
+                </span>
+            </td>
+            <td className="py-4 text-right">
+                <div className="flex justify-end gap-2">
+                    <button className="p-1 text-gray-500 hover:text-indigo-600 transition-colors">
+                        <Edit size={16} />
+                    </button>
+                    <button className="p-1 text-gray-500 hover:text-red-600 transition-colors">
+                        <Trash2 size={16} />
+                    </button>
+                </div>
             </td>
         </tr>
     );

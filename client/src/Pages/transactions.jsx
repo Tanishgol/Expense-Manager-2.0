@@ -1,12 +1,12 @@
 import React from 'react'
-import TransactionItem from '../Components/transactions/transactionitem';
-import RecentTransactions from '../Components/transactions/RecentTransactions';
 import Transaction from '../Components/transactions/transaction';
 
 const Transactions = () => {
     return (
         <>
-            <Transaction />
+            <div className='flex-1 overflow-y-auto p-4 md:p-6'>
+                <Transaction />
+            </div>
         </>
     )
 }

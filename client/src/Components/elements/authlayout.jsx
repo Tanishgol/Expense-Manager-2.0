@@ -2,32 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-const countryToCurrency = {
-    IN: '₹',
-    US: '$',
-    GB: '£',
-    EU: '€',
-    JP: '¥',
-};
-
-const getDefaultCurrency = (countryCode) => {
-    return countryToCurrency[countryCode] || '₹';
-};
-
 const AuthLayout = ({ children, title, subtitle, illustration }) => {
-    const [currency, setCurrency] = useState('₹');
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                const symbol = getDefaultCurrency(data.country_code);
-                setCurrency(symbol);
-            })
-            .catch(() => {
-                setCurrency('₹');
-            });
-    }, []);
+    const [currency] = useState('₹');
 
     return (
         <div className="flex min-h-screen flex-col md:flex-row">

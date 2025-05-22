@@ -21,7 +21,13 @@ const Input = forwardRef(({
 
                 <input
                     ref={ref}
-                    className={`w-full rounded-lg border border-slate-300 px-4 py-2.5 transition-all focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 ${icon ? 'pl-10' : ''} ${error ? 'border-red-500' : ''} ${success ? 'border-emerald-500' : ''} ${className}`}
+                    className={`w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none focus:ring-1
+                    ${icon ? 'pl-10' : ''}
+                    ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
+                    ${success ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500' : ''}
+                    ${!error && !success ? 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500' : ''}
+                    ${className || ''}`}
+                    autoComplete="off"
                     {...props}
                 />
 

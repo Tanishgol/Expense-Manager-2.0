@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserIcon, MailIcon, CircleX, CheckIcon, EyeIcon, EyeOffIcon, UserPlus } from 'lucide-react';
 import axios from 'axios';
 import AuthLayout from '../Components/elements/authlayout';
@@ -59,6 +59,7 @@ export function Register() {
         }
     };
 
+    const navigate = useNavigate();
 
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
@@ -83,7 +84,7 @@ export function Register() {
         const userData = {
             fullName,
             email,
-            password, // Only send password, no need to send confirmPassword
+            password,
         };
 
         setLoading(true);
@@ -97,7 +98,10 @@ export function Register() {
             });
 
             console.log(response.data.message);
-            // Optionally, do something on success like redirect or show message
+            setTimeout(() => {
+                navigate('/login');
+            }, 1000);
+
         } catch (err) {
             if (err.response) {
                 setError(err.response.data.message);
