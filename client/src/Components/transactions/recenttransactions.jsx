@@ -1,5 +1,5 @@
 import React from 'react'
-import  TransactionItem  from './transactionitem'
+import TransactionItem from './transactionitem'
 export const RecentTransactions = () => {
     const transactions = [
         {
@@ -48,10 +48,12 @@ export const RecentTransactions = () => {
             <table className="w-full">
                 <thead>
                     <tr className="text-left text-gray-500 border-b">
+                        <th className="pb-3 font-medium">Title</th>
                         <th className="pb-3 font-medium">Description</th>
                         <th className="pb-3 font-medium">Category</th>
                         <th className="pb-3 font-medium">Date</th>
                         <th className="pb-3 font-medium text-right">Amount</th>
+                        <th className="pb-3 font-medium text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

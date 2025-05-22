@@ -14,29 +14,38 @@ const OTPVerify = () => {
 
     const handleChange = (e, index) => {
         const value = e.target.value.replace(/\D/g, '');
-        if (value.length > 1) return;
+        if (!value) return;
+
+        // If all fields are empty and user types, always start from index 0
+        if (otp.every((digit) => digit === '') && index !== 0) {
+            inputRefs.current[0]?.focus();
+            return;
+        }
 
         const newOtp = [...otp];
         newOtp[index] = value;
         setOtp(newOtp);
 
         if (value && index < otp.length - 1) {
-            inputRefs.current[index + 1].focus();
+            inputRefs.current[index + 1]?.focus();
         }
     };
 
     const handleKeyDown = (e, index) => {
         if (e.key === 'Backspace') {
+            e.preventDefault();
+            const newOtp = [...otp];
+
             if (otp[index]) {
-                const newOtp = [...otp];
                 newOtp[index] = '';
                 setOtp(newOtp);
             } else if (index > 0) {
-                inputRefs.current[index - 1].focus();
+                newOtp[index - 1] = '';
+                setOtp(newOtp);
+                inputRefs.current[index - 1]?.focus();
             }
         }
     };
-
 
     const handlePaste = (e) => {
         e.preventDefault();
@@ -44,7 +53,7 @@ const OTPVerify = () => {
         if (/^\d{6}$/.test(pastedData)) {
             const digits = pastedData.split('');
             setOtp(digits);
-            inputRefs.current[5].focus();
+            setTimeout(() => inputRefs.current[5]?.focus(), 10);
         }
     };
 
@@ -59,12 +68,16 @@ const OTPVerify = () => {
         }
     }, [timer])
 
+    useEffect(() => {
+        inputRefs.current[0]?.focus();
+    }, []);
+
     const handleResendCode = () => {
         if (canResend) {
             setOtp(['', '', '', '', '', ''])
             setTimer(30)
             setCanResend(false)
-            inputRefs.current[0].focus()
+            inputRefs.current[0]?.focus()
         }
     }
 
@@ -99,22 +112,23 @@ const OTPVerify = () => {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                         Verification Code
                     </label>
-                    <div className="flex flex-wrap justify-center gap-4 max-w-sm xsss:grid xsss:grid-cols-6 xss:grid-cols-6 xs:grid-cols-6 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6">                        {otp.map((digit, index) => (
-                        <input
-                            key={index}
-                            ref={(el) => (inputRefs.current[index] = el)}
-                            className="w-12 h-12 text-center text-xl font-semibold border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                            type="text"
-                            maxLength={1}
-                            pattern="[0-9]"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            value={digit}
-                            onChange={(e) => handleChange(e, index)}
-                            onKeyDown={(e) => handleKeyDown(e, index)}
-                            onPaste={handlePaste}
-                        />
-                    ))}
+                    <div className="flex flex-wrap justify-center gap-4 max-w-sm xsss:grid xsss:grid-cols-6 xss:grid-cols-6 xs:grid-cols-6 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6">
+                        {otp.map((digit, index) => (
+                            <input
+                                key={index}
+                                ref={(el) => (inputRefs.current[index] = el)}
+                                className="w-12 h-12 text-center text-xl font-semibold border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                type="text"
+                                maxLength={1}
+                                pattern="[0-9]"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                value={digit}
+                                onChange={(e) => handleChange(e, index)}
+                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                onPaste={handlePaste}
+                            />
+                        ))}
                     </div>
                 </div>
 

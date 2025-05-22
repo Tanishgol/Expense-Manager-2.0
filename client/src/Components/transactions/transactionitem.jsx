@@ -1,13 +1,14 @@
 import React from 'react';
 import { format } from 'date-fns';
 import {
-    ShoppingBag,
-    Home,
-    Car,
     Utensils,
-    Wifi,
-    Heart,
-    Briefcase,
+    House,
+    Car,
+    HandPlatter,
+    Plug,
+    Hospital,
+    CircleHelp,
+    Drama,
     Edit,
     Trash2,
 } from 'lucide-react';
@@ -19,21 +20,21 @@ const TransactionItem = ({ transaction }) => {
     const getCategoryIcon = (category = '') => {
         switch (category.toLowerCase()) {
             case 'food':
-                return <ShoppingBag size={16} className="text-green-500" />;
+                return <Utensils size={16} className="text-green-500" />;
             case 'housing':
-                return <Home size={16} className="text-blue-500" />;
+                return <House size={16} className="text-blue-500" />;
             case 'transportation':
                 return <Car size={16} className="text-purple-500" />;
             case 'dining':
-                return <Utensils size={16} className="text-amber-500" />;
+                return <HandPlatter size={16} className="text-amber-500" />;
             case 'utilities':
-                return <Wifi size={16} className="text-red-500" />;
+                return <Plug size={16} className="text-red-500" />;
             case 'healthcare':
-                return <Heart size={16} className="text-pink-500" />;
-            case 'income':
-                return <Briefcase size={16} className="text-indigo-500" />;
+                return <Hospital size={16} className="text-pink-500" />;
+            case 'entertainment':
+                return <Drama size={16} className="text-yellow-500" />;
             default:
-                return <ShoppingBag size={16} className="text-gray-500" />;
+                return <CircleHelp size={16} className="text-gray-500" />;
         }
     };
 

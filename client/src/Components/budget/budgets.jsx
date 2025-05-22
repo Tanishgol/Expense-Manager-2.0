@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
 import CategoryBudget from './CategoryBudget'
 import { PlusIcon } from 'lucide-react'
+import { EditBudgetModal } from './editbudgetmodal'
+import { ViewBudgetDetailsModal } from './viewbudgetdetailsModal'
+
 const Budgets = () => {
     const [activeSection, setActiveSection] = useState('monthly')
+    const [selectedBudget, setSelectedBudget] = useState(null)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [showDetailsModal, setShowDetailsModal] = useState(false)
+
     const budgetCategories = [
         {
             category: 'Housing',
@@ -61,6 +68,25 @@ const Budgets = () => {
             color: 'bg-teal-500',
         },
     ]
+
+    const handleEditBudget = (budget) => {
+        setSelectedBudget(budget)
+        setShowEditModal(true)
+    }
+
+    const handleViewDetails = (budget) => {
+        setSelectedBudget(budget)
+        setShowDetailsModal(true)
+    }
+
+    const handleUpdateBudget = (updatedBudget) => {
+        // Here you would typically make an API call to update the budget
+        console.log('Updating budget:', updatedBudget)
+        // For now, we'll just close the modal
+        setShowEditModal(false)
+        setSelectedBudget(null)
+    }
+
     return (
         <>
             <div className="space-y-8">
@@ -154,19 +180,25 @@ const Budgets = () => {
                         </div>
                     </div>
 
-                    <div className="mt-10"> {/* slightly more top spacing */}
+                    <div className="mt-10">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">
                             Category Budgets
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {budgetCategories.map((budget, index) => (
-                                <div key={index} className="bg-gray-50 p-5 rounded-lg"> {/* more consistent padding */}
+                                <div key={index} className="bg-gray-50 p-5 rounded-lg">
                                     <CategoryBudget budget={budget} />
                                     <div className="mt-4 flex justify-end space-x-3">
-                                        <button className="text-xs text-indigo-600 hover:text-indigo-800">
+                                        <button
+                                            onClick={() => handleEditBudget(budget)}
+                                            className="text-xs text-indigo-600 hover:text-indigo-800"
+                                        >
                                             Edit
                                         </button>
-                                        <button className="text-xs text-gray-500 hover:text-gray-700">
+                                        <button
+                                            onClick={() => handleViewDetails(budget)}
+                                            className="text-xs text-gray-500 hover:text-gray-700"
+                                        >
                                             View Details
                                         </button>
                                     </div>
@@ -176,6 +208,31 @@ const Budgets = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Budget Modal */}
+            {selectedBudget && (
+                <EditBudgetModal
+                    isOpen={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false)
+                        setSelectedBudget(null)
+                    }}
+                    budget={selectedBudget}
+                    onSubmit={handleUpdateBudget}
+                />
+            )}
+
+            {/* View Budget Details Modal */}
+            {selectedBudget && (
+                <ViewBudgetDetailsModal
+                    isOpen={showDetailsModal}
+                    onClose={() => {
+                        setShowDetailsModal(false)
+                        setSelectedBudget(null)
+                    }}
+                    budget={selectedBudget}
+                />
+            )}
         </>
     )
 }

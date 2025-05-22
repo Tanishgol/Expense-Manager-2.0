@@ -166,67 +166,78 @@ export const Transactions = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            {/* Header Row: Transactions title + right side buttons */}
+            <div className="flex justify-between items-center flex-wrap gap-4">
                 <h1 className="text-2xl font-bold text-gray-800">Transactions</h1>
-                <button onClick={() => setIsModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center shadow-sm transition">
-                    <PlusIcon size={18} className="mr-1" />
-                    <span>Add Transaction</span>
-                </button>
-            </div>
 
-            <div className="bg-white rounded-lg shadow p-4 md:p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search transactions..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 pr-3 py-2 w-64 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            />
-                            <SearchIcon size={18} className="text-gray-400 absolute left-3 top-2.5" />
-                        </div>
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowFilter(!showFilter)}
-                                className={`p-2 border rounded-md transition ${showFilter
-                                    ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
-                                    : 'border-gray-300 hover:bg-gray-50 text-gray-600'
-                                    }`}
-                            >
-                                <FilterIcon size={18} />
-                            </button>
-                            {showFilter && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                                    <div className="p-2">
-                                        <h3 className="text-sm font-medium text-gray-700 mb-2">Filter by Category</h3>
-                                        <div className="space-y-1">
-                                            {categories.map(category => (
-                                                <label key={category} className="flex items-center space-x-2 text-sm">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedCategories.includes(category)}
-                                                        onChange={() => toggleCategory(category)}
-                                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                    />
-                                                    <span>{category}</span>
-                                                </label>
-                                            ))}
-                                        </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    {/* Search Box */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search transactions..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 pr-3 py-2 w-64 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        <SearchIcon size={18} className="text-gray-400 absolute left-3 top-2.5" />
+                    </div>
+
+                    {/* Filter Button */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowFilter(!showFilter)}
+                            className={`p-2 border rounded-md transition ${showFilter
+                                ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
+                                : 'border-gray-300 hover:bg-gray-50 text-gray-600'
+                                }`}
+                        >
+                            <FilterIcon size={18} />
+                        </button>
+
+                        {showFilter && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                                <div className="p-2">
+                                    <h3 className="text-sm font-medium text-gray-700 mb-2">Filter by Category</h3>
+                                    <div className="space-y-1">
+                                        {categories.map((category) => (
+                                            <label key={category} className="flex items-center space-x-2 text-sm">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCategories.includes(category)}
+                                                    onChange={() => toggleCategory(category)}
+                                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                />
+                                                <span>{category}</span>
+                                            </label>
+                                        ))}
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                        <button
-                            onClick={handleDownload}
-                            className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-                        >
-                            <DownloadIcon size={18} className="text-gray-600" />
-                        </button>
+                            </div>
+                        )}
                     </div>
-                </div>
 
+                    {/* Download Button */}
+                    <button
+                        onClick={handleDownload}
+                        className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                    >
+                        <DownloadIcon size={18} className="text-gray-600" />
+                    </button>
+
+                    {/* Add Transaction Button */}
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center shadow-sm transition"
+                    >
+                        <PlusIcon size={18} className="mr-1" />
+                        <span>Add Transaction</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Transactions Table */}
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto text-sm text-gray-700">
                         <thead>
@@ -256,7 +267,12 @@ export const Transactions = () => {
                 </div>
             </div>
 
-            <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddTransaction} />
+            {/* Modal for Adding Transactions */}
+            <AddTransactionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddTransaction}
+            />
         </div>
     );
 };

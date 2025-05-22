@@ -1,170 +1,272 @@
-import React, { useState } from 'react';
-import { XIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Modal } from '../modals/Modal';
+import { AlertCircle } from 'lucide-react';
 
-const AddTransactionModal = ({ isOpen, onClose, onAdd }) => {
+export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction }) => {
     const [formData, setFormData] = useState({
         title: '',
         amount: '',
-        category: '',
         type: 'expense',
+        category: 'Food',
         date: new Date().toISOString().split('T')[0],
         description: ''
     });
 
-    const categories = [
-        'Food', 'Housing', 'Transportation', 'Dining',
-        'Utilities', 'Healthcare', 'Entertainment', 'Shopping', 'Other'
-    ];
+    const [budgetInfo, setBudgetInfo] = useState(null);
+    const [showBudgetWarning, setShowBudgetWarning] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const parsedAmount = parseFloat(formData.amount);
-        if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+    // Update form data when editTransaction changes
+    useEffect(() => {
+        if (editTransaction) {
+            console.log('Setting form data for edit:', editTransaction);
+            setFormData({
+                title: editTransaction.title,
+                amount: Math.abs(editTransaction.amount).toString(),
+                type: editTransaction.amount >= 0 ? 'income' : 'expense',
+                category: editTransaction.category,
+                date: new Date(editTransaction.date).toISOString().split('T')[0],
+                description: editTransaction.description || ''
+            });
+        } else {
+            // Reset form when adding new transaction
+            setFormData({
+                title: '',
+                amount: '',
+                type: 'expense',
+                category: 'Food',
+                date: new Date().toISOString().split('T')[0],
+                description: ''
+            });
+        }
+    }, [editTransaction, isOpen]);
 
-        const finalAmount = formData.type === 'expense'
-            ? -Math.abs(parsedAmount)
-            : Math.abs(parsedAmount);
-
-        onAdd({ ...formData, amount: finalAmount });
-
-        // Reset and close
-        setFormData({
-            title: '',
-            amount: '',
-            category: '',
-            type: 'expense',
-            date: new Date().toISOString().split('T')[0],
-            description: ''
-        });
-        onClose();
+    const budgetLimits = {
+        'Food': 500,
+        'Housing': 1500,
+        'Transportation': 300,
+        'Utilities': 150,
+        'Entertainment': 150,
+        'Healthcare': 200,
+        'Shopping': 300,
+        'Other': 100
     };
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (formData.category && formData.type === 'expense') {
+            const limit = budgetLimits[formData.category] || 0;
+            const amount = parseFloat(formData.amount) || 0;
+            setBudgetInfo({
+                limit,
+                spent: 0, // Replace with actual spent amount from API
+                remaining: limit - amount
+            });
+            setShowBudgetWarning(amount > limit);
+        } else {
+            setBudgetInfo(null);
+            setShowBudgetWarning(false);
+        }
+    }, [formData.category, formData.amount, formData.type]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            const transactionData = {
+                ...formData,
+                amount: formData.type === 'expense'
+                    ? -Math.abs(parseFloat(formData.amount))
+                    : Math.abs(parseFloat(formData.amount)),
+                date: new Date(formData.date).toISOString()
+            };
+
+            if (editTransaction) {
+                transactionData._id = editTransaction._id;
+            }
+
+            console.log('Submitting transaction data:', transactionData);
+            await onAdd(transactionData);
+            onClose();
+        } catch (error) {
+            console.error('Error submitting transaction:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <>
-            {/* Backdrop */}
-            <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-
-            {/* Modal */}
-            <div
-                className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4"
-                role="dialog"
-                aria-modal="true"
-            >
-                <div
-                    className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
-                    onClick={(e) => e.stopPropagation()} // Prevent close on modal click
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Add Transaction</h2>
-                        <button
-                            onClick={onClose}
-                            className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                        >
-                            <XIcon size={24} />
-                        </button>
-                    </div>
-
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Title</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
-                                placeholder="Enter transaction title"
-                            />
-                        </div>
-
-                        {/* Description */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                            <textarea
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
-                                placeholder="Optional description"
-                                rows="2"
-                            />
-                        </div>
-
-                        {/* Amount */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Amount</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-3 text-gray-500">$</span>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    step="0.01"
-                                    value={formData.amount}
-                                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                    className="w-full pl-10 pr-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 transition-all"
-                                    placeholder="0.00"
-                                />
-                            </div>
-                            <p className="mt-1 text-sm text-gray-500">
-                                This will be recorded as an expense
-                            </p>
-                        </div>
-
-                        {/* Category */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
-                            <select
-                                required
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 transition-all"
-                            >
-                                <option value="">Select a category</option>
-                                {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Date */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Date</label>
-                            <input
-                                type="date"
-                                required
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
-                            />
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex justify-end space-x-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-4 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-4 py-2.5 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 transition-all"
-                            >
-                                Add Expense
-                            </button>
-                        </div>
-                    </form>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={editTransaction ? "Edit Transaction" : "Add New Transaction"}
+        >
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Title
+                    </label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                title: e.target.value,
+                            })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
                 </div>
-            </div>
-        </>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Category
+                        </label>
+                        <select
+                            value={formData.category}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    category: e.target.value,
+                                })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="Food">Food</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Type
+                        </label>
+                        <select
+                            value={formData.type}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    type: e.target.value,
+                                })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Amount
+                    </label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-2 text-gray-500">$</span>
+                        <input
+                            type="number"
+                            required
+                            min="0"
+                            step="0.01"
+                            value={formData.amount}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    amount: e.target.value,
+                                })
+                            }
+                            className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Date
+                    </label>
+                    <input
+                        type="date"
+                        required
+                        value={formData.date}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                date: e.target.value,
+                            })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description (Optional)
+                    </label>
+                    <textarea
+                        value={formData.description}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                description: e.target.value,
+                            })
+                        }
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                </div>
+
+                {budgetInfo && formData.type === 'expense' && (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Budget Limit</span>
+                            <span className="font-medium">${budgetInfo.limit.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Remaining</span>
+                            <span className={`font-medium ${budgetInfo.remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                ${budgetInfo.remaining.toFixed(2)}
+                            </span>
+                        </div>
+                        {showBudgetWarning && (
+                            <div className="mt-2 flex items-center text-red-600 text-sm">
+                                <AlertCircle size={16} className="mr-1" />
+                                <span>This transaction exceeds your budget limit</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto ${isSubmitting
+                            ? 'bg-indigo-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500'
+                            }`}
+                    >
+                        {isSubmitting ? 'Saving...' : (editTransaction ? 'Update Transaction' : 'Add Transaction')}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isSubmitting}
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </Modal>
     );
 };
 
