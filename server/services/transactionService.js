@@ -8,8 +8,12 @@ const TransactionService = {
     },
 
     // Get all transactions for a user
-    getAllTransactions: async (userId) => {
-        return await Transaction.find({ user: userId }).sort({ date: -1 });
+    getAllTransactions: async (userId, limit = null) => {
+        const query = Transaction.find({ user: userId }).sort({ date: -1 });
+        if (limit) {
+            query.limit(limit);
+        }
+        return await query.exec();
     },
 
     // Get a specific transaction

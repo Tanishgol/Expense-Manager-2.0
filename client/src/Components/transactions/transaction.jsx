@@ -70,7 +70,7 @@ export const Transactions = () => {
     const handleAddTransaction = async (transactionData) => {
         try {
             const method = editingTransaction ? 'PUT' : 'POST';
-            const url = editingTransaction 
+            const url = editingTransaction
                 ? `http://localhost:9000/api/transactions/${editingTransaction._id}`
                 : 'http://localhost:9000/api/transactions';
 
@@ -92,7 +92,7 @@ export const Transactions = () => {
             const savedTransaction = await response.json();
 
             if (editingTransaction) {
-                setTransactions(prev => 
+                setTransactions(prev =>
                     prev.map(t => t._id === savedTransaction._id ? savedTransaction : t)
                 );
             } else {
@@ -155,7 +155,12 @@ export const Transactions = () => {
                 }
 
                 const data = await response.json();
-                setTransactions(data);
+                
+                const sortedTransactions = data.sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+
+                setTransactions(sortedTransactions);
                 setError(null);
             } catch (error) {
                 console.error('Error fetching transactions:', error);
@@ -168,12 +173,13 @@ export const Transactions = () => {
         fetchTransactions();
     }, [token]);
 
+
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-[400px] px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading transactions...</p>
+                    <p className="mt-4 text-gray-600 text-sm sm:text-base lg:text-lg">Loading transactions...</p>
                 </div>
             </div>
         );
@@ -181,13 +187,13 @@ export const Transactions = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-[400px] px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
-                    <div className="text-red-600 text-xl mb-2">Error</div>
-                    <p className="text-gray-600">{error}</p>
+                    <div className="text-red-600 text-xl sm:text-2xl mb-2">Error</div>
+                    <p className="text-gray-600 text-sm sm:text-base lg:text-lg">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm sm:text-base lg:text-lg"
                     >
                         Try Again
                     </button>
@@ -201,36 +207,33 @@ export const Transactions = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
 
-                <div className="flex items-center gap-4">
-                    {/* Search Bar */}
-                    <div className="relative">
+                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+                    <div className="relative w-full md:w-auto">
                         <SearchIcon size={18} className="absolute left-3 top-2.5 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search transactions..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="pl-10 pr-4 py-2 w-full md:w-[300px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
+                    <div className="flex md:flex-row md:gap-2">
+                        <button
+                            onClick={() => setShowFilter(!showFilter)}
+                            className="p-2 border mr-2 border-gray-300 rounded-md hover:bg-gray-50 transition"
+                        >
+                            <FilterIcon size={18} className="text-gray-600" />
+                        </button>
 
-                    {/* Filter Button */}
-                    <button
-                        onClick={() => setShowFilter(!showFilter)}
-                        className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-                    >
-                        <FilterIcon size={18} className="text-gray-600" />
-                    </button>
+                        <button
+                            onClick={handleDownload}
+                            className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                        >
+                            <DownloadIcon size={18} className="text-gray-600" />
+                        </button>
+                    </div>
 
-                    {/* Download Button */}
-                    <button
-                        onClick={handleDownload}
-                        className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-                    >
-                        <DownloadIcon size={18} className="text-gray-600" />
-                    </button>
-
-                    {/* Add Transaction Button */}
                     <button
                         onClick={() => {
                             setEditingTransaction(null);
@@ -244,7 +247,6 @@ export const Transactions = () => {
                 </div>
             </div>
 
-            {/* Category Filters */}
             {showFilter && (
                 <div className="bg-white p-4 rounded-lg shadow">
                     <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Category</h3>
@@ -253,11 +255,10 @@ export const Transactions = () => {
                             <button
                                 key={category}
                                 onClick={() => toggleCategory(category)}
-                                className={`px-3 py-1 rounded-full text-sm ${
-                                    selectedCategories.includes(category)
-                                        ? 'bg-indigo-100 text-indigo-800'
-                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                                }`}
+                                className={`px-3 py-1 rounded-full text-sm ${selectedCategories.includes(category)
+                                    ? 'bg-indigo-100 text-indigo-800'
+                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                    }`}
                             >
                                 {category}
                             </button>
@@ -270,7 +271,7 @@ export const Transactions = () => {
             <div className="bg-white rounded-lg shadow p-4 md:p-6">
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto text-sm text-gray-700">
-                        <thead>
+                        <thead className="hidden md:table-header-group">
                             <tr className="border-b text-left text-gray-500">
                                 <th className="pb-3 font-medium">Title</th>
                                 <th className="pb-3 font-medium">Description</th>
@@ -283,8 +284,8 @@ export const Transactions = () => {
                         <tbody>
                             {filteredTransactions.length > 0 ? (
                                 filteredTransactions.map((transaction) => (
-                                    <TransactionItem 
-                                        key={transaction._id} 
+                                    <TransactionItem
+                                        key={transaction._id}
                                         transaction={transaction}
                                         onEdit={handleEditTransaction}
                                         onDelete={handleDeleteTransaction}
@@ -302,7 +303,6 @@ export const Transactions = () => {
                 </div>
             </div>
 
-            {/* Modal for Adding/Editing Transactions */}
             <AddTransactionModal
                 isOpen={isModalOpen}
                 onClose={() => {

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
+import PageTop from "./Components/main/pagetop";
 import Default from "./Pages/default";
 import Login from "./auth/login";
 import Otpverify from "./auth/otpverify";
@@ -21,6 +23,8 @@ function App() {
 
   return (
     <AuthProvider>
+      <Toaster position="top-center" />
+      <PageTop />
       <Routes>
         <Route path="/" element={<Default />} />
         <Route path="/login" element={<Login />} />

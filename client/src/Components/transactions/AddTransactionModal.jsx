@@ -96,6 +96,22 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         }
     };
 
+    const handleCategoryChange = (category) => {
+        setFormData({
+            ...formData,
+            category,
+            type: category === 'Income' ? 'income' : 'expense'
+        });
+    };
+
+    const handleTypeChange = (type) => {
+        setFormData({
+            ...formData,
+            type,
+            category: type === 'income' ? 'Income' : formData.category === 'Income' ? 'Food' : formData.category
+        });
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -128,14 +144,12 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         </label>
                         <select
                             value={formData.category}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    category: e.target.value,
-                                })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            onChange={(e) => handleCategoryChange(e.target.value)}
+                            disabled={formData.type === 'income'}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income' ? 'bg-gray-100 cursor-not-allowed' : ''
+                                }`}
                         >
+                            <option value="Income">Income</option>
                             <option value="Food">Food</option>
                             <option value="Housing">Housing</option>
                             <option value="Transportation">Transportation</option>
@@ -145,6 +159,11 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             <option value="Shopping">Shopping</option>
                             <option value="Other">Other</option>
                         </select>
+                        {formData.type === 'income' && (
+                            <p className="mt-1 text-sm text-gray-500">
+                                Category is locked to Income for Income type
+                            </p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -152,17 +171,21 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         </label>
                         <select
                             value={formData.type}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    type: e.target.value,
-                                })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            onChange={(e) => handleTypeChange(e.target.value)}
+                            disabled={formData.category === 'Income'}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income'
+                                ? 'border-green-300 bg-green-50'
+                                : 'border-gray-300'
+                                } ${formData.category === 'Income' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                         >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                         </select>
+                        {formData.category === 'Income' && (
+                            <p className="mt-1 text-sm text-gray-500">
+                                Type is locked to Income for Income category
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -220,6 +243,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             })
                         }
                         rows={3}
+                        autoCorrect='on'
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MailIcon, LockIcon, LogIn, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import AuthLayout from '../Components/elements/authlayout';
 import Input from '../Components/elements/input';
 import Button from '../Components/elements/button';
@@ -12,13 +13,16 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
     const navigate = useNavigate();
     const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+
+        if (!email || !password) {
+            toast.error('Please enter both email and password');
+            return;
+        }
 
         try {
             const res = await fetch('http://localhost:9000/api/login', {
@@ -33,13 +37,22 @@ const Login = () => {
 
             if (res.ok) {
                 login(data.user, data.token);
+                toast.success('Login successful!');
                 navigate('/dashboard');
             } else {
-                setError(data.message || 'Login failed');
+                if (data?.message === 'Email not found') {
+                    toast.error('Email not found');
+                } else if (data?.message === 'Invalid credentials') {
+                    toast.error('Invalid credentials');
+                } else if (data?.message === 'Password is incorrect') {
+                    toast.error('Password is incorrect');
+                } else {
+                    toast.error(data.message || 'Login failed, please try again');
+                }
             }
         } catch (err) {
             console.error(err);
-            setError('Something went wrong. Please try again.');
+            toast.error('Something went wrong. Please check your network or try again later.');
         }
     };
 
@@ -61,7 +74,6 @@ const Login = () => {
             }
         >
             <form onSubmit={handleSubmit} className="space-y-6">
-                {error && <div className="text-red-500 text-sm">{error}</div>}
                 <Input
                     label="Email"
                     type="email"

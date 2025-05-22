@@ -18,7 +18,8 @@ const TransactionController = {
     // Get all transactions for the authenticated user
     getAllTransactions: async (req, res) => {
         try {
-            const transactions = await TransactionService.getAllTransactions(req.userId);
+            const limit = parseInt(req.query.limit) || null;
+            const transactions = await TransactionService.getAllTransactions(req.userId, limit);
             res.json(transactions);
         } catch (error) {
             res.status(500).json({ message: error.message });

@@ -1,6 +1,11 @@
 import React from 'react'
 import CategoryBudget from './CategoryBudget'
+import { useNavigate } from 'react-router-dom'
+import PageTop from '../main/pagetop'
+
 export const BudgetSummary = () => {
+    const navigate = useNavigate();
+
     const budgetCategories = [
         {
             category: 'Housing',
@@ -39,14 +44,20 @@ export const BudgetSummary = () => {
         },
     ]
     return (
-        <div className="space-y-4">
-            {budgetCategories.map((budget, index) => (
-                <CategoryBudget key={index} budget={budget} />
-            ))}
-            <button className="mt-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                Manage Budget Limits
-            </button>
-        </div>
+        <>
+            <PageTop />
+            <div className="space-y-4">
+                {budgetCategories.map((budget, index) => (
+                    <CategoryBudget key={index} budget={budget} />
+                ))}
+                <button
+                    onClick={() => navigate('/budgets')}
+                    className="mt-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                >
+                    Manage Budget Limits
+                </button>
+            </div>
+        </>
     )
 }
 

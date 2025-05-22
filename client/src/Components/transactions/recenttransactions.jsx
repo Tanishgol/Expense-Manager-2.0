@@ -1,67 +1,182 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import TransactionItem from './transactionitem'
+import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
+
 export const RecentTransactions = () => {
-    const transactions = [
-        {
-            id: 1,
-            title: 'Grocery Shopping',
-            amount: -120.5,
-            date: '2023-08-15',
-            category: 'Food',
-            vendor: 'Whole Foods',
-        },
-        {
-            id: 2,
-            title: 'Salary Deposit',
-            amount: 3200.0,
-            date: '2023-08-10',
-            category: 'Income',
-            vendor: 'Acme Corp',
-        },
-        {
-            id: 3,
-            title: 'Electric Bill',
-            amount: -85.2,
-            date: '2023-08-08',
-            category: 'Utilities',
-            vendor: 'Power Company',
-        },
-        {
-            id: 4,
-            title: 'Freelance Payment',
-            amount: 350.0,
-            date: '2023-08-05',
-            category: 'Income',
-            vendor: 'Client XYZ',
-        },
-        {
-            id: 5,
-            title: 'Restaurant Dinner',
-            amount: -62.3,
-            date: '2023-08-03',
-            category: 'Dining',
-            vendor: 'Italian Bistro',
-        },
-    ]
+    const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [sortOrder, setSortOrder] = useState('desc');
+    const { token } = useAuth();
+    const location = useLocation();
+    const isDashboard = location.pathname === '/dashboard';
+
+    useEffect(() => {
+        fetchTransactions();
+    }, []);
+
+    const handleSorting = () => {
+        const sortOrder = [...transactions].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        setTransactions(sortOrder);
+    };
+
+    const fetchTransactions = async () => {
+        try {
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const url = isDashboard
+                ? 'http://localhost:9000/api/transactions?limit=5'
+                : 'http://localhost:9000/api/transactions';
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch transactions');
+            }
+
+            const data = await response.json();
+            const sortedTransactions = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            const finalTransactions = isDashboard
+                ? sortedTransactions.slice(0, 5)
+                : sortedTransactions;
+
+            setTransactions(finalTransactions);
+            setError(null);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            setError(error.message || 'Failed to load transactions');
+            toast.error('Failed to load recent transactions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEdit = async (transaction) => {
+        try {
+            // This will be handled by the parent component through props
+            console.log('Edit transaction:', transaction);
+        } catch (error) {
+            console.error('Error editing transaction:', error);
+            toast.error('Failed to edit transaction');
+        }
+    };
+
+    const handleDelete = async (transactionId) => {
+        try {
+            const response = await fetch(`http://localhost:9000/api/transactions/${transactionId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete transaction');
+            }
+
+            // Remove the deleted transaction from the state
+            setTransactions(prev => prev.filter(t => t._id !== transactionId));
+            toast.success('Transaction deleted successfully');
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            toast.error('Failed to delete transaction');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-2 text-sm text-gray-600">Loading transactions...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <div className="text-center">
+                    <div className="text-red-600 text-sm mb-2">Error</div>
+                    <p className="text-gray-600 text-sm">{error}</p>
+                    <button
+                        onClick={fetchTransactions}
+                        className="mt-2 px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (transactions.length === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <div className="text-center">
+                    <p className="text-gray-600">No recent transactions found</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full">
-                <thead>
-                    <tr className="text-left text-gray-500 border-b">
-                        <th className="pb-3 font-medium">Title</th>
-                        <th className="pb-3 font-medium">Description</th>
-                        <th className="pb-3 font-medium">Category</th>
-                        <th className="pb-3 font-medium">Date</th>
-                        <th className="pb-3 font-medium text-right">Amount</th>
-                        <th className="pb-3 font-medium text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {transactions.map((transaction) => (
-                        <TransactionItem key={transaction.id} transaction={transaction} />
-                    ))}
-                </tbody>
-            </table>
+        <div className="w-full">
+            <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm text-gray-700">
+                    <thead>
+                        <tr className="text-left text-gray-500 border-b">
+                            <th className="pb-3 font-medium">Title</th>
+                            <th className="pb-3 font-medium">Description</th>
+                            <th className="pb-3 font-medium">Category</th>
+                            <th className="pb-3 font-medium">Date</th>
+                            <th className="pb-3 font-medium text-right">Amount</th>
+                            <th className="pb-3 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {transactions.map((transaction) => (
+                            <TransactionItem
+                                key={transaction._id}
+                                transaction={transaction}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                isMobile={false}
+                            />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile Cards (shown below md) */}
+            <div className="md:hidden space-y-4 mt-4">
+                {transactions.map((transaction) => (
+                    <TransactionItem
+                        key={transaction._id}
+                        transaction={transaction}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        isMobile={true}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
