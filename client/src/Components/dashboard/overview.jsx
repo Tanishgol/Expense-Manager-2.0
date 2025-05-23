@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSignIcon, ArrowUpIcon, ArrowDownIcon, TrendingUpIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import OverviewCard from './overviewcard';
 import BalanceChart from './balancechart'
@@ -17,6 +18,7 @@ const Overview = () => {
         previousMonthExpenses: 0
     });
     const { token } = useAuth();
+    const navigate = useNavigate();
 
     const calculateOverviewData = (transactions) => {
         const data = {
@@ -179,7 +181,10 @@ const Overview = () => {
                     <h2 className="text-lg font-semibold text-gray-800">
                         Recent Transactions
                     </h2>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-800">
+                    <button 
+                        onClick={() => navigate('/transactions')}
+                        className="text-sm text-indigo-600 hover:text-indigo-800"
+                    >
                         View All
                     </button>
                 </div>

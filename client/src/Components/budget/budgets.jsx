@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import CategoryBudget from './CategoryBudget'
 import { PlusIcon } from 'lucide-react'
-import { EditBudgetModal } from './editbudgetmodal'
-import { ViewBudgetDetailsModal } from './viewbudgetdetailsModal'
+import EditBudgetModal from './editbudgetmodal'
+import ViewBudgetDetailsModal from './viewbudgetdetailsModal'
+import MonthlyBudgets from './MonthlyBudgets'
+import AnnualGoals from './annualgoals'
+import SavingsGoals from './savingsgoals'
 
 const Budgets = () => {
     const [activeSection, setActiveSection] = useState('monthly')
@@ -69,6 +72,19 @@ const Budgets = () => {
         },
     ]
 
+    const renderActiveSection = () => {
+        switch (activeSection) {
+            case 'monthly':
+                return <MonthlyBudgets />
+            case 'annual':
+                return <AnnualGoals />
+            case 'savings':
+                return <SavingsGoals />
+            default:
+                return <MonthlyBudgets />
+        }
+    }
+
     const handleEditBudget = (budget) => {
         setSelectedBudget(budget)
         setShowEditModal(true)
@@ -127,83 +143,7 @@ const Budgets = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Budget Overview
-                            </h2>
-                            <div className="bg-gray-50 p-5 rounded-lg mb-6">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Total Budget</span>
-                                    <span className="font-semibold">$3,200.00</span>
-                                </div>
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Total Spent</span>
-                                    <span className="font-semibold">$2,545.00</span>
-                                </div>
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Remaining</span>
-                                    <span className="font-semibold text-green-600">$655.00</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                                    <div
-                                        className="bg-indigo-600 h-2 rounded-full"
-                                        style={{
-                                            width: '79.5%',
-                                        }}
-                                    ></div>
-                                </div>
-                                <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">0%</span>
-                                    <span className="text-xs text-gray-500">79.5% spent</span>
-                                    <span className="text-xs text-gray-500">100%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Budget Tips
-                            </h2>
-                            <div className="bg-blue-50 border border-blue-100 rounded-lg p-5">
-                                <h3 className="font-medium text-blue-800 mb-3">
-                                    Spending Insights
-                                </h3>
-                                <ul className="text-sm text-blue-700 space-y-2">
-                                    <li>• Your Entertainment spending is over budget by 20%</li>
-                                    <li>• Your Food spending is approaching the limit (84%)</li>
-                                    <li>• You're on track with your Housing budget</li>
-                                    <li>• You have $655 remaining for this month</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-10">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                            Category Budgets
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {budgetCategories.map((budget, index) => (
-                                <div key={index} className="bg-gray-50 p-5 rounded-lg">
-                                    <CategoryBudget budget={budget} />
-                                    <div className="mt-4 flex justify-end space-x-3">
-                                        <button
-                                            onClick={() => handleEditBudget(budget)}
-                                            className="text-xs text-indigo-600 hover:text-indigo-800"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleViewDetails(budget)}
-                                            className="text-xs text-gray-500 hover:text-gray-700"
-                                        >
-                                            View Details
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    {renderActiveSection()}
                 </div>
             </div>
 

@@ -142,38 +142,38 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Profile photo upload endpoint
-app.post("/api/users/profile-photo", auth, upload.single('profilePhoto'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
+// app.post("/api/users/profile-photo", auth, upload.single('profilePhoto'), async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({ message: "No file uploaded" });
+//         }
 
-        const user = await User.findById(req.userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+//         const user = await User.findById(req.userId);
+//         if (!user) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
 
-        // Delete old profile photo if exists
-        if (user.profilePhoto) {
-            const oldPhotoPath = path.join(__dirname, user.profilePhoto);
-            if (fs.existsSync(oldPhotoPath)) {
-                fs.unlinkSync(oldPhotoPath);
-            }
-        }
+//         // Delete old profile photo if exists
+//         if (user.profilePhoto) {
+//             const oldPhotoPath = path.join(__dirname, user.profilePhoto);
+//             if (fs.existsSync(oldPhotoPath)) {
+//                 fs.unlinkSync(oldPhotoPath);
+//             }
+//         }
 
-        // Update user profile with new photo URL
-        user.profilePhoto = `/uploads/profile-photos/${req.file.filename}`;
-        await user.save();
+//         // Update user profile with new photo URL
+//         user.profilePhoto = `/uploads/profile-photos/${req.file.filename}`;
+//         await user.save();
 
-        res.json({
-            message: "Profile photo updated successfully",
-            profilePhoto: user.profilePhoto
-        });
-    } catch (error) {
-        console.error('Error uploading profile photo:', error);
-        res.status(500).json({ message: error.message });
-    }
-});
+//         res.json({
+//             message: "Profile photo updated successfully",
+//             profilePhoto: user.profilePhoto
+//         });
+//     } catch (error) {
+//         console.error('Error uploading profile photo:', error);
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
