@@ -5,6 +5,9 @@ const connectDB = require("./DBconnection");
 const bcrypt = require("bcryptjs");
 const User = require("./model/register");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 // Import API routes
 const transactionApi = require("./api/transactionApi");
@@ -22,6 +25,36 @@ app.use(
   })
 );
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/profile-photos';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Not an image! Please upload an image.'), false);
+        }
+    }
+});
 
 // API Routes
 app.use("/api/transactions", transactionApi);
@@ -106,6 +139,40 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// Profile photo upload endpoint
+app.post("/api/users/profile-photo", auth, upload.single('profilePhoto'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Delete old profile photo if exists
+        if (user.profilePhoto) {
+            const oldPhotoPath = path.join(__dirname, user.profilePhoto);
+            if (fs.existsSync(oldPhotoPath)) {
+                fs.unlinkSync(oldPhotoPath);
+            }
+        }
+
+        // Update user profile with new photo URL
+        user.profilePhoto = `/uploads/profile-photos/${req.file.filename}`;
+        await user.save();
+
+        res.json({
+            message: "Profile photo updated successfully",
+            profilePhoto: user.profilePhoto
+        });
+    } catch (error) {
+        console.error('Error uploading profile photo:', error);
+        res.status(500).json({ message: error.message });
+    }
 });
 
 // Error handling middleware

@@ -133,10 +133,6 @@ const Profile = () => {
                                 <p className="font-medium text-gray-800">January 15, 2023</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase text-gray-500">Account Type</p>
-                                <p className="font-medium text-gray-800">Premium</p>
-                            </div>
-                            <div>
                                 <p className="text-xs uppercase text-gray-500">Last Login</p>
                                 <p className="font-medium text-gray-800">Today at 2:34 PM</p>
                             </div>

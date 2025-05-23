@@ -6,9 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 export const Navbar = ({ activeTab, setActiveTab }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
 
     const navItems = [
         {
@@ -69,8 +68,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                                     key={item.id}
                                     onClick={() => handleNavigation(item)}
                                     className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${activeTab === item.id
-                                            ? 'text-indigo-600 bg-indigo-50'
-                                            : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
+                                        ? 'text-indigo-600 bg-indigo-50'
+                                        : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
                                         }`}
                                 >
                                     <span className="mr-2">{item.icon}</span>
@@ -94,9 +93,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                                 </div>
                                 <div className="hidden md:block text-left">
                                     <p className="text-sm font-medium text-gray-700">
-                                        Alex Johnson
+                                        {user?.fullName || 'User'}
                                     </p>
-                                    <p className="text-xs text-gray-500">alex@example.com</p>
+                                    <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
                                 </div>
                                 <ChevronDownIcon
                                     size={16}
@@ -120,7 +119,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                                         <span>Settings</span>
                                     </button>
                                     <div className="border-t border-gray-100 my-1"></div>
-                                    <button 
+                                    <button
                                         onClick={handleLogout}
                                         className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                                     >
