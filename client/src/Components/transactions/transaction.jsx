@@ -61,6 +61,9 @@ export const Transactions = () => {
             }
 
             setTransactions(prev => prev.filter(t => t._id !== transactionId));
+
+            // Dispatch event to update budgets
+            window.dispatchEvent(new Event('transactionChange'));
         } catch (error) {
             console.error('Error deleting transaction:', error);
             setError(error.message || 'Failed to delete transaction');
@@ -91,15 +94,20 @@ export const Transactions = () => {
 
             const savedTransaction = await response.json();
 
+            // Update transactions list
             if (editingTransaction) {
-                setTransactions(prev =>
-                    prev.map(t => t._id === savedTransaction._id ? savedTransaction : t)
-                );
+                setTransactions(prev => prev.map(t =>
+                    t._id === savedTransaction._id ? savedTransaction : t
+                ));
             } else {
-                setTransactions(prev => [...prev, savedTransaction]);
+                setTransactions(prev => [savedTransaction, ...prev]);
             }
 
+            // Dispatch event to update budgets
+            window.dispatchEvent(new Event('transactionChange'));
+
             setEditingTransaction(null);
+            setIsModalOpen(false);
         } catch (error) {
             console.error('Error saving transaction:', error);
             setError(error.message || 'Failed to save transaction');
@@ -155,7 +163,7 @@ export const Transactions = () => {
                 }
 
                 const data = await response.json();
-                
+
                 const sortedTransactions = data.sort(
                     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
                 );

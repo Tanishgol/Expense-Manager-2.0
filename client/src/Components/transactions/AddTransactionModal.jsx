@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../modals/Modal';
 import { AlertCircle } from 'lucide-react';
+import BudgetService from '../../services/budgetService';
+import toast from 'react-hot-toast';
 
 export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction }) => {
     const [formData, setFormData] = useState({
         title: '',
         amount: '',
         type: 'expense',
-        category: 'Food',
+        category: 'Select Category',
         date: new Date().toISOString().split('T')[0],
         description: ''
     });
@@ -15,6 +17,22 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
     const [budgetInfo, setBudgetInfo] = useState(null);
     const [showBudgetWarning, setShowBudgetWarning] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [availableCategories, setAvailableCategories] = useState([]);
+
+    // Fetch available categories with budgets
+    useEffect(() => {
+        const fetchAvailableCategories = async () => {
+            try {
+                const budgets = await BudgetService.getAllBudgets('monthly');
+                // Use Set to ensure unique categories
+                const uniqueCategories = [...new Set(budgets.map(b => b.category))];
+                setAvailableCategories(uniqueCategories);
+            } catch (error) {
+                console.error('Error fetching available categories:', error);
+            }
+        };
+        fetchAvailableCategories();
+    }, []);
 
     // Update form data when editTransaction changes
     useEffect(() => {
@@ -34,34 +52,36 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 title: '',
                 amount: '',
                 type: 'expense',
-                category: 'Food',
+                category: 'Select Category',
                 date: new Date().toISOString().split('T')[0],
                 description: ''
             });
         }
     }, [editTransaction, isOpen]);
 
-    const budgetLimits = {
-        'Food': 500,
-        'Housing': 1500,
-        'Transportation': 300,
-        'Utilities': 150,
-        'Entertainment': 150,
-        'Healthcare': 200,
-        'Shopping': 300,
-        'Other': 100
-    };
-
     useEffect(() => {
         if (formData.category && formData.type === 'expense') {
-            const limit = budgetLimits[formData.category] || 0;
-            const amount = parseFloat(formData.amount) || 0;
-            setBudgetInfo({
-                limit,
-                spent: 0, // Replace with actual spent amount from API
-                remaining: limit - amount
-            });
-            setShowBudgetWarning(amount > limit);
+            const fetchBudgetInfo = async () => {
+                try {
+                    const budgets = await BudgetService.getAllBudgets('monthly');
+                    const budget = budgets.find(b => b.category === formData.category);
+                    if (budget) {
+                        const amount = parseFloat(formData.amount) || 0;
+                        setBudgetInfo({
+                            limit: budget.limit,
+                            spent: budget.spent,
+                            remaining: budget.limit - budget.spent - amount
+                        });
+                        setShowBudgetWarning(amount > (budget.limit - budget.spent));
+                    } else {
+                        setBudgetInfo(null);
+                        setShowBudgetWarning(false);
+                    }
+                } catch (error) {
+                    console.error('Error fetching budget info:', error);
+                }
+            };
+            fetchBudgetInfo();
         } else {
             setBudgetInfo(null);
             setShowBudgetWarning(false);
@@ -71,6 +91,12 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+
+        // Check if budget exists for expense category
+        if (formData.type === 'expense' && !availableCategories.includes(formData.category)) {
+            toast.error('Please set a budget for this category before adding expenses');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -91,6 +117,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             onClose();
         } catch (error) {
             console.error('Error submitting transaction:', error);
+            toast.error(error.message || 'Failed to add transaction');
         } finally {
             setIsSubmitting(false);
         }
@@ -146,22 +173,29 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             value={formData.category}
                             onChange={(e) => handleCategoryChange(e.target.value)}
                             disabled={formData.type === 'income'}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income' ? 'bg-gray-100 cursor-not-allowed' : ''
-                                }`}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                         >
-                            <option value="Income">Income</option>
-                            <option value="Food">Food</option>
-                            <option value="Housing">Housing</option>
-                            <option value="Transportation">Transportation</option>
-                            <option value="Utilities">Utilities</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Healthcare">Healthcare</option>
-                            <option value="Shopping">Shopping</option>
-                            <option value="Other">Other</option>
+                            {formData.type === 'income' ? (
+                                <option value="Income">Income</option>
+                            ) : (
+                                <>
+                                    <option value="Select Category" disabled>Select Category</option>
+                                    {availableCategories.map(category => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}
+                                </>
+                            )}
                         </select>
                         {formData.type === 'income' && (
                             <p className="mt-1 text-sm text-gray-500">
                                 Category is locked to Income for Income type
+                            </p>
+                        )}
+                        {formData.type === 'expense' && !availableCategories.includes(formData.category) && formData.category !== 'Select Category' && (
+                            <p className="mt-1 text-sm text-red-500">
+                                Please set a budget for this category first
                             </p>
                         )}
                     </div>
@@ -272,8 +306,8 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                         type="submit"
-                        disabled={isSubmitting}
-                        className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto ${isSubmitting
+                        disabled={isSubmitting || (formData.type === 'expense' && !availableCategories.includes(formData.category))}
+                        className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto ${isSubmitting || (formData.type === 'expense' && !availableCategories.includes(formData.category))
                             ? 'bg-indigo-400 cursor-not-allowed'
                             : 'bg-indigo-600 hover:bg-indigo-500'
                             }`}

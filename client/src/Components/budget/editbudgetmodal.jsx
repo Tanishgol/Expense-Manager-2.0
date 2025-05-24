@@ -1,17 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../modals/Modal';
 
 export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
-    const [limit, setLimit] = useState(budget.limit.toString());
+    const [formData, setFormData] = useState({
+        limit: ''
+    });
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        if (budget) {
+            setFormData({
+                limit: budget.limit?.toString() || ''
+            });
+        }
+    }, [budget]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const newLimit = parseFloat(limit);
-        onSubmit({
-            ...budget,
-            limit: newLimit,
-            percentage: (budget.spent / newLimit) * 100,
-        });
+        const newBudget = {
+            ...formData,
+            limit: parseFloat(formData.limit)
+        };
+        await onSubmit(newBudget);
         onClose();
     };
 
@@ -19,7 +28,7 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={`Edit ${budget.category} Budget`}
+            title={`Edit ${budget?.category} Budget`}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -35,24 +44,26 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
                             min="0"
                             step="0.01"
                             required
-                            value={limit}
-                            onChange={(e) => setLimit(e.target.value)}
-                            className="w-full pl-7 pr-12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            value={formData.limit}
+                            onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
+                            className="w-full pl-7 pr-12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                     </div>
                 </div>
+
                 <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-gray-600">Current Spending</span>
-                        <span className="font-medium">${budget.spent.toFixed(2)}</span>
+                        <span className="font-medium">${budget?.spent?.toFixed(2) || '0.00'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Remaining</span>
                         <span className="font-medium text-green-600">
-                            ${(parseFloat(limit) - budget.spent).toFixed(2)}
+                            ${(parseFloat(formData.limit) - (budget?.spent || 0)).toFixed(2)}
                         </span>
                     </div>
                 </div>
+
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                         type="submit"

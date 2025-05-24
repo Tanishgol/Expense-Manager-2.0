@@ -6,12 +6,15 @@ import ViewBudgetDetailsModal from './viewbudgetdetailsModal'
 import MonthlyBudgets from './MonthlyBudgets'
 import AnnualGoals from './annualgoals'
 import SavingsGoals from './savingsgoals'
+import BudgetService from '../../services/budgetService'
+import toast from 'react-hot-toast'
 
 const Budgets = () => {
     const [activeSection, setActiveSection] = useState('monthly')
     const [selectedBudget, setSelectedBudget] = useState(null)
     const [showEditModal, setShowEditModal] = useState(false)
     const [showDetailsModal, setShowDetailsModal] = useState(false)
+    const [showAddModal, setShowAddModal] = useState(false)
 
     const budgetCategories = [
         {
@@ -72,6 +75,20 @@ const Budgets = () => {
         },
     ]
 
+    const handleAddBudget = async (budgetData) => {
+        try {
+            await BudgetService.createBudget({
+                ...budgetData,
+                type: activeSection
+            })
+            toast.success('Budget created successfully')
+            setShowAddModal(false)
+        } catch (error) {
+            toast.error('Failed to create budget')
+            console.error('Error creating budget:', error)
+        }
+    }
+
     const renderActiveSection = () => {
         switch (activeSection) {
             case 'monthly':
@@ -106,7 +123,10 @@ const Budgets = () => {
             <div className="space-y-8">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold text-gray-800">Budget Management</h1>
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center">
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center"
+                    >
                         <PlusIcon size={18} className="mr-1" />
                         <span>Add Budget</span>
                     </button>
@@ -146,6 +166,21 @@ const Budgets = () => {
                     {renderActiveSection()}
                 </div>
             </div>
+
+            {showAddModal && (
+                <EditBudgetModal
+                    isOpen={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    budget={{
+                        category: '',
+                        limit: 0,
+                        spent: 0,
+                        percentage: 0,
+                        color: 'bg-blue-500'
+                    }}
+                    onSubmit={handleAddBudget}
+                />
+            )}
 
             {selectedBudget && (
                 <EditBudgetModal
