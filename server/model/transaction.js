@@ -8,32 +8,26 @@ const transactionSchema = new Schema(
             ref: 'User',
             required: true
         },
-        title: {
+        type: {
             type: String,
-            required: [true, "Title is required"],
-            trim: true
+            required: true,
+            enum: ['income', 'expense']
         },
         amount: {
             type: Number,
-            required: [true, "Amount is required"]
-        },
-        date: {
-            type: Date,
-            required: [true, "Date is required"],
-            default: Date.now
+            required: true,
+            min: [0, 'Amount cannot be negative']
         },
         category: {
             type: String,
-            required: [true, "Category is required"],
-            enum: ['Food', 'Housing', 'Transportation', 'Dining', 'Utilities', 'Healthcare', 'Income', 'Entertainment', 'Shopping', 'Other']
-        },
-        vendor: {
-            type: String,
-            trim: true
+            required: true
         },
         description: {
-            type: String,
-            trim: true
+            type: String
+        },
+        date: {
+            type: Date,
+            default: Date.now
         }
     },
     { timestamps: true }

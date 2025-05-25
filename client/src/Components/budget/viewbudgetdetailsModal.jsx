@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../modals/Modal';
 import { useAuth } from '../../context/AuthContext';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
     const [recentTransactions, setRecentTransactions] = useState([]);
@@ -25,8 +25,20 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                 }
 
                 const transactions = await response.json();
+                const currentMonth = new Date();
+                const startDate = startOfMonth(currentMonth);
+                const endDate = endOfMonth(currentMonth);
+
                 const categoryTransactions = transactions
-                    .filter(t => t.category === budget.category && t.amount < 0)
+                    .filter(t => {
+                        const transactionDate = new Date(t.date);
+                        return (
+                            t.category === budget.category &&
+                            t.amount < 0 && // Only expenses
+                            transactionDate >= startDate &&
+                            transactionDate <= endDate
+                        );
+                    })
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 3);
 
@@ -109,7 +121,7 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                 </div>
 
                 <div className="mt-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Recent Transactions</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">Recent Transactions - {format(new Date(), 'MMMM yyyy')}</h3>
                     {recentTransactions.length > 0 ? (
                         <div className="space-y-2">
                             {recentTransactions.map((transaction) => (

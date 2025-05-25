@@ -32,7 +32,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             }
         };
         fetchAvailableCategories();
-    }, []);
+    }, [isOpen]);
 
     // Update form data when editTransaction changes
     useEffect(() => {
@@ -59,33 +59,60 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         }
     }, [editTransaction, isOpen]);
 
+    const fetchBudgetInfo = async (category, amount) => {
+        try {
+            const budgets = await BudgetService.getAllBudgets('monthly');
+            const budget = budgets.find(b => b.category === category);
+            if (budget) {
+                const currentAmount = parseFloat(amount) || 0;
+                const currentSpent = budget.spent || 0;
+                const remaining = budget.limit - currentSpent - currentAmount;
+
+                console.log('Budget Info:', {
+                    category,
+                    limit: budget.limit,
+                    spent: currentSpent,
+                    currentAmount,
+                    remaining
+                });
+
+                setBudgetInfo({
+                    limit: budget.limit,
+                    spent: currentSpent,
+                    remaining: remaining
+                });
+                setShowBudgetWarning(currentAmount > (budget.limit - currentSpent));
+            } else {
+                setBudgetInfo(null);
+                setShowBudgetWarning(false);
+            }
+        } catch (error) {
+            console.error('Error fetching budget info:', error);
+        }
+    };
+
+    // Fetch budget info when category changes or amount changes
     useEffect(() => {
-        if (formData.category && formData.type === 'expense') {
-            const fetchBudgetInfo = async () => {
-                try {
-                    const budgets = await BudgetService.getAllBudgets('monthly');
-                    const budget = budgets.find(b => b.category === formData.category);
-                    if (budget) {
-                        const amount = parseFloat(formData.amount) || 0;
-                        setBudgetInfo({
-                            limit: budget.limit,
-                            spent: budget.spent,
-                            remaining: budget.limit - budget.spent - amount
-                        });
-                        setShowBudgetWarning(amount > (budget.limit - budget.spent));
-                    } else {
-                        setBudgetInfo(null);
-                        setShowBudgetWarning(false);
-                    }
-                } catch (error) {
-                    console.error('Error fetching budget info:', error);
-                }
-            };
-            fetchBudgetInfo();
+        if (formData.category && formData.type === 'expense' && formData.category !== 'Select Category') {
+            fetchBudgetInfo(formData.category, formData.amount);
         } else {
             setBudgetInfo(null);
             setShowBudgetWarning(false);
         }
+    }, [formData.category, formData.amount, formData.type]);
+
+    // Add event listener for transaction changes
+    useEffect(() => {
+        const handleTransactionChange = async () => {
+            if (formData.category && formData.type === 'expense' && formData.category !== 'Select Category') {
+                await fetchBudgetInfo(formData.category, formData.amount);
+            }
+        };
+
+        window.addEventListener('transactionChange', handleTransactionChange);
+        return () => {
+            window.removeEventListener('transactionChange', handleTransactionChange);
+        };
     }, [formData.category, formData.amount, formData.type]);
 
     const handleSubmit = async (e) => {
@@ -123,12 +150,25 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         }
     };
 
-    const handleCategoryChange = (category) => {
+    const handleCategoryChange = async (category) => {
         setFormData({
             ...formData,
             category,
             type: category === 'Income' ? 'income' : 'expense'
         });
+        if (category !== 'Income' && category !== 'Select Category') {
+            await fetchBudgetInfo(category, formData.amount);
+        }
+    };
+
+    const handleAmountChange = async (amount) => {
+        setFormData({
+            ...formData,
+            amount
+        });
+        if (formData.category && formData.type === 'expense' && formData.category !== 'Select Category') {
+            await fetchBudgetInfo(formData.category, amount);
+        }
     };
 
     const handleTypeChange = (type) => {
@@ -235,12 +275,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             min="0"
                             step="0.01"
                             value={formData.amount}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    amount: e.target.value,
-                                })
-                            }
+                            onChange={(e) => handleAmountChange(e.target.value)}
                             className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>

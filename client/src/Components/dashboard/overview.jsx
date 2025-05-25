@@ -7,6 +7,7 @@ import OverviewCard from './overviewcard';
 import BalanceChart from './balancechart'
 import { RecentTransactions } from '../transactions/recenttransactions'
 import { BudgetSummary } from '../budget/budgetsummery'
+import TransactionService from '../../services/transactionService'
 
 const Overview = () => {
     const [loading, setLoading] = useState(true);
@@ -19,6 +20,7 @@ const Overview = () => {
     });
     const { token } = useAuth();
     const navigate = useNavigate();
+    const [transactions, setTransactions] = useState([]);
 
     const calculateOverviewData = (transactions) => {
         const data = {
@@ -87,29 +89,27 @@ const Overview = () => {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                const response = await fetch('http://localhost:9000/api/transactions', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include'
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch transactions');
-
-                const transactions = await response.json();
-                const data = calculateOverviewData(transactions);
-                setOverviewData(data);
-                setLoading(false);
+                setLoading(true);
+                const data = await TransactionService.getAllTransactions();
+                setTransactions(data || []);
+                const overviewData = calculateOverviewData(data || []);
+                setOverviewData(overviewData);
             } catch (error) {
                 console.error('Error fetching transactions:', error);
-                toast.error('Failed to load overview data');
+                if (error.message === 'Please authenticate' || error.response?.status === 401) {
+                    toast.error('Session expired. Please login again');
+                    navigate('/login');
+                } else {
+                    toast.error('Failed to fetch transactions. Please try again later.');
+                }
+                setTransactions([]);
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchTransactions();
-    }, [token]);
+    }, [token, navigate]);
 
     if (loading) {
         return (
@@ -181,7 +181,7 @@ const Overview = () => {
                     <h2 className="text-lg font-semibold text-gray-800">
                         Recent Transactions
                     </h2>
-                    <button 
+                    <button
                         onClick={() => navigate('/transactions')}
                         className="text-sm text-indigo-600 hover:text-indigo-800"
                     >

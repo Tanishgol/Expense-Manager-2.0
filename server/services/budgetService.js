@@ -1,5 +1,6 @@
 const Budget = require('../model/budget');
 const Transaction = require('../model/transaction');
+const mongoose = require('mongoose');
 
 const BudgetService = {
     // Create a new budget
@@ -28,7 +29,7 @@ const BudgetService = {
             const spent = await Transaction.aggregate([
                 {
                     $match: {
-                        user: userId,
+                        user: new mongoose.Types.ObjectId(userId),
                         category: budget.category,
                         amount: { $lt: 0 }, // Only expenses
                         date: {
@@ -61,7 +62,7 @@ const BudgetService = {
         const spent = await Transaction.aggregate([
             {
                 $match: {
-                    user: userId,
+                    user: new mongoose.Types.ObjectId(userId),
                     category: budget.category,
                     amount: { $lt: 0 }, // Only expenses
                     date: {
@@ -136,7 +137,7 @@ const BudgetService = {
             const spent = await Transaction.aggregate([
                 {
                     $match: {
-                        user: userId,
+                        user: new mongoose.Types.ObjectId(userId),
                         category: budget.category,
                         amount: { $lt: 0 }, // Only expenses
                         date: {

@@ -12,6 +12,7 @@ const fs = require("fs");
 // Import API routes
 const transactionApi = require("./api/transactionApi");
 const budgetRoutes = require("./routes/budgetRoutes");
+const annualGoalRoutes = require('./routes/annualGoalRoutes');
 
 const app = express();
 
@@ -60,6 +61,7 @@ const upload = multer({
 // API Routes
 app.use("/api/transactions", transactionApi);
 app.use("/api/budgets", budgetRoutes);
+app.use("/api/annual-goals", annualGoalRoutes);
 
 // Register route
 app.post("/api/register", async (req, res) => {
