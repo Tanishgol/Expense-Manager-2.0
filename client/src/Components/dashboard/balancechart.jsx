@@ -54,7 +54,6 @@ const BalanceChart = () => {
             }
         });
 
-        console.log('Monthly Totals:', monthly);
         return monthly;
     };
 

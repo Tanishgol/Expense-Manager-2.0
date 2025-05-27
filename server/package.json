@@ -13,12 +13,15 @@
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "csv-writer": "^1.6.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.3",
     "multer": "^2.0.0",
-    "server": "file:"
+    "pdfkit": "^0.17.1",
+    "server": "file:",
+    "xlsx": "^0.18.5"
   }
 }
