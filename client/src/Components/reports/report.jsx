@@ -46,12 +46,12 @@ export const Report = () => {
                         'Authorization': `Bearer ${token}`
                     },
                 })
-                
+
                 if (!response.ok) {
                     const errorData = await response.text()
                     throw new Error(`Failed to fetch transactions: ${response.status} ${response.statusText} - ${errorData}`)
                 }
-                
+
                 const data = await response.json()
                 setTransactions(data)
                 setLoading(false)
@@ -117,7 +117,7 @@ export const Report = () => {
                 }, {})
 
             const topExpenseCategory = Object.entries(expensesByCategory)
-                .reduce((max, [category, amount]) => 
+                .reduce((max, [category, amount]) =>
                     amount > max.amount ? { category, amount } : max,
                     { category: '', amount: 0 }
                 )
@@ -142,43 +142,12 @@ export const Report = () => {
             const token = localStorage.getItem('token')
             if (!token) throw new Error('No authentication token found')
 
-            const response = await fetch('http://localhost:9000/api/transactions/export', {
-                method: 'POST',
+            const response = await fetch(`http://localhost:9000/api/transactions/export?format=${format}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    format,
-                    dateRange,
-                    transactions: transactions.filter(t => {
-                        const transactionDate = new Date(t.date)
-                        const now = new Date()
-                        let startDate, endDate
-
-                        switch (dateRange) {
-                            case 'month':
-                                startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-                                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-                                break
-                            case 'quarter':
-                                const quarter = Math.floor(now.getMonth() / 3)
-                                startDate = new Date(now.getFullYear(), quarter * 3, 1)
-                                endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0)
-                                break
-                            case 'year':
-                                startDate = new Date(now.getFullYear(), 0, 1)
-                                endDate = new Date(now.getFullYear(), 11, 31)
-                                break
-                            default:
-                                startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-                                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-                        }
-
-                        return transactionDate >= startDate && transactionDate <= endDate
-                    }),
-                    summary
-                })
+                }
             })
 
             if (!response.ok) throw new Error('Export failed')
@@ -187,7 +156,7 @@ export const Report = () => {
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `financial-report-${dateRange}-${new Date().toISOString().split('T')[0]}.${format}`
+            a.download = `transactions-${new Date().toISOString().split('T')[0]}.${format}`
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
@@ -216,9 +185,8 @@ export const Report = () => {
                     <button
                         onClick={() => setShowExportMenu(!showExportMenu)}
                         disabled={exportLoading || !transactions.length}
-                        className={`bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md flex items-center ${
-                            exportLoading || !transactions.length ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md flex items-center ${exportLoading || !transactions.length ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                     >
                         {exportLoading ? (
                             <>

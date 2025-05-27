@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleware/auth");
 const Transaction = require("../model/transaction");
+const { exportReport } = require("../controller/transactionExport");
 
 // Get all transactions for a user
 const getAllTransactions = async (req, res) => {
@@ -84,11 +85,59 @@ const getTransactionStats = async (req, res) => {
     }
 };
 
+// Export transactions
+const exportTransactions = async (req, res) => {
+    try {
+        const format = req.query.format || 'csv';
+        const transactions = await Transaction.find({ user: req.userId })
+            .sort({ date: -1 });
+
+        // Calculate summary
+        const totalIncome = transactions
+            .filter(t => t.amount > 0)
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        const totalExpenses = transactions
+            .filter(t => t.amount < 0)
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+        const netSavings = totalIncome - totalExpenses;
+        const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
+
+        // Find top expense category
+        const expensesByCategory = transactions
+            .filter(t => t.amount < 0)
+            .reduce((acc, t) => {
+                acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+                return acc;
+            }, {});
+
+        const topExpenseCategory = Object.entries(expensesByCategory)
+            .reduce((max, [category, amount]) => 
+                amount > max.amount ? { category, amount } : max,
+                { category: '', amount: 0 }
+            );
+
+        const summary = {
+            totalIncome,
+            totalExpenses,
+            netSavings,
+            savingsRate,
+            topExpenseCategory
+        };
+
+        await exportReport(req, res, { format, transactions, summary });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Define routes
 router.get('/', verifyToken, getAllTransactions);
 router.post('/', verifyToken, createTransaction);
 router.put('/:id', verifyToken, updateTransaction);
 router.delete('/:id', verifyToken, deleteTransaction);
 router.get('/stats', verifyToken, getTransactionStats);
+router.get('/export', verifyToken, exportTransactions);
 
 module.exports = router;

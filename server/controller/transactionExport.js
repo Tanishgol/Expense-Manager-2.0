@@ -2,9 +2,7 @@ const PDFDocument = require('pdfkit');
 const XLSX = require('xlsx');
 const { createObjectCsvStringifier } = require('csv-writer');
 
-exports.exportReport = async (req, res) => {
-    const { format, transactions, summary } = req.body;
-
+exports.exportReport = async (req, res, { format, transactions, summary }) => {
     try {
         if (format === 'csv') {
             const csvStringifier = createObjectCsvStringifier({
@@ -18,24 +16,24 @@ exports.exportReport = async (req, res) => {
             });
             const csv = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(transactions);
             res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', 'attachment; filename=\"report.csv\"');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"transactions.csv\"');
             return res.send(csv);
         }
 
         if (format === 'xlsx') {
             const ws = XLSX.utils.json_to_sheet(transactions);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Report');
+            XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
             const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=\"report.xlsx\"');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"transactions.xlsx\"');
             return res.send(buf);
         }
 
         if (format === 'pdf') {
             const doc = new PDFDocument();
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=\"report.pdf\"');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"transactions.pdf\"');
             doc.pipe(res);
             doc.fontSize(18).text('Financial Report', { align: 'center' });
             doc.moveDown();

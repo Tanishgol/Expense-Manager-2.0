@@ -114,31 +114,38 @@ export const Transactions = () => {
         }
     };
 
-    const handleDownload = () => {
-        // Implement CSV download functionality
-        const headers = ['Title', 'Description', 'Category', 'Date', 'Amount'];
-        const csvData = transactions.map(t => [
-            t.title,
-            t.description || '',
-            t.category,
-            new Date(t.date).toLocaleDateString(),
-            t.amount
-        ]);
+    const handleDownload = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
 
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+            const response = await fetch('http://localhost:9000/api/transactions/export', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'transactions.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            if (!response.ok) {
+                throw new Error('Failed to export transactions');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error exporting transactions:', error);
+            alert('Failed to export transactions. Please try again.');
+        }
     };
 
     useEffect(() => {
