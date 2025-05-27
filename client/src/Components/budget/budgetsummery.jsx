@@ -11,25 +11,33 @@ export const BudgetSummary = () => {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        fetchBudgetSummary()
-    }, [])
+        fetchBudgetSummary();
+    }, []);
 
     const fetchBudgetSummary = async () => {
         try {
-            setIsLoading(true)
-            const budgets = await BudgetService.getBudgetSummary()
-            // Sort budgets by spent amount in descending order and take top 5
-            const topBudgets = budgets
+            setIsLoading(true);
+            const budgets = await BudgetService.getBudgetSummary();
+
+            const uniqueBudgets = budgets.filter(
+                (budget, index, self) =>
+                    index === self.findIndex(
+                        (b) => b.category.toLowerCase() === budget.category.toLowerCase()
+                    )
+            );
+
+            const topBudgets = uniqueBudgets
                 .sort((a, b) => (b.spent || 0) - (a.spent || 0))
-                .slice(0, 5)
-            setBudgetCategories(topBudgets)
+                .slice(0, 3);
+
+            setBudgetCategories(topBudgets);
         } catch (error) {
-            toast.error('Failed to fetch budget summary')
-            console.error('Error fetching budget summary:', error)
+            toast.error('Failed to fetch budget summary');
+            console.error('Error fetching budget summary:', error);
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     if (isLoading) {
         return (
@@ -38,7 +46,6 @@ export const BudgetSummary = () => {
             </div>
         )
     }
-
     return (
         <>
             <PageTop />

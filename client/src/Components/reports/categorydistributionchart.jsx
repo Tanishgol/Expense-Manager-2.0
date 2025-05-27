@@ -9,12 +9,10 @@ const CategoryDistributionChart = () => {
         if (chartRef.current) {
             const ctx = chartRef.current.getContext('2d');
             if (ctx) {
-                // Destroy previous chart instance if it exists
                 if (chartInstance.current) {
                     chartInstance.current.destroy();
                 }
 
-                // Create new doughnut chart
                 chartInstance.current = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -32,14 +30,14 @@ const CategoryDistributionChart = () => {
                             {
                                 data: [1200, 420, 240, 180, 185, 75, 250, 90],
                                 backgroundColor: [
-                                    'rgba(59, 130, 246, 0.8)',     // Blue
-                                    'rgba(34, 197, 94, 0.8)',      // Green
-                                    'rgba(168, 85, 247, 0.8)',     // Purple
-                                    'rgba(245, 158, 11, 0.8)',     // Amber
-                                    'rgba(239, 68, 68, 0.8)',      // Red
-                                    'rgba(236, 72, 153, 0.8)',     // Pink
-                                    'rgba(79, 70, 229, 0.8)',      // Indigo
-                                    'rgba(107, 114, 128, 0.8)',    // Gray
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(34, 197, 94, 0.8)',
+                                    'rgba(168, 85, 247, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(236, 72, 153, 0.8)',
+                                    'rgba(79, 70, 229, 0.8)',
+                                    'rgba(107, 114, 128, 0.8)',
                                 ],
                                 borderColor: '#ffffff',
                                 borderWidth: 1,
@@ -77,7 +75,6 @@ const CategoryDistributionChart = () => {
             }
         }
 
-        // Cleanup chart instance on unmount
         return () => {
             if (chartInstance.current) {
                 chartInstance.current.destroy();

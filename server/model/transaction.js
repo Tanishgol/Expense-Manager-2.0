@@ -29,13 +29,13 @@ const transactionSchema = new Schema(
         "Food",
         "Housing",
         "Transportation",
-        "Dining",
         "Utilities",
         "Healthcare",
-        "Income",
         "Entertainment",
         "Shopping",
+        "Personal Care",
         "Other",
+        "Income"
       ],
     },
     vendor: {

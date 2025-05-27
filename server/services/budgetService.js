@@ -130,6 +130,9 @@ const BudgetService = {
 
     // Get budget summary for a user
     getBudgetSummary: async (userId) => {
+        // First, clean up any duplicate budgets
+        await BudgetService.cleanupDuplicateBudgets(userId);
+        
         const budgets = await Budget.find({ user: userId, type: 'monthly' });
         
         // Calculate spent amount from transactions for each budget
@@ -159,6 +162,29 @@ const BudgetService = {
         }
 
         return budgets;
+    },
+
+    // Clean up duplicate budgets
+    cleanupDuplicateBudgets: async (userId) => {
+        const budgets = await Budget.find({ user: userId, type: 'monthly' });
+        const categories = new Set();
+        const duplicates = [];
+
+        // Find duplicate categories
+        budgets.forEach(budget => {
+            if (categories.has(budget.category)) {
+                duplicates.push(budget);
+            } else {
+                categories.add(budget.category);
+            }
+        });
+
+        // Delete duplicate budgets
+        for (const duplicate of duplicates) {
+            await Budget.findByIdAndDelete(duplicate._id);
+        }
+
+        return duplicates.length;
     },
 
     // Check if budget exists for a category

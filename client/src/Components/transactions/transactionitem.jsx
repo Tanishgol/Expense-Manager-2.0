@@ -4,13 +4,13 @@ import {
     Utensils,
     House,
     Car,
-    HandPlatter,
-    Plug,
     Hospital,
-    CircleHelp,
+    Plug,
     Drama,
-    BanknoteArrowUp,
     ShoppingCart,
+    Sparkles,
+    CircleHelp,
+    BanknoteArrowUp,
     Edit,
     Trash2,
 } from 'lucide-react';
@@ -27,20 +27,22 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                 return <House size={16} className="text-blue-500" />;
             case 'transportation':
                 return <Car size={16} className="text-purple-500" />;
-            case 'dining':
-                return <HandPlatter size={16} className="text-amber-500" />;
-            case 'utilities':
-                return <Plug size={16} className="text-red-500" />;
             case 'healthcare':
                 return <Hospital size={16} className="text-pink-500" />;
+            case 'utilities':
+                return <Plug size={16} className="text-red-500" />;
             case 'entertainment':
                 return <Drama size={16} className="text-yellow-500" />;
-            case 'income':
-                return <BanknoteArrowUp size={16} className="text-green-500" />;
             case 'shopping':
-                return <ShoppingCart size={16} className="text-blue-500" />;
-            default:
+                return <ShoppingCart size={16} className="text-blue-400" />;
+            case 'personal care':
+                return <Sparkles size={16} className="text-violet-500" />;
+            case 'other':
                 return <CircleHelp size={16} className="text-gray-500" />;
+            case 'income':
+                return <BanknoteArrowUp size={16} className="text-green-600" />;
+            default:
+                return <CircleHelp size={16} className="text-gray-400" />;
         }
     };
 

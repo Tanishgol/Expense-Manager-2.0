@@ -87,29 +87,35 @@ const Overview = () => {
     };
 
     useEffect(() => {
+        let ignore = false;
+
         const fetchTransactions = async () => {
             try {
                 setLoading(true);
                 const data = await TransactionService.getAllTransactions();
-                setTransactions(data || []);
-                const overviewData = calculateOverviewData(data || []);
-                setOverviewData(overviewData);
-            } catch (error) {
-                console.error('Error fetching transactions:', error);
-                if (error.message === 'Please authenticate' || error.response?.status === 401) {
-                    toast.error('Session expired. Please login again');
-                    navigate('/login');
-                } else {
-                    toast.error('Failed to fetch transactions. Please try again later.');
+                if (!ignore) {
+                    const uniqueTransactions = Array.from(new Map(data.map(tx => [tx._id, tx])).values());
+                    setTransactions(uniqueTransactions);
+                    setOverviewData(calculateOverviewData(uniqueTransactions));
                 }
-                setTransactions([]);
+            } catch (error) {
+                if (!ignore) {
+                    console.error('Error fetching transactions:', error);
+                    toast.error('Failed to fetch transactions');
+                    setTransactions([]);
+                }
             } finally {
-                setLoading(false);
+                if (!ignore) setLoading(false);
             }
         };
 
         fetchTransactions();
+
+        return () => {
+            ignore = true;
+        };
     }, [token, navigate]);
+
 
     if (loading) {
         return (
