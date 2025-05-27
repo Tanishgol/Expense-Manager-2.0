@@ -6,6 +6,7 @@ import BudgetService from '../../services/budgetService'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import AnnualGoalService from '../../services/annualGoalService'
 
 const MonthlyBudgets = () => {
     const [selectedBudget, setSelectedBudget] = useState(null)
@@ -16,6 +17,7 @@ const MonthlyBudgets = () => {
     const navigate = useNavigate()
     const [showAddModal, setShowAddModal] = useState(false)
     const { token } = useAuth()
+    const [annualGoals, setAnnualGoals] = useState([])
 
     const defaultCategories = [
         'Food',
@@ -38,6 +40,10 @@ const MonthlyBudgets = () => {
         }
         initializeBudgets()
     }, [navigate])
+
+    useEffect(() => {
+        fetchAnnualGoals()
+    }, [])
 
     const fetchTransactions = async () => {
         try {
@@ -141,7 +147,6 @@ const MonthlyBudgets = () => {
         }
     }
 
-    // Add event listener for transaction changes
     useEffect(() => {
         const handleTransactionChange = () => {
             initializeBudgets()
@@ -211,6 +216,72 @@ const MonthlyBudgets = () => {
         }
     }
 
+    const fetchAnnualGoals = async () => {
+        try {
+            setIsLoading(true)
+            const goals = await AnnualGoalService.getAllGoals()
+            setAnnualGoals(goals || [])
+        } catch (error) {
+            console.error('Error fetching annual goals:', error)
+            if (error.message === 'Please authenticate' || error.response?.status === 401) {
+                toast.error('Session expired. Please login again')
+                navigate('/login')
+            } else {
+                toast.error(error.message || 'Failed to fetch annual goals')
+            }
+            setAnnualGoals([])
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const calculateProgress = (current, target) => {
+        if (!current || !target || target === 0) return 0
+        return (current / target) * 100
+    }
+
+    const getProgressHighlights = () => {
+        if (!annualGoals.length) return []
+
+        return annualGoals.map(goal => {
+            const progress = calculateProgress(goal.current, goal.target)
+            const deadline = new Date(goal.deadline)
+            const today = new Date()
+            const monthsRemaining = (deadline.getFullYear() - today.getFullYear()) * 12 +
+                (deadline.getMonth() - today.getMonth())
+
+            let status = ''
+            let message = ''
+
+            if (progress >= 100) {
+                status = 'completed'
+                message = `${goal.title} is completed`
+            } else if (progress >= 75) {
+                status = 'almost complete'
+                message = `${goal.title} is ${progress.toFixed(1)}% complete`
+            } else if (monthsRemaining <= 3 && progress < 75) {
+                status = 'needs increased savings'
+                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
+                message = `${goal.title} needs increased savings ($${monthlyTarget.toFixed(0)}/month to reach target)`
+            } else if (progress >= 50) {
+                status = 'on track'
+                message = `${goal.title} is on track for ${deadline.toLocaleDateString('en-US', { month: 'long' })} deadline`
+            } else {
+                status = 'needs attention'
+                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
+                message = `${goal.title} needs attention ($${monthlyTarget.toFixed(0)}/month needed)`
+            }
+
+            return {
+                title: goal.title,
+                progress,
+                status,
+                message,
+                deadline: goal.deadline
+            }
+        })
+    }
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -219,13 +290,23 @@ const MonthlyBudgets = () => {
         )
     }
 
+    const progressHighlights = getProgressHighlights()
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                        Annual Goals Overview
-                    </h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Monthly Goals Overview
+                        </h2>
+                        <button className="text-gray-700 text-1xl font-semibold mb-6"
+                            onClick={() => setShowAddModal(true)}
+                        >
+                            Edit Monthly Budget
+                        </button>
+                    </div>
+
                     <div className="bg-gray-50 p-5 rounded-lg">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-gray-600">Total Target</span>
@@ -262,12 +343,20 @@ const MonthlyBudgets = () => {
                         <h3 className="font-medium text-blue-800 mb-3">
                             Progress Highlights
                         </h3>
-                        <ul className="text-sm text-blue-700 space-y-2">
-                            <li>• Emergency Fund is 75% complete</li>
-                            <li>• Vacation Fund is on track for June deadline</li>
-                            <li>• Home Renovation needs increased savings</li>
-                            <li>• New Car Fund is 60% complete</li>
-                        </ul>
+                        {annualGoals.length > 0 ? (
+                            <ul className="text-sm text-blue-700 space-y-2">
+                                {progressHighlights.map((insight, index) => (
+                                    <li key={index} className="flex items-start">
+                                        <span className="mr-2">•</span>
+                                        <span>{insight.message}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-blue-700">
+                                No annual goals set yet. Start by creating your first goal!
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

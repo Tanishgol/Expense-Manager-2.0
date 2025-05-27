@@ -3,6 +3,9 @@ import ExpenseChart from './expensechart'
 import IncomeExpenseChart from './incomeexpensechart'
 import CategoryDistributionChart from './categorydistributionchart'
 import { CalendarIcon, DownloadIcon, ChevronDownIcon } from 'lucide-react'
+import AnnualGoalService from '../../services/annualGoalService'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 export const Report = () => {
     const [dateRange, setDateRange] = useState('month')
@@ -12,6 +15,8 @@ export const Report = () => {
     const [exportLoading, setExportLoading] = useState(false)
     const [showExportMenu, setShowExportMenu] = useState(false)
     const exportMenuRef = useRef(null)
+    const [annualGoals, setAnnualGoals] = useState([])
+    const navigate = useNavigate()
     const [summary, setSummary] = useState({
         totalIncome: 0,
         totalExpenses: 0,
@@ -33,13 +38,16 @@ export const Report = () => {
     }, [])
 
     useEffect(() => {
-        const fetchTransactions = async () => {
+        const fetchData = async () => {
             try {
+                setLoading(true)
                 const token = localStorage.getItem('token')
                 if (!token) {
                     throw new Error('No authentication token found. Please log in.')
                 }
-                const response = await fetch('http://localhost:9000/api/transactions', {
+
+                // Fetch transactions
+                const transactionsResponse = await fetch('http://localhost:9000/api/transactions', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -47,23 +55,31 @@ export const Report = () => {
                     },
                 })
 
-                if (!response.ok) {
-                    const errorData = await response.text()
-                    throw new Error(`Failed to fetch transactions: ${response.status} ${response.statusText} - ${errorData}`)
+                if (!transactionsResponse.ok) {
+                    throw new Error('Failed to fetch transactions')
                 }
 
-                const data = await response.json()
-                setTransactions(data)
-                setLoading(false)
-            } catch (err) {
-                console.error('Error fetching transactions:', err)
-                setError(err.message)
+                const transactionsData = await transactionsResponse.json()
+                setTransactions(transactionsData)
+
+                // Fetch annual goals
+                const goals = await AnnualGoalService.getAllGoals()
+                setAnnualGoals(goals || [])
+            } catch (error) {
+                console.error('Error fetching data:', error)
+                if (error.message === 'Please authenticate' || error.response?.status === 401) {
+                    toast.error('Session expired. Please login again')
+                    navigate('/login')
+                } else {
+                    setError(error.message || 'Failed to fetch data')
+                }
+            } finally {
                 setLoading(false)
             }
         }
 
-        fetchTransactions()
-    }, [])
+        fetchData()
+    }, [navigate])
 
     useEffect(() => {
         if (transactions.length > 0) {
@@ -167,6 +183,53 @@ export const Report = () => {
         } finally {
             setExportLoading(false)
         }
+    }
+
+    const calculateGoalProgress = (current, target) => {
+        if (!current || !target || target === 0) return 0
+        return (current / target) * 100
+    }
+
+    const getGoalInsights = () => {
+        if (!annualGoals.length) return []
+
+        return annualGoals.map(goal => {
+            const progress = calculateGoalProgress(goal.current, goal.target)
+            const deadline = new Date(goal.deadline)
+            const today = new Date()
+            const monthsRemaining = (deadline.getFullYear() - today.getFullYear()) * 12 +
+                (deadline.getMonth() - today.getMonth())
+
+            let status = ''
+            let message = ''
+
+            if (progress >= 100) {
+                status = 'completed'
+                message = `${goal.title} is completed`
+            } else if (progress >= 75) {
+                status = 'almost complete'
+                message = `${goal.title} is ${progress.toFixed(1)}% complete`
+            } else if (monthsRemaining <= 3 && progress < 75) {
+                status = 'needs increased savings'
+                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
+                message = `${goal.title} needs increased savings ($${monthlyTarget.toFixed(0)}/month to reach target)`
+            } else if (progress >= 50) {
+                status = 'on track'
+                message = `${goal.title} is on track for ${deadline.toLocaleDateString('en-US', { month: 'long' })} deadline`
+            } else {
+                status = 'needs attention'
+                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
+                message = `${goal.title} needs attention ($${monthlyTarget.toFixed(0)}/month needed)`
+            }
+
+            return {
+                title: goal.title,
+                progress,
+                status,
+                message,
+                deadline: goal.deadline
+            }
+        })
     }
 
     if (loading) {
@@ -286,54 +349,74 @@ export const Report = () => {
                             <CategoryDistributionChart transactions={transactions} dateRange={dateRange} />
                         </div>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-md font-medium text-gray-700 mb-4">Summary</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-sm text-gray-600 mb-1">Total Income</p>
-                                <p className="text-xl font-semibold text-green-600">
-                                    {new Intl.NumberFormat('en-US', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(summary.totalIncome)}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 mb-1">Total Expenses</p>
-                                <p className="text-xl font-semibold text-red-600">
-                                    {new Intl.NumberFormat('en-US', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(summary.totalExpenses)}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 mb-1">Net Savings</p>
-                                <p className={`text-xl font-semibold ${summary.netSavings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {new Intl.NumberFormat('en-US', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(summary.netSavings)}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600 mb-1">Savings Rate</p>
-                                <p className="text-xl font-semibold text-blue-600">
-                                    {summary.savingsRate.toFixed(1)}%
-                                </p>
-                            </div>
-                            <div className="pt-4 border-t border-gray-200">
-                                <p className="text-sm text-gray-600 mb-1">
-                                    Top Expense Category
-                                </p>
-                                <p className="font-medium">
-                                    {summary.topExpenseCategory.category}: {new Intl.NumberFormat('en-US', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(summary.topExpenseCategory.amount)}
-                                </p>
+                    <div className="space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="text-md font-medium text-gray-700 mb-4">Summary</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Total Income</p>
+                                    <p className="text-xl font-semibold text-green-600">
+                                        {new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        }).format(summary.totalIncome)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Total Expenses</p>
+                                    <p className="text-xl font-semibold text-red-600">
+                                        {new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        }).format(summary.totalExpenses)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Net Savings</p>
+                                    <p className={`text-xl font-semibold ${summary.netSavings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        }).format(summary.netSavings)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Savings Rate</p>
+                                    <p className="text-xl font-semibold text-blue-600">
+                                        {summary.savingsRate.toFixed(1)}%
+                                    </p>
+                                </div>
+                                <div className="pt-4 border-t border-gray-200">
+                                    <p className="text-sm text-gray-600 mb-1">
+                                        Top Expense Category
+                                    </p>
+                                    <p className="font-medium">
+                                        {summary.topExpenseCategory.category}: {new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        }).format(summary.topExpenseCategory.amount)}
+                                    </p>
+                                </div>
                             </div>
                         </div>
+                        {annualGoals.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-md font-medium text-gray-700 mb-4">Goal Insights</h3>
+                                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                                    <h4 className="font-medium text-blue-800 mb-3">
+                                        Progress Highlights
+                                    </h4>
+                                    <ul className="text-sm text-blue-700 space-y-2">
+                                        {getGoalInsights().map((insight, index) => (
+                                            <li key={index} className="flex items-start">
+                                                <span className="mr-2">•</span>
+                                                <span>{insight.message}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

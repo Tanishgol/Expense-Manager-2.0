@@ -34,7 +34,7 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                         const transactionDate = new Date(t.date);
                         return (
                             t.category === budget.category &&
-                            t.amount < 0 && // Only expenses
+                            t.amount < 0 &&
                             transactionDate >= startDate &&
                             transactionDate <= endDate
                         );
