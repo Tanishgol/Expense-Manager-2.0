@@ -218,7 +218,7 @@ export const Transactions = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 md:mt-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
 
@@ -254,7 +254,7 @@ export const Transactions = () => {
                             setEditingTransaction(null);
                             setIsModalOpen(true);
                         }}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center shadow-sm transition"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md md:text-sm flex items-center shadow-sm transition"
                     >
                         <PlusIcon size={18} className="mr-1" />
                         <span>Add Transaction</span>
