@@ -233,32 +233,34 @@ export const Transactions = () => {
                             className="pl-10 pr-4 py-2 w-full md:w-[300px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
-                    <div className="flex md:flex-row md:gap-2">
-                        <button
-                            onClick={() => setShowFilter(!showFilter)}
-                            className="p-2 border mr-2 border-gray-300 rounded-md hover:bg-gray-50 transition"
-                        >
-                            <FilterIcon size={18} className="text-gray-600" />
-                        </button>
+                    <div className="w-full flex flex-col xs:flex-row xs:items-center xs:justify-center xs:gap-3 gap-2">
+                        <div className="flex gap-2 justify-center">
+                            <button
+                                onClick={() => setShowFilter(!showFilter)}
+                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                            >
+                                <FilterIcon size={18} className="text-gray-600" />
+                            </button>
+
+                            <button
+                                onClick={handleDownload}
+                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                            >
+                                <DownloadIcon size={18} className="text-gray-600" />
+                            </button>
+                        </div>
 
                         <button
-                            onClick={handleDownload}
-                            className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                            onClick={() => {
+                                setEditingTransaction(null);
+                                setIsModalOpen(true);
+                            }}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center shadow-sm transition w-full xs:w-auto"
                         >
-                            <DownloadIcon size={18} className="text-gray-600" />
+                            <PlusIcon size={18} className="mr-1" />
+                            <span>Add Transaction</span>
                         </button>
                     </div>
-
-                    <button
-                        onClick={() => {
-                            setEditingTransaction(null);
-                            setIsModalOpen(true);
-                        }}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md md:text-sm flex items-center shadow-sm transition"
-                    >
-                        <PlusIcon size={18} className="mr-1" />
-                        <span>Add Transaction</span>
-                    </button>
                 </div>
             </div>
 
@@ -282,11 +284,10 @@ export const Transactions = () => {
                 </div>
             )}
 
-            {/* Transactions Table */}
             <div className="bg-white rounded-lg shadow p-4 md:p-6">
-                <div className="overflow-x-auto">
+                <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full table-auto text-sm text-gray-700">
-                        <thead className="hidden md:table-header-group">
+                        <thead>
                             <tr className="border-b text-left text-gray-500">
                                 <th className="pb-3 font-medium">Title</th>
                                 <th className="pb-3 font-medium">Description</th>
@@ -304,6 +305,7 @@ export const Transactions = () => {
                                         transaction={transaction}
                                         onEdit={handleEditTransaction}
                                         onDelete={handleDeleteTransaction}
+                                        isMobile={false}
                                     />
                                 ))
                             ) : (
@@ -315,6 +317,24 @@ export const Transactions = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="grid md:grid-cols-2 sm:grid-cols-2 xs:grid-cols-1 xss:grid-cols-1 xsss:grid-cols-1 gap-2 gap-y-4 mt-4 lg:hidden">
+                    {filteredTransactions.length > 0 ? (
+                        filteredTransactions.map((transaction) => (
+                            <TransactionItem
+                                key={transaction._id}
+                                transaction={transaction}
+                                onEdit={handleEditTransaction}
+                                onDelete={handleDeleteTransaction}
+                                isMobile={true}
+                            />
+                        ))
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            No transactions found
+                        </div>
+                    )}
                 </div>
             </div>
 

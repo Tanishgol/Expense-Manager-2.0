@@ -72,18 +72,21 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                 {description && (
                     <p className="text-sm text-gray-600 mb-2">{description}</p>
                 )}
-                <div className="flex justify-end gap-2 mt-2">
+                <div className="flex justify-center gap-4 mt-4">
                     <button
                         onClick={() => onEdit(transaction)}
-                        className="p-1 text-gray-500 hover:text-indigo-600 transition-colors"
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 text-white hover:bg-indigo-100 rounded transition"
                     >
                         <Edit size={16} />
+                        <span>Edit</span>
                     </button>
+
                     <button
                         onClick={() => onDelete(transaction._id)}
-                        className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-red-800 text-yellow-200 hover:bg-red-100 rounded transition"
                     >
                         <Trash2 size={16} />
+                        <span>Delete</span>
                     </button>
                 </div>
             </div>
@@ -122,17 +125,17 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                     {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
                 </span>
             </td>
-            <td className="py-4 text-right">
-                <div className="flex justify-end gap-2">
+            <td className="py-4 text-center">
+                <div className="inline-flex justify-center items-center gap-2">
                     <button
                         onClick={() => onEdit(transaction)}
-                        className="p-1 text-gray-500 hover:text-indigo-600 transition-colors"
+                        className="p-1  bg-gray-800 text-white rounded transition-colors"
                     >
                         <Edit size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(transaction._id)}
-                        className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                        className="p-1  bg-red-800 text-yellow-200 rounded transition-colors"
                     >
                         <Trash2 size={16} />
                     </button>

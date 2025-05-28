@@ -10,16 +10,12 @@ import {
 } from 'lucide-react'
 const Profile = () => {
     return (
-        <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8 mt-10">
             <h1 className="text-2xl font-bold text-gray-800">Your Profile</h1>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column */}
                 <div className="lg:col-span-2 space-y-6">
                     <ProfileHeader />
-
                     <div className="bg-white rounded-lg shadow p-6 space-y-8">
-                        {/* Personal Info */}
                         <section className="border-b pb-6">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4">
                                 Personal Information
@@ -46,13 +42,11 @@ const Profile = () => {
                             </div>
                         </section>
 
-                        {/* Preferences */}
                         <section className="border-b pb-6">
                             <h2 className="text-lg font-semibold text-gray-800 mb-4">
                                 Account Preferences
                             </h2>
                             <div className="space-y-6">
-                                {/* Language */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
                                         <div className="p-2 bg-indigo-50 rounded-lg">
@@ -70,21 +64,7 @@ const Profile = () => {
                                     </select>
                                 </div>
 
-                                {/* Notifications */}
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="p-2 bg-indigo-50 rounded-lg">
-                                            <BellIcon className="h-5 w-5 text-indigo-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-800">Notifications</p>
-                                            <p className="text-sm text-gray-500">Manage your notification preferences</p>
-                                        </div>
-                                    </div>
-                                    <button className="text-sm text-indigo-600 hover:text-indigo-800">
-                                        Configure
-                                    </button>
-                                </div>
+                               
                             </div>
                         </section>
 

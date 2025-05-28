@@ -66,7 +66,6 @@ export const RecentTransactions = () => {
 
     const handleEdit = async (transaction) => {
         try {
-            // This will be handled by the parent component through props
             console.log('Edit transaction:', transaction);
         } catch (error) {
             console.error('Error editing transaction:', error);
@@ -90,7 +89,6 @@ export const RecentTransactions = () => {
                 throw new Error(errorData.message || 'Failed to delete transaction');
             }
 
-            // Remove the deleted transaction from the state
             setTransactions(prev => prev.filter(t => t._id !== transactionId));
             toast.success('Transaction deleted successfully');
         } catch (error) {
@@ -139,7 +137,7 @@ export const RecentTransactions = () => {
 
     return (
         <div className="w-full">
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-sm text-gray-700">
                     <thead>
                         <tr className="text-left text-gray-500 border-b">
@@ -165,8 +163,7 @@ export const RecentTransactions = () => {
                 </table>
             </div>
 
-            {/* Mobile Cards (shown below md) */}
-            <div className="md:hidden space-y-4 mt-4">
+            <div className="grid md:grid-cols-2 sm:grid-cols-2 xs:grid-cols-1 xss:grid-cols-1 xsss:grid-cols-1 gap-2 gap-y-4 mt-4 lg:hidden">
                 {transactions.map((transaction) => (
                     <TransactionItem
                         key={transaction._id}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import ExpenseChart from './expensechart'
 import IncomeExpenseChart from './incomeexpensechart'
 import CategoryDistributionChart from './categorydistributionchart'
-import { CalendarIcon, DownloadIcon, ChevronDownIcon } from 'lucide-react'
+import { DownloadIcon, ChevronDownIcon } from 'lucide-react'
 import AnnualGoalService from '../../services/annualGoalService'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -242,7 +242,7 @@ export const Report = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center xs:mt-14 xss:mt-14 xsss:mt-14">
                 <h1 className="text-2xl font-bold text-gray-800">Financial Reports</h1>
                 <div className="relative" ref={exportMenuRef}>
                     <button
@@ -259,7 +259,7 @@ export const Report = () => {
                         ) : (
                             <>
                                 <DownloadIcon size={18} className="mr-1" />
-                                <span>Export Reports</span>
+                                <span className='xs:text-sm xss:text-sm xsss:text-sm'>Export Reports</span>
                                 <ChevronDownIcon size={16} className="ml-1" />
                             </>
                         )}
@@ -291,35 +291,41 @@ export const Report = () => {
                 </div>
             </div>
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-semibold text-gray-800">
+                <div className="flex flex-col xsss:flex-col xs:flex-row justify-between items-center mb-6 gap-3 xs:gap-2">
+                    <h2 className="text-lg font-semibold text-gray-800 text-center xs:text-left xsss:mb-2">
                         Financial Overview
                     </h2>
-                    <div className="flex items-center space-x-2">
+
+                    <div className="flex items-center justify-center w-full xs:w-auto">
                         <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                             <button
                                 onClick={() => setDateRange('month')}
-                                className={`px-3 py-1 text-sm ${dateRange === 'month' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                                className={`px-3 py-1 text-sm transition-colors duration-150 ${dateRange === 'month'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
                             >
                                 Month
                             </button>
                             <button
                                 onClick={() => setDateRange('quarter')}
-                                className={`px-3 py-1 text-sm ${dateRange === 'quarter' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                                className={`px-3 py-1 text-sm transition-colors duration-150 ${dateRange === 'quarter'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
                             >
                                 Quarter
                             </button>
                             <button
                                 onClick={() => setDateRange('year')}
-                                className={`px-3 py-1 text-sm ${dateRange === 'year' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                                className={`px-3 py-1 text-sm transition-colors duration-150 ${dateRange === 'year'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
                             >
                                 Year
                             </button>
                         </div>
-                        <button className="flex items-center border border-gray-300 rounded-md px-3 py-1 text-sm hover:bg-gray-50">
-                            <CalendarIcon size={14} className="mr-1" />
-                            <span>Custom</span>
-                        </button>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
