@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AnnualGoalService from '../../services/annualGoalService'
+import { TargetBudgetModal } from './targetbudgetmodal.jsx'
 
 const MonthlyBudgets = () => {
     const [selectedBudget, setSelectedBudget] = useState(null)
@@ -18,6 +19,11 @@ const MonthlyBudgets = () => {
     const [showAddModal, setShowAddModal] = useState(false)
     const { token } = useAuth()
     const [annualGoals, setAnnualGoals] = useState([])
+    const [isTargetModalOpen, setIsTargetModalOpen] = useState(false)
+    const [totalBudget, setTotalBudget] = useState(0)
+    const [monthlyIncome, setMonthlyIncome] = useState(0)
+    const [isEditingTotal, setIsEditingTotal] = useState(false)
+    const [hasSetTotalBudget, setHasSetTotalBudget] = useState(false)
 
     const defaultCategories = [
         'Food',
@@ -45,6 +51,24 @@ const MonthlyBudgets = () => {
         fetchAnnualGoals()
     }, [])
 
+    const calculateMonthlyIncome = (transactions) => {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        const income = transactions
+            .filter(t => {
+                const transactionDate = new Date(t.date);
+                return (
+                    t.amount > 0 && // Only income
+                    transactionDate.getMonth() === currentMonth &&
+                    transactionDate.getFullYear() === currentYear
+                );
+            })
+            .reduce((total, t) => total + t.amount, 0);
+
+        return income || 0; // Return 0 if no income
+    };
+
     const fetchTransactions = async () => {
         try {
             const response = await fetch('http://localhost:9000/api/transactions', {
@@ -61,9 +85,13 @@ const MonthlyBudgets = () => {
             }
 
             const transactions = await response.json();
+            // Calculate monthly income from transactions
+            const income = calculateMonthlyIncome(transactions);
+            setMonthlyIncome(income);
             return transactions;
         } catch (error) {
             console.error('Error fetching transactions:', error);
+            setMonthlyIncome(0); // Set income to 0 on error
             return [];
         }
     };
@@ -93,27 +121,8 @@ const MonthlyBudgets = () => {
 
             // If no budgets exist, create default budgets
             if (budgets.length === 0) {
-                // Create default budgets one by one to ensure no duplicates
-                for (const category of defaultCategories) {
-                    try {
-                        const spent = calculateCategorySpending(transactions, category);
-                        await BudgetService.createBudget({
-                            category,
-                            limit: 0,
-                            type: 'monthly',
-                            color: 'bg-blue-500',
-                            spent
-                        })
-                    } catch (error) {
-                        // Skip if budget already exists
-                        if (error.message !== 'A budget for this category already exists') {
-                            throw error
-                        }
-                    }
-                }
-                // Fetch all budgets after creation
-                const updatedBudgets = await BudgetService.getAllBudgets('monthly')
-                setBudgetCategories(updatedBudgets)
+                setHasSetTotalBudget(false)
+                setBudgetCategories([])
             } else {
                 // Update spent amounts based on transactions
                 const updatedBudgets = budgets.map(budget => ({
@@ -133,6 +142,8 @@ const MonthlyBudgets = () => {
                     return acc
                 }, [])
                 setBudgetCategories(uniqueBudgets)
+                setTotalBudget(uniqueBudgets.reduce((sum, budget) => sum + (budget.limit || 0), 0))
+                setHasSetTotalBudget(true)
             }
         } catch (error) {
             if (error.message === 'Please authenticate') {
@@ -160,45 +171,65 @@ const MonthlyBudgets = () => {
 
     const handleUpdateBudget = async (updatedBudget) => {
         try {
+            // Check if the new budget would exceed monthly income
+            const currentTotal = budgetCategories.reduce((sum, budget) => {
+                if (budget._id === selectedBudget._id) {
+                    return sum + updatedBudget.limit;
+                }
+                return sum + budget.limit;
+            }, 0);
+
+            if (currentTotal > monthlyIncome) {
+                toast.error(`Total budget cannot exceed monthly income of $${monthlyIncome.toLocaleString()}`);
+                return;
+            }
+
             await BudgetService.updateBudget(selectedBudget._id, {
                 limit: updatedBudget.limit,
                 color: updatedBudget.color
-            })
-            toast.success('Budget updated successfully')
-            initializeBudgets()
+            });
+            toast.success('Budget updated successfully');
+            initializeBudgets();
         } catch (error) {
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again')
-                navigate('/login')
+                toast.error('Session expired. Please login again');
+                navigate('/login');
             } else {
-                toast.error('Failed to update budget')
-                console.error('Error updating budget:', error)
+                toast.error('Failed to update budget');
+                console.error('Error updating budget:', error);
             }
         }
-    }
+    };
 
     const handleAddBudget = async (budgetData) => {
         try {
+            // Check if adding this budget would exceed monthly income
+            const currentTotal = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
+            if (currentTotal + budgetData.limit > monthlyIncome) {
+                toast.error(`Total budget cannot exceed monthly income of $${monthlyIncome.toLocaleString()}`);
+                return;
+            }
+
             await BudgetService.createBudget({
                 ...budgetData,
                 type: 'monthly',
                 color: 'bg-blue-500'
-            })
-            toast.success('Budget created successfully')
-            setShowAddModal(false)
-            initializeBudgets()
+            });
+            toast.success('Budget created successfully');
+            setShowAddModal(false);
+            initializeBudgets();
         } catch (error) {
             if (error.message === 'A budget for this category already exists') {
-                toast.error('A budget for this category already exists')
+                toast.error('A budget for this category already exists');
             } else if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again')
-                navigate('/login')
+                toast.error('Session expired. Please login again');
+                navigate('/login');
             } else {
-                toast.error('Failed to create budget')
-                console.error('Error creating budget:', error)
+                toast.error('Failed to create budget');
+                console.error('Error creating budget:', error);
             }
         }
-    }
+    };
 
     const handleDeleteBudget = async (budgetId) => {
         try {
@@ -282,6 +313,28 @@ const MonthlyBudgets = () => {
         })
     }
 
+    const handleTargetUpdated = async (newTotal) => {
+        setTotalBudget(newTotal);
+        setHasSetTotalBudget(true);
+        await initializeBudgets(); // Refresh all budgets
+    };
+
+    const calculateTotalSpent = () => {
+        return budgetCategories.reduce((sum, budget) => sum + (budget.spent || 0), 0);
+    };
+
+    const calculateProgressPercentage = () => {
+        const spent = calculateTotalSpent();
+        if (totalBudget <= 0) return 0;
+        const percentage = (spent / totalBudget) * 100;
+        return Math.min(percentage, 100); // Cap at 100%
+    };
+
+    const calculateRemainingBudget = () => {
+        const spent = calculateTotalSpent();
+        return Math.max(totalBudget - spent, 0); // Don't show negative remaining
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -300,41 +353,77 @@ const MonthlyBudgets = () => {
                         <h2 className="text-lg font-semibold text-gray-800">
                             Monthly Goals Overview
                         </h2>
-                        <button className="text-gray-700 text-1xl font-semibold mb-6"
-                            onClick={() => setShowAddModal(true)}
-                        >
-                            Edit Monthly Budget
-                        </button>
+                        {monthlyIncome > 0 ? (
+                            <button
+                                className="text-gray-700 text-1xl font-semibold mb-6"
+                                onClick={() => {
+                                    setIsEditingTotal(true);
+                                    setIsTargetModalOpen(true);
+                                }}
+                            >
+                                {totalBudget > 0 ? 'Edit Total Budget' : 'Set Total Budget'}
+                            </button>
+                        ) : (
+                            <div className="text-sm text-red-600 mb-6">
+                                No income recorded for this month
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-gray-50 p-5 rounded-lg">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Total Target</span>
-                            <span className="font-semibold">$50,000.00</span>
-                        </div>
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Total Saved</span>
-                            <span className="font-semibold">$27,500.00</span>
-                        </div>
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Remaining</span>
-                            <span className="font-semibold text-green-600">$22,500.00</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                            <div
-                                className="bg-indigo-600 h-2 rounded-full"
-                                style={{
-                                    width: '55%',
-                                }}
-                            ></div>
-                        </div>
-                        <div className="flex justify-between items-center mt-1">
-                            <span className="text-xs text-gray-500">0%</span>
-                            <span className="text-xs text-gray-500">55% saved</span>
-                            <span className="text-xs text-gray-500">100%</span>
-                        </div>
+                        {monthlyIncome > 0 ? (
+                            <>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-600">Total Income</span>
+                                    <span className="font-semibold">${monthlyIncome.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-600">Total Target Budget of Spending</span>
+                                    <span className="font-semibold">
+                                        ${totalBudget > 0 ? totalBudget.toFixed(2) : monthlyIncome.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-600">Total Spent</span>
+                                    <span className="font-semibold">${calculateTotalSpent().toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-600">Remaining</span>
+                                    <span className={`font-semibold ${calculateRemainingBudget() < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                        ${(totalBudget > 0 ? calculateRemainingBudget() : (monthlyIncome - calculateTotalSpent())).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                                    <div
+                                        className={`h-2 rounded-full ${calculateProgressPercentage() > 100 ? 'bg-red-600' : 'bg-indigo-600'}`}
+                                        style={{
+                                            width: `${totalBudget > 0
+                                                ? calculateProgressPercentage()
+                                                : Math.min((calculateTotalSpent() / monthlyIncome) * 100, 100)}%`,
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="flex justify-between items-center mt-1">
+                                    <span className="text-xs text-gray-500">0%</span>
+                                    <span className="text-xs text-gray-500">
+                                        {totalBudget > 0
+                                            ? (calculateProgressPercentage() > 100
+                                                ? `${Math.round(calculateProgressPercentage())}% (Over Budget)`
+                                                : `${Math.round(calculateProgressPercentage())}% spent`)
+                                            : `${Math.round((calculateTotalSpent() / monthlyIncome) * 100)}% spent`}
+                                    </span>
+                                    <span className="text-xs text-gray-500">100%</span>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-gray-600 mb-2">No income recorded for this month</p>
+                                <p className="text-sm text-gray-500">Add income transactions to set your monthly budget</p>
+                            </div>
+                        )}
                     </div>
                 </div>
+
                 <div>
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">
                         Goal Insights
@@ -361,38 +450,61 @@ const MonthlyBudgets = () => {
                 </div>
             </div>
 
-            <div className="mt-10">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                    Monthly Budget Categories
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {budgetCategories.map((budget) => (
-                        <div key={budget._id} className="bg-gray-50 p-4 rounded-lg">
-                            <CategoryBudget budget={budget} />
-                            <div className="mt-4 flex justify-end">
-                                <button
-                                    onClick={() => {
-                                        setSelectedBudget(budget)
-                                        setShowEditModal(true)
-                                    }}
-                                    className="text-xs text-indigo-600 hover:text-indigo-800 mr-3"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setSelectedBudget(budget)
-                                        setShowDetailsModal(true)
-                                    }}
-                                    className="text-xs text-gray-500 hover:text-gray-700"
-                                >
-                                    View Details
-                                </button>
+            {hasSetTotalBudget && monthlyIncome > 0 ? (
+                <div className="mt-10">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Monthly Budget Categories
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {budgetCategories.map((budget) => (
+                            <div key={budget._id} className="bg-gray-50 p-4 rounded-lg">
+                                <CategoryBudget budget={budget} />
+                                <div className="mt-4 flex justify-end">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedBudget(budget);
+                                            setShowEditModal(true);
+                                        }}
+                                        className="text-xs text-indigo-600 hover:text-indigo-800 mr-3"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedBudget(budget);
+                                            setShowDetailsModal(true);
+                                        }}
+                                        className="text-xs text-gray-500 hover:text-gray-700"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            ) : monthlyIncome > 0 ? (
+                <div className="mt-10 text-center p-8 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Set Your Monthly Budget First</h3>
+                    <p className="text-gray-600 mb-4">Please set your total monthly budget before managing individual categories.</p>
+                    <button
+                        onClick={() => {
+                            setIsEditingTotal(false);
+                            setIsTargetModalOpen(true);
+                        }}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    >
+                        Set Monthly Budget
+                    </button>
+                </div>
+            ) : (
+                <div className="mt-10 text-center p-8 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Income Recorded</h3>
+                    <p className="text-gray-600 mb-4">Please add income transactions for this month before setting up your budget.</p>
+                </div>
+            )}
 
             {showAddModal && (
                 <EditBudgetModal
@@ -433,6 +545,18 @@ const MonthlyBudgets = () => {
                     budget={selectedBudget}
                 />
             )}
+
+            <TargetBudgetModal
+                isOpen={isTargetModalOpen}
+                onClose={() => {
+                    setIsTargetModalOpen(false);
+                    setIsEditingTotal(false);
+                }}
+                initialValue={totalBudget}
+                monthlyIncome={monthlyIncome}
+                onTargetUpdated={handleTargetUpdated}
+                isEditing={isEditingTotal}
+            />
         </div>
     )
 }
