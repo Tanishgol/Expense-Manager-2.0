@@ -115,14 +115,22 @@ const MonthlyBudgets = () => {
 
     const initializeBudgets = async () => {
         try {
-            setIsLoading(true)
-            const budgets = await BudgetService.getAllBudgets('monthly')
-            const transactions = await fetchTransactions()
+            setIsLoading(true);
+
+            // Fetch total budget first
+            const totalBudgetData = await BudgetService.getTotalBudget();
+            if (totalBudgetData) {
+                setTotalBudget(totalBudgetData.amount);
+                setHasSetTotalBudget(true);
+            }
+
+            const budgets = await BudgetService.getAllBudgets('monthly');
+            const transactions = await fetchTransactions();
 
             // If no budgets exist, create default budgets
             if (budgets.length === 0) {
-                setHasSetTotalBudget(false)
-                setBudgetCategories([])
+                setHasSetTotalBudget(false);
+                setBudgetCategories([]);
             } else {
                 // Update spent amounts based on transactions
                 const updatedBudgets = budgets.map(budget => ({
@@ -135,28 +143,26 @@ const MonthlyBudgets = () => {
 
                 // Filter out any duplicate categories, keeping only the first occurrence
                 const uniqueBudgets = updatedBudgets.reduce((acc, current) => {
-                    const exists = acc.find(item => item.category === current.category)
+                    const exists = acc.find(item => item.category === current.category);
                     if (!exists) {
-                        acc.push(current)
+                        acc.push(current);
                     }
-                    return acc
-                }, [])
-                setBudgetCategories(uniqueBudgets)
-                setTotalBudget(uniqueBudgets.reduce((sum, budget) => sum + (budget.limit || 0), 0))
-                setHasSetTotalBudget(true)
+                    return acc;
+                }, []);
+                setBudgetCategories(uniqueBudgets);
             }
         } catch (error) {
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again')
-                navigate('/login')
+                toast.error('Session expired. Please login again');
+                navigate('/login');
             } else {
-                toast.error('Failed to fetch budgets')
-                console.error('Error fetching budgets:', error)
+                toast.error('Failed to fetch budgets');
+                console.error('Error fetching budgets:', error);
             }
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         const handleTransactionChange = () => {
@@ -171,7 +177,7 @@ const MonthlyBudgets = () => {
 
     const handleUpdateBudget = async (updatedBudget) => {
         try {
-            // Check if the new budget would exceed monthly income
+            // Calculate new total if this budget is updated
             const currentTotal = budgetCategories.reduce((sum, budget) => {
                 if (budget._id === selectedBudget._id) {
                     return sum + updatedBudget.limit;
@@ -179,17 +185,21 @@ const MonthlyBudgets = () => {
                 return sum + budget.limit;
             }, 0);
 
-            if (currentTotal > monthlyIncome) {
-                toast.error(`Total budget cannot exceed monthly income of $${monthlyIncome.toLocaleString()}`);
+            // Validate against total budget
+            if (currentTotal > totalBudget) {
+                toast.error(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
                 return;
             }
 
+            // Update the budget
             await BudgetService.updateBudget(selectedBudget._id, {
                 limit: updatedBudget.limit,
                 color: updatedBudget.color
             });
+
+            // Refresh budgets
+            await initializeBudgets();
             toast.success('Budget updated successfully');
-            initializeBudgets();
         } catch (error) {
             if (error.message === 'Please authenticate') {
                 toast.error('Session expired. Please login again');
@@ -203,21 +213,26 @@ const MonthlyBudgets = () => {
 
     const handleAddBudget = async (budgetData) => {
         try {
-            // Check if adding this budget would exceed monthly income
+            // Calculate new total with the new budget
             const currentTotal = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
-            if (currentTotal + budgetData.limit > monthlyIncome) {
-                toast.error(`Total budget cannot exceed monthly income of $${monthlyIncome.toLocaleString()}`);
+            const newTotal = currentTotal + budgetData.limit;
+
+            // Validate against total budget
+            if (newTotal > totalBudget) {
+                toast.error(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
                 return;
             }
 
+            // Create the new budget
             await BudgetService.createBudget({
                 ...budgetData,
                 type: 'monthly',
                 color: 'bg-blue-500'
             });
-            toast.success('Budget created successfully');
+
             setShowAddModal(false);
-            initializeBudgets();
+            await initializeBudgets();
+            toast.success('Budget created successfully');
         } catch (error) {
             if (error.message === 'A budget for this category already exists') {
                 toast.error('A budget for this category already exists');
@@ -330,9 +345,14 @@ const MonthlyBudgets = () => {
         return Math.min(percentage, 100); // Cap at 100%
     };
 
+    const calculateRemainingIncome = () => {
+        const spent = calculateTotalSpent();
+        return Math.max(monthlyIncome - spent, 0);
+    };
+
     const calculateRemainingBudget = () => {
         const spent = calculateTotalSpent();
-        return Math.max(totalBudget - spent, 0); // Don't show negative remaining
+        return Math.max(totalBudget - spent, 0);
     };
 
     if (isLoading) {
@@ -379,19 +399,17 @@ const MonthlyBudgets = () => {
                                 </div>
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-gray-600">Total Target Budget of Spending</span>
-                                    <span className="font-semibold">
-                                        ${totalBudget > 0 ? totalBudget.toFixed(2) : monthlyIncome.toFixed(2)}
+                                    <span className="font-semibold text-green-600">
+                                        ${Math.min(totalBudget, monthlyIncome).toFixed(2)}
                                     </span>
+                                </div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-600">Remaining Budget</span>
+                                    <span className="font-semibold">${calculateRemainingBudget().toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-gray-600">Total Spent</span>
                                     <span className="font-semibold">${calculateTotalSpent().toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Remaining</span>
-                                    <span className={`font-semibold ${calculateRemainingBudget() < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        ${(totalBudget > 0 ? calculateRemainingBudget() : (monthlyIncome - calculateTotalSpent())).toFixed(2)}
-                                    </span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
                                     <div
@@ -518,7 +536,8 @@ const MonthlyBudgets = () => {
                         color: 'bg-blue-500'
                     }}
                     onSubmit={handleAddBudget}
-                    existingCategories={budgetCategories.map(b => b.category)}
+                    totalBudget={totalBudget}
+                    currentTotal={budgetCategories.reduce((sum, budget) => sum + budget.limit, 0)}
                 />
             )}
 
@@ -531,7 +550,8 @@ const MonthlyBudgets = () => {
                     }}
                     budget={selectedBudget}
                     onSubmit={handleUpdateBudget}
-                    existingCategories={budgetCategories.map(b => b.category)}
+                    totalBudget={totalBudget}
+                    currentTotal={budgetCategories.reduce((sum, budget) => sum + budget.limit, 0)}
                 />
             )}
 

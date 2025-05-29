@@ -70,6 +70,41 @@ const BudgetService = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    getTotalBudget: async () => {
+        const response = await fetch('http://localhost:9000/api/budgets/total', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch total budget');
+        }
+
+        return await response.json();
+    },
+
+    setTotalBudget: async (amount) => {
+        const response = await fetch('http://localhost:9000/api/budgets/total', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ amount })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to set total budget');
+        }
+
+        return await response.json();
     }
 };
 

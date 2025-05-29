@@ -55,51 +55,10 @@ export const TargetBudgetModal = ({
 
         setLoading(true);
         try {
-            // Get all existing budgets
-            const existingBudgets = await BudgetService.getAllBudgets('monthly');
+            // Save to database first
+            await BudgetService.setTotalBudget(numValue);
 
-            if (existingBudgets.length === 0) {
-                // If no budgets exist, create default budgets with the total amount
-                const defaultCategories = [
-                    'Food',
-                    'Housing',
-                    'Transportation',
-                    'Utilities',
-                    'Healthcare',
-                    'Entertainment',
-                    'Shopping',
-                    'Personal Care',
-                    'Other'
-                ];
-
-                const equalShare = Math.round(numValue / defaultCategories.length);
-                const createPromises = defaultCategories.map(category =>
-                    BudgetService.createBudget({
-                        category,
-                        limit: equalShare,
-                        type: 'monthly',
-                        color: 'bg-blue-500',
-                        spent: 0
-                    })
-                );
-
-                await Promise.all(createPromises);
-            } else {
-                // Calculate the ratio for proportional updates
-                const totalCurrentBudget = existingBudgets.reduce((sum, budget) => sum + (budget.limit || 0), 0);
-                const ratio = totalCurrentBudget > 0 ? numValue / totalCurrentBudget : 1;
-
-                // Update all budgets proportionally
-                const updatePromises = existingBudgets.map(budget =>
-                    BudgetService.updateBudget(budget._id, {
-                        limit: Math.round(budget.limit * ratio),
-                        color: budget.color
-                    })
-                );
-
-                await Promise.all(updatePromises);
-            }
-
+            // Only update UI after successful save
             if (onTargetUpdated) {
                 onTargetUpdated(numValue);
             }

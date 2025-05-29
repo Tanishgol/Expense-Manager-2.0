@@ -3,7 +3,7 @@ import Modal from '../modals/Modal';
 import BudgetService from '../../services/budgetService';
 import toast from 'react-hot-toast';
 
-export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
+export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget, currentTotal }) => {
     const [formData, setFormData] = useState({
         limit: ''
     });
@@ -28,6 +28,24 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
 
             if (isNaN(numValue) || numValue < 0) {
                 setError('Please enter a valid amount');
+                setLoading(false);
+                return;
+            }
+
+            // Calculate new total budget
+            let newTotal;
+            if (budget?._id) {
+                // For updates, subtract old budget and add new one
+                newTotal = currentTotal - budget.limit + numValue;
+            } else {
+                // For new budgets, add to current total
+                newTotal = currentTotal + numValue;
+            }
+
+            // Check if new total exceeds the target budget
+            if (newTotal > totalBudget) {
+                setError(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
+                setLoading(false);
                 return;
             }
 
@@ -42,7 +60,6 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
                     limit: numValue,
                     color: budget.color
                 });
-                toast.success('Budget updated successfully');
             } else {
                 // Create new budget
                 await BudgetService.createBudget({
@@ -50,7 +67,6 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
                     type: 'monthly',
                     color: 'bg-blue-500'
                 });
-                toast.success('Budget created successfully');
             }
 
             await onSubmit(newBudget);
@@ -107,11 +123,19 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit }) => {
                             <span className="text-sm text-gray-600">Current Spending</span>
                             <span className="font-medium">${budget.spent.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Remaining</span>
                             <span className="font-medium text-green-600">
                                 ${(parseFloat(formData.limit) - (budget.spent || 0)).toFixed(2)}
                             </span>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Total Budget</span>
+                            <span className="font-medium text-blue-600">${totalBudget.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Remaining Budget</span>
+                            <span className="font-medium text-red-600">${(totalBudget - currentTotal).toFixed(2)}</span>
                         </div>
                     </div>
                 )}

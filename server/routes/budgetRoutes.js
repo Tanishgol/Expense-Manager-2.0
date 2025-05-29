@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/auth');
 const Budget = require('../model/budget');
+const TotalBudget = require('../model/totalBudget');
 
 // Get all budgets for a user
 const getAllBudgets = async (req, res) => {
@@ -10,6 +11,63 @@ const getAllBudgets = async (req, res) => {
         res.json(budgets);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// Get total budget
+const getTotalBudget = async (req, res) => {
+    try {
+        const currentDate = new Date();
+        const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+
+        const totalBudget = await TotalBudget.findOne({
+            user: req.userId,
+            month,
+            year
+        });
+
+        res.json(totalBudget || { amount: 0 });
+    } catch (error) {
+        console.error('Error fetching total budget:', error);
+        res.status(500).json({ message: 'Failed to fetch total budget' });
+    }
+};
+
+// Set total budget
+const setTotalBudget = async (req, res) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || amount < 0) {
+            return res.status(400).json({ message: 'Invalid budget amount' });
+        }
+
+        const currentDate = new Date();
+        const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+
+        const totalBudget = await TotalBudget.findOneAndUpdate(
+            {
+                user: req.userId,
+                month,
+                year
+            },
+            {
+                amount,
+                user: req.userId,
+                month,
+                year
+            },
+            {
+                new: true,
+                upsert: true
+            }
+        );
+
+        res.json(totalBudget);
+    } catch (error) {
+        console.error('Error setting total budget:', error);
+        res.status(500).json({ message: 'Failed to set total budget' });
     }
 };
 
@@ -76,5 +134,7 @@ router.post('/', verifyToken, createBudget);
 router.put('/:id', verifyToken, updateBudget);
 router.delete('/:id', verifyToken, deleteBudget);
 router.get('/summary', verifyToken, getBudgetSummary);
+router.get('/total', verifyToken, getTotalBudget);
+router.post('/total', verifyToken, setTotalBudget);
 
 module.exports = router; 

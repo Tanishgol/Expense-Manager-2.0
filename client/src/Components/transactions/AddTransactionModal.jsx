@@ -66,28 +66,25 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             if (budget) {
                 const currentAmount = parseFloat(amount) || 0;
                 const currentSpent = budget.spent || 0;
-                const remaining = budget.limit - currentSpent - currentAmount;
-
-                console.log('Budget Info:', {
-                    category,
-                    limit: budget.limit,
-                    spent: currentSpent,
-                    currentAmount,
-                    remaining
-                });
+                // Calculate remaining without including the current transaction amount
+                const remaining = budget.limit - currentSpent;
+                // Calculate if the new transaction would exceed the budget
+                const wouldExceed = currentAmount > remaining;
 
                 setBudgetInfo({
                     limit: budget.limit,
                     spent: currentSpent,
                     remaining: remaining
                 });
-                setShowBudgetWarning(currentAmount > (budget.limit - currentSpent));
+                setShowBudgetWarning(wouldExceed);
             } else {
                 setBudgetInfo(null);
                 setShowBudgetWarning(false);
             }
         } catch (error) {
             console.error('Error fetching budget info:', error);
+            setBudgetInfo(null);
+            setShowBudgetWarning(false);
         }
     };
 
@@ -125,13 +122,36 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             return;
         }
 
+        // Validate amount
+        const amount = parseFloat(formData.amount);
+        if (isNaN(amount) || amount <= 0) {
+            toast.error('Please enter a valid amount');
+            return;
+        }
+
+        // For expenses, validate against budget
+        if (formData.type === 'expense') {
+            const currentSpent = budgetInfo?.spent || 0;
+            const budgetLimit = budgetInfo?.limit || 0;
+            const newTotal = currentSpent + amount;
+
+            if (newTotal > budgetLimit) {
+                const remaining = budgetLimit - currentSpent;
+                toast.error(
+                    `This transaction would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
+                    { duration: 4000 }
+                );
+                return;
+            }
+        }
+
         setIsSubmitting(true);
         try {
             const transactionData = {
                 ...formData,
                 amount: formData.type === 'expense'
-                    ? -Math.abs(parseFloat(formData.amount))
-                    : Math.abs(parseFloat(formData.amount)),
+                    ? -Math.abs(amount)
+                    : Math.abs(amount),
                 date: new Date(formData.date).toISOString()
             };
 
@@ -139,7 +159,6 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 transactionData._id = editTransaction._id;
             }
 
-            console.log('Submitting transaction data:', transactionData);
             await onAdd(transactionData);
             onClose();
         } catch (error) {
@@ -162,10 +181,29 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
     };
 
     const handleAmountChange = async (amount) => {
+        const parsedAmount = parseFloat(amount) || 0;
+        
+        // For expenses, validate against budget immediately
+        if (formData.type === 'expense' && formData.category !== 'Select Category') {
+            const currentSpent = budgetInfo?.spent || 0;
+            const budgetLimit = budgetInfo?.limit || 0;
+            const newTotal = currentSpent + parsedAmount;
+
+            if (newTotal > budgetLimit) {
+                const remaining = budgetLimit - currentSpent;
+                toast.error(
+                    `This amount would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
+                    { duration: 4000 }
+                );
+                return;
+            }
+        }
+
         setFormData({
             ...formData,
             amount
         });
+
         if (formData.category && formData.type === 'expense' && formData.category !== 'Select Category') {
             await fetchBudgetInfo(formData.category, amount);
         }
@@ -322,6 +360,10 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Budget Limit</span>
                             <span className="font-medium">${budgetInfo.limit.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Spent</span>
+                            <span className="font-medium">${budgetInfo.spent.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Remaining</span>
