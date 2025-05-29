@@ -1,25 +1,70 @@
-import React, { useState, useEffect } from 'react'
-import CategoryBudget from './CategoryBudget'
-import { useNavigate } from 'react-router-dom'
-import PageTop from '../main/pagetop'
-import BudgetService from '../../services/budgetService'
-import toast from 'react-hot-toast'
+import React, { useState, useEffect, useCallback } from 'react';
+import CategoryBudget from './CategoryBudget';
+import { useNavigate } from 'react-router-dom';
+import PageTop from '../main/pagetop';
+import BudgetService from '../../services/budgetService';
+import toast from 'react-hot-toast';
 
 export const BudgetSummary = () => {
     const navigate = useNavigate();
-    const [budgetCategories, setBudgetCategories] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [budgetCategories, setBudgetCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        fetchBudgetSummary();
-    }, []);
-
-    const fetchBudgetSummary = async () => {
+    const fetchTransactions = async () => {
         try {
-            setIsLoading(true);
-            const budgets = await BudgetService.getBudgetSummary();
+            const response = await fetch('http://localhost:9000/api/transactions', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
 
-            const uniqueBudgets = budgets.filter(
+            if (!response.ok) {
+                throw new Error('Failed to fetch transactions');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            return [];
+        }
+    };
+
+    const calculateCategorySpending = (transactions, category) => {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        return transactions
+            .filter(t => {
+                const transactionDate = new Date(t.date);
+                return (
+                    t.category === category &&
+                    t.amount < 0 && // Only expenses
+                    transactionDate.getMonth() === currentMonth &&
+                    transactionDate.getFullYear() === currentYear
+                );
+            })
+            .reduce((total, t) => total + Math.abs(t.amount), 0);
+    };
+
+    const fetchBudgetSummary = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const budgets = await BudgetService.getAllBudgets('monthly');
+            const transactions = await fetchTransactions();
+
+            const updatedBudgets = budgets.map(budget => {
+                const spent = calculateCategorySpending(transactions, budget.category);
+                return {
+                    ...budget,
+                    spent,
+                    percentage: budget.limit > 0 ? (spent / budget.limit) * 100 : 0
+                };
+            });
+
+            const uniqueBudgets = updatedBudgets.filter(
                 (budget, index, self) =>
                     index === self.findIndex(
                         (b) => b.category.toLowerCase() === budget.category.toLowerCase()
@@ -32,25 +77,37 @@ export const BudgetSummary = () => {
 
             setBudgetCategories(topBudgets);
         } catch (error) {
-            toast.error('Failed to fetch budget summary');
             console.error('Error fetching budget summary:', error);
+            toast.error('Failed to fetch budget summary');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            </div>
-        )
-    }
+    useEffect(() => {
+        fetchBudgetSummary();
+
+        const handleBudgetChange = () => fetchBudgetSummary();
+        const handleTransactionChange = () => fetchBudgetSummary();
+
+        window.addEventListener('budgetChange', handleBudgetChange);
+        window.addEventListener('transactionChange', handleTransactionChange);
+
+        return () => {
+            window.removeEventListener('budgetChange', handleBudgetChange);
+            window.removeEventListener('transactionChange', handleTransactionChange);
+        };
+    }, [fetchBudgetSummary]);
+
     return (
         <>
             <PageTop />
             <div className="space-y-4">
-                {budgetCategories.length === 0 ? (
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                    </div>
+                ) : budgetCategories.length === 0 ? (
                     <p className="text-gray-500 text-center">No budget data available</p>
                 ) : (
                     <>
@@ -67,7 +124,7 @@ export const BudgetSummary = () => {
                 )}
             </div>
         </>
-    )
-}
+    );
+};
 
-export default BudgetSummary
+export default BudgetSummary;

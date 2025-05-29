@@ -58,10 +58,40 @@ export const TargetBudgetModal = ({
             // Save to database first
             await BudgetService.setTotalBudget(numValue);
 
+            // Create default budget categories if they don't exist
+            const defaultCategories = [
+                'Food',
+                'Housing',
+                'Transportation',
+                'Utilities',
+                'Healthcare',
+                'Entertainment',
+                'Shopping',
+                'Personal Care',
+                'Other'
+            ];
+
+            for (const category of defaultCategories) {
+                try {
+                    await BudgetService.createBudget({
+                        category,
+                        limit: 0,
+                        type: 'monthly',
+                        color: 'bg-blue-500'
+                    });
+                } catch (error) {
+                    if (!error.message.includes('already exists')) {
+                        throw error;
+                    }
+                }
+            }
+
             // Only update UI after successful save
             if (onTargetUpdated) {
                 onTargetUpdated(numValue);
             }
+            // Dispatch budget change event
+            window.dispatchEvent(new Event('budgetChange'));
             toast.success(isEditing ? 'Total budget updated successfully' : 'Total budget set successfully');
             onClose();
         } catch (error) {
@@ -116,6 +146,11 @@ export const TargetBudgetModal = ({
                             type="number"
                             value={newTarget}
                             onChange={(e) => handleTargetChange(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !error && !loading) {
+                                    handleSubmit();
+                                }
+                            }}
                             className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1
                                 ${error
                                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500'

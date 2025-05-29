@@ -61,22 +61,52 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
 
     const fetchBudgetInfo = async (category, amount) => {
         try {
+            // Get all transactions for the current month
+            const response = await fetch('http://localhost:9000/api/transactions', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch transactions');
+            }
+
+            const transactions = await response.json();
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            // Calculate total spent for this category in current month
+            const spent = transactions
+                .filter(t => {
+                    const transactionDate = new Date(t.date);
+                    return (
+                        t.category === category &&
+                        t.amount < 0 && // Only expenses
+                        transactionDate.getMonth() === currentMonth &&
+                        transactionDate.getFullYear() === currentYear
+                    );
+                })
+                .reduce((total, t) => total + Math.abs(t.amount), 0);
+
+            // Get budget info
             const budgets = await BudgetService.getAllBudgets('monthly');
             const budget = budgets.find(b => b.category === category);
+
             if (budget) {
                 const currentAmount = parseFloat(amount) || 0;
-                const currentSpent = budget.spent || 0;
-                // Calculate remaining without including the current transaction amount
-                const remaining = budget.limit - currentSpent;
-                // Calculate if the new transaction would exceed the budget
-                const wouldExceed = currentAmount > remaining;
+                const budgetLimit = budget.limit;
+                const remaining = budgetLimit - spent;
 
                 setBudgetInfo({
-                    limit: budget.limit,
-                    spent: currentSpent,
+                    limit: budgetLimit,
+                    spent: spent,
                     remaining: remaining
                 });
-                setShowBudgetWarning(wouldExceed);
+                setShowBudgetWarning(currentAmount > remaining);
             } else {
                 setBudgetInfo(null);
                 setShowBudgetWarning(false);
@@ -129,19 +159,25 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             return;
         }
 
-        // For expenses, validate against budget
+        // For expenses, validate against budget only if amount is being changed
         if (formData.type === 'expense') {
-            const currentSpent = budgetInfo?.spent || 0;
-            const budgetLimit = budgetInfo?.limit || 0;
-            const newTotal = currentSpent + amount;
+            const isAmountChanged = editTransaction && Math.abs(editTransaction.amount) !== amount;
 
-            if (newTotal > budgetLimit) {
-                const remaining = budgetLimit - currentSpent;
-                toast.error(
-                    `This transaction would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
-                    { duration: 4000 }
-                );
-                return;
+            if (isAmountChanged) {
+                const currentSpent = budgetInfo?.spent || 0;
+                const budgetLimit = budgetInfo?.limit || 0;
+                // For edits, subtract the old amount from currentSpent before adding new amount
+                const oldAmount = editTransaction ? Math.abs(editTransaction.amount) : 0;
+                const newTotal = (currentSpent - oldAmount) + amount;
+
+                if (newTotal > budgetLimit) {
+                    const remaining = budgetLimit - (currentSpent - oldAmount);
+                    toast.error(
+                        `This transaction would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
+                        { duration: 2000 }
+                    );
+                    return;
+                }
             }
         }
 
@@ -182,7 +218,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
 
     const handleAmountChange = async (amount) => {
         const parsedAmount = parseFloat(amount) || 0;
-        
+
         // For expenses, validate against budget immediately
         if (formData.type === 'expense' && formData.category !== 'Select Category') {
             const currentSpent = budgetInfo?.spent || 0;
@@ -193,7 +229,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 const remaining = budgetLimit - currentSpent;
                 toast.error(
                     `This amount would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
-                    { duration: 4000 }
+                    { duration: 2000 }
                 );
                 return;
             }
@@ -368,7 +404,9 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Remaining</span>
                             <span className={`font-medium ${budgetInfo.remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                ${budgetInfo.remaining.toFixed(2)}
+                                {/* remaining means the amount of money left in the budget */}
+                                {/* remaining = budget limit - spent */}
+                                ${budgetInfo.limit - budgetInfo.spent}
                             </span>
                         </div>
                         {showBudgetWarning && (

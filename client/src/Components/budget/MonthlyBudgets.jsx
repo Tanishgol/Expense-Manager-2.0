@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import CategoryBudget from './CategoryBudget'
 import EditBudgetModal from './editbudgetmodal'
 import ViewBudgetDetailsModal from './viewbudgetdetailsModal'
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AnnualGoalService from '../../services/annualGoalService'
 import { TargetBudgetModal } from './targetbudgetmodal.jsx'
+import ViewMessageModal from './viewmessagemodal'
 
 const MonthlyBudgets = () => {
     const [selectedBudget, setSelectedBudget] = useState(null)
@@ -24,6 +25,8 @@ const MonthlyBudgets = () => {
     const [monthlyIncome, setMonthlyIncome] = useState(0)
     const [isEditingTotal, setIsEditingTotal] = useState(false)
     const [hasSetTotalBudget, setHasSetTotalBudget] = useState(false)
+    const [showMessageModal, setShowMessageModal] = useState(false)
+    const [allMessages, setAllMessages] = useState([])
 
     const defaultCategories = [
         'Food',
@@ -199,6 +202,8 @@ const MonthlyBudgets = () => {
 
             // Refresh budgets
             await initializeBudgets();
+            // Dispatch budget change event
+            window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget updated successfully');
         } catch (error) {
             if (error.message === 'Please authenticate') {
@@ -232,6 +237,8 @@ const MonthlyBudgets = () => {
 
             setShowAddModal(false);
             await initializeBudgets();
+            // Dispatch budget change event
+            window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget created successfully');
         } catch (error) {
             if (error.message === 'A budget for this category already exists') {
@@ -248,19 +255,21 @@ const MonthlyBudgets = () => {
 
     const handleDeleteBudget = async (budgetId) => {
         try {
-            await BudgetService.deleteBudget(budgetId)
-            toast.success('Budget deleted successfully')
-            initializeBudgets()
+            await BudgetService.deleteBudget(budgetId);
+            // Dispatch budget change event
+            window.dispatchEvent(new Event('budgetChange'));
+            toast.success('Budget deleted successfully');
+            initializeBudgets();
         } catch (error) {
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again')
-                navigate('/login')
+                toast.error('Session expired. Please login again');
+                navigate('/login');
             } else {
-                toast.error('Failed to delete budget')
-                console.error('Error deleting budget:', error)
+                toast.error('Failed to delete budget');
+                console.error('Error deleting budget:', error);
             }
         }
-    }
+    };
 
     const fetchAnnualGoals = async () => {
         try {
@@ -286,56 +295,130 @@ const MonthlyBudgets = () => {
         return (current / target) * 100
     }
 
+    const calculateTotalSpent = useCallback(() => {
+        return budgetCategories.reduce((sum, budget) => sum + (budget.spent || 0), 0);
+    }, [budgetCategories]);
+
     const getProgressHighlights = () => {
-        if (!annualGoals.length) return []
+        const highlights = [];
 
-        return annualGoals.map(goal => {
-            const progress = calculateProgress(goal.current, goal.target)
-            const deadline = new Date(goal.deadline)
-            const today = new Date()
-            const monthsRemaining = (deadline.getFullYear() - today.getFullYear()) * 12 +
-                (deadline.getMonth() - today.getMonth())
+        // Budget spending insights
+        const budgetInsights = budgetCategories
+            .filter(budget => budget.limit > 0)
+            .map(budget => {
+                const percentage = (budget.spent / budget.limit) * 100;
+                let message = '';
 
-            let status = ''
-            let message = ''
+                if (percentage >= 90) {
+                    message = `⚠️ ${budget.category} budget is at ${percentage.toFixed(1)}% - Consider reducing spending`;
+                } else if (percentage >= 75) {
+                    message = `⚠️ ${budget.category} budget is at ${percentage.toFixed(1)}% - Watch your spending`;
+                } else if (percentage >= 50) {
+                    message = `📊 ${budget.category} budget is at ${percentage.toFixed(1)}% - On track`;
+                }
 
-            if (progress >= 100) {
-                status = 'completed'
-                message = `${goal.title} is completed`
-            } else if (progress >= 75) {
-                status = 'almost complete'
-                message = `${goal.title} is ${progress.toFixed(1)}% complete`
-            } else if (monthsRemaining <= 3 && progress < 75) {
-                status = 'needs increased savings'
-                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
-                message = `${goal.title} needs increased savings ($${monthlyTarget.toFixed(0)}/month to reach target)`
-            } else if (progress >= 50) {
-                status = 'on track'
-                message = `${goal.title} is on track for ${deadline.toLocaleDateString('en-US', { month: 'long' })} deadline`
-            } else {
-                status = 'needs attention'
-                const monthlyTarget = (goal.target - goal.current) / monthsRemaining
-                message = `${goal.title} needs attention ($${monthlyTarget.toFixed(0)}/month needed)`
+                return {
+                    title: budget.category,
+                    progress: percentage,
+                    status: percentage >= 90 ? 'critical' : percentage >= 75 ? 'warning' : 'info',
+                    message,
+                    type: 'budget'
+                };
+            })
+            .filter(insight => insight.message !== '');
+
+        // Add budget insights to highlights
+        highlights.push(...budgetInsights);
+
+        // Goal progress insights
+        if (annualGoals.length > 0) {
+            const goalInsights = annualGoals.map(goal => {
+                const progress = calculateProgress(goal.current, goal.target);
+                const deadline = new Date(goal.deadline);
+                const today = new Date();
+                const monthsRemaining = (deadline.getFullYear() - today.getFullYear()) * 12 +
+                    (deadline.getMonth() - today.getMonth());
+
+                let message = '';
+                let status = '';
+
+                if (progress >= 100) {
+                    status = 'completed';
+                    message = `🎉 ${goal.title} is completed!`;
+                } else if (progress >= 75) {
+                    status = 'almost complete';
+                    message = `🎯 ${goal.title} is ${progress.toFixed(1)}% complete`;
+                } else if (monthsRemaining <= 3 && progress < 75) {
+                    status = 'needs increased savings';
+                    const monthlyTarget = (goal.target - goal.current) / monthsRemaining;
+                    message = `⚠️ ${goal.title} needs increased savings ($${monthlyTarget.toFixed(0)}/month to reach target)`;
+                } else if (progress >= 50) {
+                    status = 'on track';
+                    message = `📈 ${goal.title} is on track for ${deadline.toLocaleDateString('en-US', { month: 'long' })} deadline`;
+                } else {
+                    status = 'needs attention';
+                    const monthlyTarget = (goal.target - goal.current) / monthsRemaining;
+                    message = `⚠️ ${goal.title} needs attention ($${monthlyTarget.toFixed(0)}/month needed)`;
+                }
+
+                return {
+                    title: goal.title,
+                    progress,
+                    status,
+                    message,
+                    type: 'goal'
+                };
+            });
+
+            // Add goal insights to highlights
+            highlights.push(...goalInsights);
+        }
+
+        // Spending trend insights
+        const totalSpent = calculateTotalSpent();
+        const totalBudget = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
+        const overallProgress = (totalSpent / totalBudget) * 100;
+
+        if (totalBudget > 0) {
+            let trendMessage = '';
+            if (overallProgress >= 90) {
+                trendMessage = `⚠️ Overall spending is at ${overallProgress.toFixed(1)}% of monthly budget - Consider reducing expenses`;
+            } else if (overallProgress >= 75) {
+                trendMessage = `📊 Overall spending is at ${overallProgress.toFixed(1)}% of monthly budget - Watch your expenses`;
+            } else if (overallProgress >= 50) {
+                trendMessage = `📈 Overall spending is at ${overallProgress.toFixed(1)}% of monthly budget - On track`;
             }
 
-            return {
-                title: goal.title,
-                progress,
-                status,
-                message,
-                deadline: goal.deadline
+            if (trendMessage) {
+                highlights.push({
+                    title: 'Overall Spending',
+                    progress: overallProgress,
+                    status: overallProgress >= 90 ? 'critical' : overallProgress >= 75 ? 'warning' : 'info',
+                    message: trendMessage,
+                    type: 'trend'
+                });
             }
-        })
-    }
+        }
+
+        // Sort highlights by priority (critical > warning > info)
+        return highlights.sort((a, b) => {
+            const priority = { critical: 0, warning: 1, info: 2 };
+            return priority[a.status] - priority[b.status];
+        });
+    };
+
+    // Add useEffect to update allMessages when highlights change
+    useEffect(() => {
+        const highlights = getProgressHighlights();
+        setAllMessages(highlights);
+    }, [budgetCategories, annualGoals, calculateTotalSpent]);
 
     const handleTargetUpdated = async (newTotal) => {
         setTotalBudget(newTotal);
         setHasSetTotalBudget(true);
         await initializeBudgets(); // Refresh all budgets
-    };
-
-    const calculateTotalSpent = () => {
-        return budgetCategories.reduce((sum, budget) => sum + (budget.spent || 0), 0);
+        // Dispatch budget change event
+        window.dispatchEvent(new Event('budgetChange'));
     };
 
     const calculateProgressPercentage = () => {
@@ -369,13 +452,14 @@ const MonthlyBudgets = () => {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-gray-800">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                        <h2 className="text-xl font-semibold text-gray-800">
                             Monthly Goals Overview
                         </h2>
+
                         {monthlyIncome > 0 ? (
                             <button
-                                className="text-gray-700 text-1xl font-semibold mb-6"
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded transition duration-200"
                                 onClick={() => {
                                     setIsEditingTotal(true);
                                     setIsTargetModalOpen(true);
@@ -384,11 +468,12 @@ const MonthlyBudgets = () => {
                                 {totalBudget > 0 ? 'Edit Total Budget' : 'Set Total Budget'}
                             </button>
                         ) : (
-                            <div className="text-sm text-red-600 mb-6">
+                            <div className="text-sm text-red-600">
                                 No income recorded for this month
                             </div>
                         )}
                     </div>
+
 
                     <div className="bg-gray-50 p-5 rounded-lg">
                         {monthlyIncome > 0 ? (
@@ -443,25 +528,42 @@ const MonthlyBudgets = () => {
                 </div>
 
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                        Goal Insights
-                    </h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Monthly Insights
+                        </h2>
+                        <button
+                            onClick={() => setShowMessageModal(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded transition duration-200"
+                        >
+                            View all messages
+                        </button>
+                    </div>
                     <div className="bg-blue-50 border border-blue-100 rounded-lg p-5">
                         <h3 className="font-medium text-blue-800 mb-3">
                             Progress Highlights
                         </h3>
-                        {annualGoals.length > 0 ? (
+                        {progressHighlights.length > 0 ? (
                             <ul className="text-sm text-blue-700 space-y-2">
-                                {progressHighlights.map((insight, index) => (
+                                {progressHighlights.slice(0, 5).map((insight, index) => (
                                     <li key={index} className="flex items-start">
                                         <span className="mr-2">•</span>
-                                        <span>{insight.message}</span>
+                                        <span
+                                            className={`font-semibold ${insight.status === 'critical'
+                                                ? 'text-red-600'
+                                                : insight.status === 'warning'
+                                                    ? 'text-orange-600'
+                                                    : 'text-blue-700'
+                                                }`}
+                                        >
+                                            {insight.message}
+                                        </span>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
                             <p className="text-sm text-blue-700">
-                                No annual goals set yet. Start by creating your first goal!
+                                No insights available yet. Start by setting up your budgets and goals!
                             </p>
                         )}
                     </div>
@@ -576,6 +678,12 @@ const MonthlyBudgets = () => {
                 monthlyIncome={monthlyIncome}
                 onTargetUpdated={handleTargetUpdated}
                 isEditing={isEditingTotal}
+            />
+
+            <ViewMessageModal
+                isOpen={showMessageModal}
+                onClose={() => setShowMessageModal(false)}
+                messages={allMessages}
             />
         </div>
     )
