@@ -223,15 +223,25 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         if (formData.type === 'expense' && formData.category !== 'Select Category') {
             const currentSpent = budgetInfo?.spent || 0;
             const budgetLimit = budgetInfo?.limit || 0;
-            const newTotal = currentSpent + parsedAmount;
+            const remaining = budgetLimit - currentSpent;
 
-            if (newTotal > budgetLimit) {
-                const remaining = budgetLimit - currentSpent;
+            // For new transactions, check if amount exceeds remaining budget
+            if (!editTransaction && parsedAmount > remaining) {
                 toast.error(
                     `This amount would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
                     { duration: 2000 }
                 );
                 return;
+            }
+            else if (editTransaction && parsedAmount > Math.abs(editTransaction.amount)) {
+                const additionalAmount = parsedAmount - Math.abs(editTransaction.amount);
+                if (additionalAmount > remaining) {
+                    toast.error(
+                        `This amount would exceed your budget limit. You have $${remaining.toFixed(2)} remaining in your ${formData.category} budget.`,
+                        { duration: 2000 }
+                    );
+                    return;
+                }
             }
         }
 
