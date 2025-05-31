@@ -11,22 +11,22 @@ import { TargetBudgetModal } from './targetbudgetmodal.jsx'
 import ViewMessageModal from './viewmessagemodal'
 
 const MonthlyBudgets = () => {
-    const [selectedBudget, setSelectedBudget] = useState(null)
+    const navigate = useNavigate()
+    const { token } = useAuth()
+    const [isLoading, setIsLoading] = useState(true)
     const [showEditModal, setShowEditModal] = useState(false)
     const [showDetailsModal, setShowDetailsModal] = useState(false)
-    const [budgetCategories, setBudgetCategories] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-    const navigate = useNavigate()
-    const [showAddModal, setShowAddModal] = useState(false)
-    const { token } = useAuth()
-    const [annualGoals, setAnnualGoals] = useState([])
     const [isTargetModalOpen, setIsTargetModalOpen] = useState(false)
-    const [totalBudget, setTotalBudget] = useState(0)
-    const [monthlyIncome, setMonthlyIncome] = useState(0)
+    const [showAddModal, setShowAddModal] = useState(false)
     const [isEditingTotal, setIsEditingTotal] = useState(false)
     const [hasSetTotalBudget, setHasSetTotalBudget] = useState(false)
     const [showMessageModal, setShowMessageModal] = useState(false)
+    const [selectedBudget, setSelectedBudget] = useState(null)
+    const [budgetCategories, setBudgetCategories] = useState([])
+    const [annualGoals, setAnnualGoals] = useState([])
     const [allMessages, setAllMessages] = useState([])
+    const [totalBudget, setTotalBudget] = useState(0)
+    const [monthlyIncome, setMonthlyIncome] = useState(0)
 
     const defaultCategories = [
         'Food',
@@ -62,14 +62,14 @@ const MonthlyBudgets = () => {
             .filter(t => {
                 const transactionDate = new Date(t.date);
                 return (
-                    t.amount > 0 && // Only income
+                    t.amount > 0 &&
                     transactionDate.getMonth() === currentMonth &&
                     transactionDate.getFullYear() === currentYear
                 );
             })
             .reduce((total, t) => total + t.amount, 0);
 
-        return income || 0; // Return 0 if no income
+        return income || 0;
     };
 
     const fetchTransactions = async () => {
@@ -88,13 +88,12 @@ const MonthlyBudgets = () => {
             }
 
             const transactions = await response.json();
-            // Calculate monthly income from transactions
             const income = calculateMonthlyIncome(transactions);
             setMonthlyIncome(income);
             return transactions;
         } catch (error) {
             console.error('Error fetching transactions:', error);
-            setMonthlyIncome(0); // Set income to 0 on error
+            setMonthlyIncome(0);
             return [];
         }
     };
@@ -108,7 +107,7 @@ const MonthlyBudgets = () => {
                 const transactionDate = new Date(t.date);
                 return (
                     t.category === category &&
-                    t.amount < 0 && // Only expenses
+                    t.amount < 0 &&
                     transactionDate.getMonth() === currentMonth &&
                     transactionDate.getFullYear() === currentYear
                 );
@@ -120,7 +119,6 @@ const MonthlyBudgets = () => {
         try {
             setIsLoading(true);
 
-            // Fetch total budget first
             const totalBudgetData = await BudgetService.getTotalBudget();
             if (totalBudgetData) {
                 setTotalBudget(totalBudgetData.amount);
@@ -130,12 +128,10 @@ const MonthlyBudgets = () => {
             const budgets = await BudgetService.getAllBudgets('monthly');
             const transactions = await fetchTransactions();
 
-            // If no budgets exist, create default budgets
             if (budgets.length === 0) {
                 setHasSetTotalBudget(false);
                 setBudgetCategories([]);
             } else {
-                // Update spent amounts based on transactions
                 const updatedBudgets = budgets.map(budget => ({
                     ...budget,
                     spent: calculateCategorySpending(transactions, budget.category),
@@ -144,7 +140,6 @@ const MonthlyBudgets = () => {
                         : 0
                 }));
 
-                // Filter out any duplicate categories, keeping only the first occurrence
                 const uniqueBudgets = updatedBudgets.reduce((acc, current) => {
                     const exists = acc.find(item => item.category === current.category);
                     if (!exists) {
@@ -180,7 +175,6 @@ const MonthlyBudgets = () => {
 
     const handleUpdateBudget = async (updatedBudget) => {
         try {
-            // Calculate new total if this budget is updated
             const currentTotal = budgetCategories.reduce((sum, budget) => {
                 if (budget._id === selectedBudget._id) {
                     return sum + updatedBudget.limit;
@@ -188,21 +182,17 @@ const MonthlyBudgets = () => {
                 return sum + budget.limit;
             }, 0);
 
-            // Validate against total budget
             if (currentTotal > totalBudget) {
                 toast.error(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
                 return;
             }
 
-            // Update the budget
             await BudgetService.updateBudget(selectedBudget._id, {
                 limit: updatedBudget.limit,
                 color: updatedBudget.color
             });
 
-            // Refresh budgets
             await initializeBudgets();
-            // Dispatch budget change event
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget updated successfully');
         } catch (error) {
@@ -218,17 +208,14 @@ const MonthlyBudgets = () => {
 
     const handleAddBudget = async (budgetData) => {
         try {
-            // Calculate new total with the new budget
             const currentTotal = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
             const newTotal = currentTotal + budgetData.limit;
 
-            // Validate against total budget
             if (newTotal > totalBudget) {
                 toast.error(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
                 return;
             }
 
-            // Create the new budget
             await BudgetService.createBudget({
                 ...budgetData,
                 type: 'monthly',
@@ -237,7 +224,6 @@ const MonthlyBudgets = () => {
 
             setShowAddModal(false);
             await initializeBudgets();
-            // Dispatch budget change event
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget created successfully');
         } catch (error) {
@@ -256,7 +242,6 @@ const MonthlyBudgets = () => {
     const handleDeleteBudget = async (budgetId) => {
         try {
             await BudgetService.deleteBudget(budgetId);
-            // Dispatch budget change event
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget deleted successfully');
             initializeBudgets();
@@ -302,7 +287,6 @@ const MonthlyBudgets = () => {
     const getProgressHighlights = () => {
         const highlights = [];
 
-        // Budget spending insights
         const budgetInsights = budgetCategories
             .filter(budget => budget.limit > 0)
             .map(budget => {
@@ -327,10 +311,8 @@ const MonthlyBudgets = () => {
             })
             .filter(insight => insight.message !== '');
 
-        // Add budget insights to highlights
         highlights.push(...budgetInsights);
 
-        // Goal progress insights
         if (annualGoals.length > 0) {
             const goalInsights = annualGoals.map(goal => {
                 const progress = calculateProgress(goal.current, goal.target);
@@ -370,14 +352,12 @@ const MonthlyBudgets = () => {
                 };
             });
 
-            // Add goal insights to highlights
             highlights.push(...goalInsights);
         }
 
-        // Spending trend insights
         const totalSpent = calculateTotalSpent();
         const totalBudget = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
-        const overallProgress = (totalSpent / totalBudget) * 100;
+        const overallProgress = (totalBudget > 0) ? (totalSpent / totalBudget) * 100 : 0;
 
         if (totalBudget > 0) {
             let trendMessage = '';
@@ -400,14 +380,23 @@ const MonthlyBudgets = () => {
             }
         }
 
-        // Sort highlights by priority (critical > warning > info)
+        // Add default message if no highlights are present
+        if (highlights.length === 0) {
+            highlights.push({
+                title: 'No Active Insights',
+                progress: 0,
+                status: 'info',
+                message: '📊 Your budgets and goals are all in good shape! Keep up the good work!',
+                type: 'default'
+            });
+        }
+
         return highlights.sort((a, b) => {
             const priority = { critical: 0, warning: 1, info: 2 };
             return priority[a.status] - priority[b.status];
         });
     };
 
-    // Add useEffect to update allMessages when highlights change
     useEffect(() => {
         const highlights = getProgressHighlights();
         setAllMessages(highlights);
@@ -416,8 +405,7 @@ const MonthlyBudgets = () => {
     const handleTargetUpdated = async (newTotal) => {
         setTotalBudget(newTotal);
         setHasSetTotalBudget(true);
-        await initializeBudgets(); // Refresh all budgets
-        // Dispatch budget change event
+        await initializeBudgets();
         window.dispatchEvent(new Event('budgetChange'));
     };
 
@@ -425,7 +413,7 @@ const MonthlyBudgets = () => {
         const spent = calculateTotalSpent();
         if (totalBudget <= 0) return 0;
         const percentage = (spent / totalBudget) * 100;
-        return Math.min(percentage, 100); // Cap at 100%
+        return Math.min(percentage, 100);
     };
 
     const calculateRemainingIncome = () => {
