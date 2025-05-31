@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import CategoryBudget from './CategoryBudget'
+import React, { useState, useEffect } from 'react'
 import { PlusIcon } from 'lucide-react'
 import EditBudgetModal from './editbudgetmodal'
 import ViewBudgetDetailsModal from './viewbudgetdetailsModal'
@@ -16,64 +15,6 @@ const Budgets = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false)
     const [showAddModal, setShowAddModal] = useState(false)
 
-    const budgetCategories = [
-        {
-            category: 'Housing',
-            spent: 1200,
-            limit: 1500,
-            percentage: 80,
-            color: 'bg-blue-500',
-        },
-        {
-            category: 'Food',
-            spent: 420,
-            limit: 500,
-            percentage: 84,
-            color: 'bg-green-500',
-        },
-        {
-            category: 'Transportation',
-            spent: 240,
-            limit: 300,
-            percentage: 80,
-            color: 'bg-purple-500',
-        },
-        {
-            category: 'Entertainment',
-            spent: 180,
-            limit: 150,
-            percentage: 120,
-            color: 'bg-amber-500',
-        },
-        {
-            category: 'Utilities',
-            spent: 100,
-            limit: 150,
-            percentage: 67,
-            color: 'bg-red-500',
-        },
-        {
-            category: 'Healthcare',
-            spent: 75,
-            limit: 200,
-            percentage: 37.5,
-            color: 'bg-pink-500',
-        },
-        {
-            category: 'Shopping',
-            spent: 250,
-            limit: 300,
-            percentage: 83.3,
-            color: 'bg-indigo-500',
-        },
-        {
-            category: 'Personal Care',
-            spent: 80,
-            limit: 100,
-            percentage: 80,
-            color: 'bg-teal-500',
-        },
-    ]
 
     const handleAddBudget = async (budgetData) => {
         try {
@@ -102,34 +43,30 @@ const Budgets = () => {
         }
     }
 
-    const handleEditBudget = (budget) => {
-        setSelectedBudget(budget)
-        setShowEditModal(true)
-    }
-
-    const handleViewDetails = (budget) => {
-        setSelectedBudget(budget)
-        setShowDetailsModal(true)
-    }
-
     const handleUpdateBudget = (updatedBudget) => {
-        console.log('Updating budget:', updatedBudget)
         setShowEditModal(false)
         setSelectedBudget(null)
     }
 
+    const AddButton = () => (
+        <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors duration-200"
+        >
+            <PlusIcon className="w-5 h-5" />
+            <span>Add Budget</span>
+        </button>
+    )
+
     return (
         <>
             <div className="space-y-8">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-bold text-gray-800">Budget Management</h1>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center"
-                    >
-                        <PlusIcon size={18} className="mr-1" />
-                        <span>Add Budget</span>
-                    </button>
+                    <div>
+                        {activeSection === 'annual' && <AddButton />}
+                        {activeSection === 'savings' && <AddButton />}
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6">

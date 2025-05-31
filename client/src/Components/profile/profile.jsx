@@ -5,7 +5,6 @@ import {
     UserIcon,
     KeyIcon,
     ShieldIcon,
-    BellIcon,
     GlobeIcon,
 } from 'lucide-react'
 const Profile = () => {
@@ -20,14 +19,13 @@ const Profile = () => {
                             <h2 className="text-lg font-semibold text-gray-800 mb-4">
                                 Personal Information
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-6">
                                 {[
                                     { label: "Full Name", type: "text", value: "Alex Johnson" },
                                     { label: "Email Address", type: "email", value: "alex@example.com" },
-                                    { label: "Phone Number", type: "tel", value: "+1 (555) 123-4567" },
-                                    { label: "Location", type: "text", value: "San Francisco, CA" }
+                                    { label: "Location", type: "text", value: "San Francisco, CA", fullWidth: true }
                                 ].map((field, i) => (
-                                    <div key={i}>
+                                    <div key={i} className={field.fullWidth ? "md:col-span-2" : ""}>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             {field.label}
                                         </label>
@@ -63,38 +61,26 @@ const Profile = () => {
                                         <option>French</option>
                                     </select>
                                 </div>
-
-                               
                             </div>
-                        </section>
-
-                        {/* Activity Log */}
-                        <section>
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Recent Activity
-                            </h2>
-                            <ActivityLog />
                         </section>
                     </div>
                 </div>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                    {/* Quick Actions */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                        <div className="space-y-4">
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow p-8 min-h-[220px]">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-6">Quick Actions</h2>
+                        <div className="space-y-6">
                             {[
                                 { label: "Edit Profile", desc: "Update your personal information", icon: UserIcon },
                                 { label: "Change Password", desc: "Update your security credentials", icon: KeyIcon },
-                                { label: "Privacy Settings", desc: "Control your data and privacy", icon: ShieldIcon }
                             ].map((action, i) => (
                                 <button
                                     key={i}
-                                    className="flex items-center space-x-3 w-full p-3 text-left rounded-lg hover:bg-gray-50"
+                                    className="flex items-center space-x-4 w-full p-5 text-left rounded-lg hover:bg-gray-50"
+                                    style={{ minHeight: '56px' }}
                                 >
-                                    <div className="p-2 bg-indigo-50 rounded-lg">
-                                        <action.icon className="h-5 w-5 text-indigo-600" />
+                                    <div className="p-3 bg-indigo-50 rounded-lg">
+                                        <action.icon className="h-6 w-6 text-indigo-600" />
                                     </div>
                                     <div>
                                         <p className="font-medium text-gray-800">{action.label}</p>
@@ -105,9 +91,9 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Status</h2>
-                        <div className="space-y-4 text-sm text-gray-600">
+                    <div className="bg-white rounded-lg shadow p-8 min-h-[180px]">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-6">Account Status</h2>
+                        <div className="space-y-6 text-sm text-gray-600">
                             <div>
                                 <p className="text-xs uppercase text-gray-500">Member Since</p>
                                 <p className="font-medium text-gray-800">January 15, 2023</p>
@@ -118,6 +104,15 @@ const Profile = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                    Recent Activity
+                </h2>
+                <div className="bg-white rounded-lg shadow p-6">
+                    <ActivityLog />
                 </div>
             </div>
         </div>

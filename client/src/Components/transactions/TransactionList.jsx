@@ -20,12 +20,10 @@ export const TransactionList = ({ transactions, onEdit, onDelete }) => {
             amount: Math.abs(transaction.amount),
             type: transaction.amount >= 0 ? 'income' : 'expense'
         };
-        console.log('Editing transaction:', transactionToEdit);
         onEdit(transactionToEdit);
     };
 
     const handleDelete = (transactionId) => {
-        console.log('Deleting transaction:', transactionId);
         onDelete(transactionId);
     };
 

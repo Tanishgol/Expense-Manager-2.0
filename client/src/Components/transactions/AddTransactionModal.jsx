@@ -37,7 +37,6 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
     // Update form data when editTransaction changes
     useEffect(() => {
         if (editTransaction) {
-            console.log('Setting form data for edit:', editTransaction);
             setFormData({
                 title: editTransaction.title,
                 amount: Math.abs(editTransaction.amount).toString(),

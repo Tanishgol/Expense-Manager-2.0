@@ -97,7 +97,6 @@ export function Register() {
                 },
             });
 
-            console.log(response.data.message);
             setTimeout(() => {
                 navigate('/login');
             }, 1000);
