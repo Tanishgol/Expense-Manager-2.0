@@ -5,24 +5,53 @@ import AuthLayout from '../Components/elements/authlayout'
 import Button from '../Components/elements/button'
 import resetPasswordImage from '../Assets/reset-password-icon.png'
 import { toast } from 'react-hot-toast'
-import Input from '../Components/elements/input'
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [passwordStrength, setPasswordStrength] = useState(0)
+    const [passwordsMatch, setPasswordsMatch] = useState(true)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Get OTP from state passed by OTP verification component
-    const { state } = location
-    const otp = state?.otp
+    // Get token from URL search params
+    const searchParams = new URLSearchParams(location.search)
+    const token = searchParams.get('token')
 
-    if (!otp) {
+    if (!token) {
         navigate('/email-verification')
         return null
+    }
+
+    const handlePasswordChange = (e) => {
+        const value = e.target.value
+        setPassword(value)
+
+        let strength = 0
+        if (value.length > 6) strength += 1
+        if (/[A-Z]/.test(value)) strength += 1
+        if (/[0-9]/.test(value)) strength += 1
+        if (/[^A-Za-z0-9]/.test(value)) strength += 1
+
+        setPasswordStrength(strength)
+
+        if (confirmPassword) {
+            setPasswordsMatch(confirmPassword === value)
+        }
+    }
+
+    const handleConfirmPasswordChange = (e) => {
+        const value = e.target.value
+        setConfirmPassword(value)
+        setPasswordsMatch(password === value)
+    }
+
+    const getStrengthColor = (index) => {
+        const colors = ['bg-red-500', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-500']
+        return index < passwordStrength ? colors[passwordStrength - 1] : 'bg-slate-200'
     }
 
     const handleSubmit = async (e) => {
@@ -47,7 +76,7 @@ const ResetPassword = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    otp,
+                    token,
                     newPassword: password,
                 }),
             })
@@ -71,7 +100,7 @@ const ResetPassword = () => {
     return (
         <AuthLayout
             title="Reset Your Password"
-            subtitle="Enter your new password"
+            subtitle="Enter your new password below"
             illustration={
                 <div className="flex flex-col items-center">
                     <div className="mb-4">
@@ -94,7 +123,7 @@ const ResetPassword = () => {
                             required
                             icon={<LockIcon className="h-5 w-5" />}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             disabled={isLoading}
                         />
                         <button
@@ -119,7 +148,7 @@ const ResetPassword = () => {
                             required
                             icon={<LockIcon className="h-5 w-5" />}
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={handleConfirmPasswordChange}
                             disabled={isLoading}
                         />
                         <button

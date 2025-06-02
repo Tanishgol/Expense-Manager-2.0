@@ -131,7 +131,10 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                         </div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Total Budget</span>
-                            <span className="font-medium text-blue-600">${totalBudget.toFixed(2)}</span>
+                            <span className="font-medium text-blue-600">
+                                ${(totalBudget ?? 0).toFixed(2)}
+                            </span>
+
                         </div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">Remaining Budget</span>

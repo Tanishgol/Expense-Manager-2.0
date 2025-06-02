@@ -5,90 +5,106 @@ import AuthLayout from '../Components/elements/authlayout'
 import Button from '../Components/elements/button'
 import verifyImage from '../Assets/OTPverify.png'
 
-const OTPVerify = () => {
-    const [otp, setOtp] = useState(['', '', '', '', '', ''])
-    const inputRefs = useRef([])
-    const [timer, setTimer] = useState(30)
-    const [canResend, setCanResend] = useState(false)
-    const navigate = useNavigate()
+    const OTPVerify = () => {
+        const [otp, setOtp] = useState(['', '', '', '', '', ''])
+        const inputRefs = useRef([])
+        const [timer, setTimer] = useState(30)
+        const [canResend, setCanResend] = useState(false)
+        const navigate = useNavigate()
 
-    const handleChange = (e, index) => {
-        const value = e.target.value.replace(/\D/g, '');
-        if (!value) return;
+        const handleChange = (e, index) => {
+            const value = e.target.value.replace(/\D/g, '');
+            if (!value) return;
 
-        // If all fields are empty and user types, always start from index 0
-        if (otp.every((digit) => digit === '') && index !== 0) {
-            inputRefs.current[0]?.focus();
-            return;
-        }
-
-        const newOtp = [...otp];
-        newOtp[index] = value;
-        setOtp(newOtp);
-
-        if (value && index < otp.length - 1) {
-            inputRefs.current[index + 1]?.focus();
-        }
-    };
-
-    const handleKeyDown = (e, index) => {
-        if (e.key === 'Backspace') {
-            e.preventDefault();
             const newOtp = [...otp];
+            
+            if (otp.every((digit) => digit === '') && index !== 0) {
+                newOtp[index] = value;
+                setOtp(newOtp);
+                setTimeout(() => {
+                    setOtp(prev => {
+                        const resetOtp = [...prev];
+                        resetOtp[index] = '';
+                        resetOtp[0] = value;
+                        return resetOtp;
+                    });
+                    inputRefs.current[1]?.focus();
+                }, 0);
+                return;
+            }
 
-            if (otp[index]) {
-                newOtp[index] = '';
-                setOtp(newOtp);
-            } else if (index > 0) {
-                newOtp[index - 1] = '';
-                setOtp(newOtp);
+            newOtp[index] = value;
+            setOtp(newOtp);
+
+            if (value && index < otp.length - 1) {
+                inputRefs.current[index + 1]?.focus();
+            }
+        };
+
+        const handleKeyDown = (e, index) => {
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                const newOtp = [...otp];
+
+                if (otp[index]) {
+                    newOtp[index] = '';
+                    setOtp(newOtp);
+                } else if (index > 0) {
+                    newOtp[index - 1] = '';
+                    setOtp(newOtp);
+                    inputRefs.current[index - 1]?.focus();
+                }
+            } else if (e.key === 'ArrowLeft' && index > 0) {
+                e.preventDefault();
                 inputRefs.current[index - 1]?.focus();
+            } else if (e.key === 'ArrowRight' && index < otp.length - 1) {
+                e.preventDefault();
+                inputRefs.current[index + 1]?.focus();
+            }
+        };
+
+        const handlePaste = (e) => {
+            e.preventDefault();
+            const pastedData = e.clipboardData.getData('text/plain').trim();
+            if (/^\d{6}$/.test(pastedData)) {
+                const digits = pastedData.split('');
+                setOtp(digits);
+                setTimeout(() => inputRefs.current[5]?.focus(), 10);
+            }
+        };
+
+        useEffect(() => {
+            if (timer > 0) {
+                const interval = setInterval(() => {
+                    setTimer((prev) => prev - 1)
+                }, 1000)
+                return () => clearInterval(interval)
+            } else {
+                setCanResend(true)
+            }
+        }, [timer])
+
+        useEffect(() => {
+            inputRefs.current[0]?.focus();
+        }, []);
+
+        const handleResendCode = () => {
+            if (canResend) {
+                setOtp(['', '', '', '', '', ''])
+                setTimer(30)
+                setCanResend(false)
+                inputRefs.current[0]?.focus()
             }
         }
-    };
 
-    const handlePaste = (e) => {
-        e.preventDefault();
-        const pastedData = e.clipboardData.getData('text/plain').trim();
-        if (/^\d{6}$/.test(pastedData)) {
-            const digits = pastedData.split('');
-            setOtp(digits);
-            setTimeout(() => inputRefs.current[5]?.focus(), 10);
+        const handleVerify = () => {
+            const enteredOtp = otp.join('')
+            if (enteredOtp.length === 6) {
+                navigate('/reset-password')
+            } else {
+                alert('Please enter the complete 6-digit OTP')
+            }
         }
-    };
-
-    useEffect(() => {
-        if (timer > 0) {
-            const interval = setInterval(() => {
-                setTimer((prev) => prev - 1)
-            }, 1000)
-            return () => clearInterval(interval)
-        } else {
-            setCanResend(true)
-        }
-    }, [timer])
-
-    useEffect(() => {
-        inputRefs.current[0]?.focus();
-    }, []);
-
-    const handleResendCode = () => {
-        if (canResend) {
-            setOtp(['', '', '', '', '', ''])
-            setTimer(30)
-            setCanResend(false)
-            inputRefs.current[0]?.focus()
-        }
-    }
-
-    const handleVerify = () => {
-        const enteredOtp = otp.join('')
-        if (enteredOtp.length === 6) {
-            navigate('/reset-password')
-        } else {
-            alert('Please enter the complete 6-digit OTP')
-        }
-    }
 
     return (
         <AuthLayout

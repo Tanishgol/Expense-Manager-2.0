@@ -63,41 +63,43 @@ const Budgets = () => {
             <div className="space-y-8">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-bold text-gray-800">Budget Management</h1>
-                    <div>
-                        {activeSection === 'annual' && <AddButton />}
-                        {activeSection === 'savings' && <AddButton />}
-                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex space-x-6 border-b pb-2 mb-6">
-                        <button
-                            onClick={() => setActiveSection('monthly')}
-                            className={`pb-3 px-2 ${activeSection === 'monthly'
-                                ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
-                                : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            Monthly Budgets
-                        </button>
-                        <button
-                            onClick={() => setActiveSection('annual')}
-                            className={`pb-3 px-2 ${activeSection === 'annual'
-                                ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
-                                : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            Annual Goals
-                        </button>
-                        <button
-                            onClick={() => setActiveSection('savings')}
-                            className={`pb-3 px-2 ${activeSection === 'savings'
-                                ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
-                                : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            Savings Goals
-                        </button>
+                    <div className="flex justify-between items-center border-b pb-2 mb-6">
+                        <div className="flex space-x-6">
+                            <button
+                                onClick={() => setActiveSection('monthly')}
+                                className={`pb-3 px-2 ${activeSection === 'monthly'
+                                    ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                Monthly Budgets
+                            </button>
+                            <button
+                                onClick={() => setActiveSection('annual')}
+                                className={`pb-3 px-2 ${activeSection === 'annual'
+                                    ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                Annual Goals
+                            </button>
+                            <button
+                                onClick={() => setActiveSection('savings')}
+                                className={`pb-3 px-2 ${activeSection === 'savings'
+                                    ? 'border-b-2 border-indigo-600 text-indigo-600 font-medium'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                Savings Goals
+                            </button>
+                        </div>
+
+                        {(activeSection === 'annual' || activeSection === 'savings') && (
+                            <AddButton />
+                        )}
                     </div>
 
                     {renderActiveSection()}

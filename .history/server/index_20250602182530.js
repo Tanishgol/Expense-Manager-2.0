@@ -81,54 +81,52 @@ transporter.verify(function(error, success) {
   }
 });
 
-// Function to generate 6-digit OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
-// Enhanced email sending function with OTP
-const sendResetEmail = async (email, otp) => {
+// Enhanced email sending function with better error handling
+const sendResetEmail = async (email, resetToken) => {
+  const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+  
   const mailOptions = {
     from: {
       name: 'Expense Manager',
       address: process.env.EMAIL_USER
     },
     to: email,
-    subject: 'Password Reset OTP - Expense Manager',
+    subject: 'Password Reset Request - Expense Manager',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #059669;">Password Reset OTP</h2>
+        <h2 style="color: #059669;">Password Reset Request</h2>
         <p>Hello,</p>
         <p>You have requested to reset your password for your Expense Manager account.</p>
-        <p>Please use the following OTP to reset your password:</p>
+        <p>Please click the button below to reset your password:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; font-size: 32px; letter-spacing: 5px; font-weight: bold;">
-            ${otp}
-          </div>
+          <a href="${resetUrl}" 
+             style="background-color: #059669; color: white; padding: 12px 24px; 
+                    text-decoration: none; border-radius: 5px; display: inline-block;">
+            Reset Password
+          </a>
         </div>
         <p><strong>Important:</strong></p>
         <ul>
-          <li>This OTP will expire in 1 hour</li>
+          <li>This link will expire in 1 hour</li>
           <li>If you didn't request this reset, please ignore this email</li>
-          <li>Never share this OTP with anyone</li>
         </ul>
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-          For security reasons, this OTP can only be used once. If you need to reset your password again, 
-          please request a new OTP.
+          For security reasons, this link can only be used once. If you need to reset your password again, 
+          please request a new link.
         </p>
       </div>
     `,
     text: `
-      Password Reset OTP
+      Password Reset Request
       
       You have requested to reset your password.
       
-      Your OTP is: ${otp}
+      Please click the following link to reset your password:
+      ${resetUrl}
       
-      This OTP will expire in 1 hour.
+      This link will expire in 1 hour.
       
       If you didn't request this reset, please ignore this email.
-      Never share this OTP with anyone.
     `
   };
 
@@ -136,6 +134,7 @@ const sendResetEmail = async (email, otp) => {
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
     console.log('Message ID:', info.messageId);
+    console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
     return info;
   } catch (error) {
     console.error('Error sending email:', error);
@@ -162,20 +161,19 @@ app.post("/api/verify-email", async (req, res) => {
       });
     }
 
-    // Generate OTP
-    const otp = generateOTP();
-    const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    user.resetPasswordToken = hashedOTP;
+    user.resetPasswordToken = hashedToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
     try {
-      await sendResetEmail(email, otp);
+      await sendResetEmail(email, resetToken);
       
       res.json({ 
         exists: true,
-        message: "OTP has been sent to your email"
+        message: "Password reset instructions sent to your email"
       });
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
@@ -186,7 +184,7 @@ app.post("/api/verify-email", async (req, res) => {
       await user.save();
       
       return res.status(500).json({
-        message: "Failed to send OTP. Please try again later.",
+        message: "Failed to send reset email. Please try again later.",
         error: emailError.message
       });
     }
@@ -199,21 +197,20 @@ app.post("/api/verify-email", async (req, res) => {
   }
 });
 
-// Update the reset password endpoint to verify OTP
 app.post("/api/reset-password", async (req, res) => {
   try {
-    const { otp, newPassword } = req.body;
+    const { token, newPassword } = req.body;
     
-    const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await User.findOne({
-      resetPasswordToken: hashedOTP,
+      resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() }
     });
 
     if (!user) {
       return res.status(400).json({
-        message: "Invalid or expired OTP"
+        message: "Invalid or expired reset token"
       });
     }
 

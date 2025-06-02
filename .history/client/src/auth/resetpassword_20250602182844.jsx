@@ -8,25 +8,24 @@ import { toast } from 'react-hot-toast'
 import Input from '../Components/elements/input'
 
 const ResetPassword = () => {
+    const [otp, setOtp] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [passwordStrength, setPasswordStrength] = useState(0)
+    const [passwordsMatch, setPasswordsMatch] = useState(true)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Get OTP from state passed by OTP verification component
-    const { state } = location
-    const otp = state?.otp
-
-    if (!otp) {
-        navigate('/email-verification')
-        return null
-    }
-
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        if (!otp) {
+            toast.error('Please enter the OTP sent to your email')
+            return
+        }
 
         if (password !== confirmPassword) {
             toast.error('Passwords do not match')
@@ -71,7 +70,7 @@ const ResetPassword = () => {
     return (
         <AuthLayout
             title="Reset Your Password"
-            subtitle="Enter your new password"
+            subtitle="Enter the OTP sent to your email and your new password"
             illustration={
                 <div className="flex flex-col items-center">
                     <div className="mb-4">
@@ -79,13 +78,25 @@ const ResetPassword = () => {
                     </div>
                     <h2 className="mb-2 text-2xl font-bold">Secure Reset</h2>
                     <p className="text-center text-emerald-50">
-                        Choose a strong password to keep your account secure.
+                        Enter the OTP from your email and choose a new password.
                     </p>
                 </div>
             }
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
+                    <Input
+                        label="Enter OTP"
+                        type="text"
+                        placeholder="Enter 6-digit OTP"
+                        required
+                        maxLength={6}
+                        pattern="[0-9]{6}"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        disabled={isLoading}
+                    />
+
                     <div className="relative">
                         <Input
                             label="New Password"

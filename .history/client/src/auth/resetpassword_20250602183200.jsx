@@ -71,7 +71,7 @@ const ResetPassword = () => {
     return (
         <AuthLayout
             title="Reset Your Password"
-            subtitle="Enter your new password"
+            subtitle="Enter the OTP sent to your email and your new password"
             illustration={
                 <div className="flex flex-col items-center">
                     <div className="mb-4">
@@ -79,13 +79,25 @@ const ResetPassword = () => {
                     </div>
                     <h2 className="mb-2 text-2xl font-bold">Secure Reset</h2>
                     <p className="text-center text-emerald-50">
-                        Choose a strong password to keep your account secure.
+                        Enter the OTP from your email and choose a new password.
                     </p>
                 </div>
             }
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
+                    <Input
+                        label="Enter OTP"
+                        type="text"
+                        placeholder="Enter 6-digit OTP"
+                        required
+                        maxLength={6}
+                        pattern="[0-9]{6}"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        disabled={isLoading}
+                    />
+
                     <div className="relative">
                         <Input
                             label="New Password"
