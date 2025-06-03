@@ -8,6 +8,49 @@ import Button from '../Components/elements/button';
 import Checkbox from '../Components/elements/checkbox';
 import savingmoney from '../Assets/save-money-register.png';
 
+function evaluatePasswordStrength(password) {
+    let score = 0;
+    let feedback = '';
+
+    // Check length
+    if (password.length >= 8) score += 2;
+    else if (password.length >= 6) score += 1;
+
+    // Check character types
+    if (/[a-z]/.test(password)) score += 2; // Lowercase
+    if (/[A-Z]/.test(password)) score += 2; // Uppercase
+    if (/[0-9]/.test(password)) score += 2; // Numbers
+    if (/[^A-Za-z0-9]/.test(password)) score += 2; // Special characters
+
+    // Convert score to strength level (1-4)
+    let strength = Math.min(4, Math.ceil(score / 2.5));
+
+    // Generate feedback
+    if (score < 4) {
+        feedback = 'Too weak: add more variety';
+        strength = 1;
+    } else {
+        const missing = [];
+        if (password.length < 8) missing.push('length (8+ chars)');
+        if (!/[A-Z]/.test(password)) missing.push('uppercase');
+        if (!/[a-z]/.test(password)) missing.push('lowercase');
+        if (!/[0-9]/.test(password)) missing.push('numbers');
+        if (!/[^A-Za-z0-9]/.test(password)) missing.push('special chars');
+
+        if (missing.length > 0) {
+            if (strength <= 2) {
+                feedback = `Basic: add ${missing[0]}`;
+            } else {
+                feedback = `Medium: add ${missing[0]} to strengthen`;
+            }
+        } else {
+            feedback = 'Strong password';
+        }
+    }
+
+    return { strength, feedback };
+}
+
 function getStrengthColor(strength) {
     switch (strength) {
         case 1:
@@ -27,6 +70,7 @@ export function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordStrength, setPasswordStrength] = useState(0);
+    const [strengthFeedback, setStrengthFeedback] = useState('');
     const [passwordsMatch, setPasswordsMatch] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,19 +84,9 @@ export function Register() {
         const value = e.target.value;
         setPassword(value);
 
-        let strength = 0;
-
-        const hasLower = /[a-z]/.test(value);
-        const hasUpper = /[A-Z]/.test(value);
-        const hasSpecial = /[^A-Za-z0-9]/.test(value);
-        const hasNumber = /\d/.test(value);
-
-        if (hasLower) strength = 1;
-        if (hasLower && hasUpper) strength = 2;
-        if (hasLower && hasUpper && hasSpecial) strength = 3;
-        if (hasLower && hasUpper && hasSpecial && hasNumber) strength = 4;
-
+        const { strength, feedback } = evaluatePasswordStrength(value);
         setPasswordStrength(strength);
+        setStrengthFeedback(feedback);
 
         if (confirmPassword) {
             setPasswordsMatch(confirmPassword === value);
@@ -179,18 +213,14 @@ export function Register() {
                                 ))}
                             </div>
                             <p className="text-xs text-slate-600" id="passwordStrength">
-                                {passwordStrength === 1 && 'Weak password: add uppercase letters'}
-                                {passwordStrength === 2 && 'Getting better: add special characters'}
-                                {passwordStrength === 3 && 'Almost there: add a number'}
-                                {passwordStrength === 4 && (
+                                {passwordStrength === 4 ? (
                                     <span className="flex items-center text-emerald-600">
-                                        <CheckIcon className="mr-1 h-3 w-3" /> Strong password
+                                        <CheckIcon className="mr-1 h-3 w-3" /> {strengthFeedback}
                                     </span>
-                                )}
+                                ) : strengthFeedback}
                             </p>
                         </div>
                     )}
-
                 </div>
 
                 <div>
