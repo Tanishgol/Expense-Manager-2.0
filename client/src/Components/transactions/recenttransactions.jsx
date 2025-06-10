@@ -8,7 +8,6 @@ export const RecentTransactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sortOrder, setSortOrder] = useState('desc');
     const { token } = useAuth();
     const location = useLocation();
     const isDashboard = location.pathname === '/dashboard';
@@ -96,17 +95,6 @@ export const RecentTransactions = () => {
             toast.error('Failed to delete transaction');
         }
     };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[200px]">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-2 text-sm text-gray-600">Loading transactions...</p>
-                </div>
-            </div>
-        );
-    }
 
     if (error) {
         return (

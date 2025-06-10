@@ -93,7 +93,6 @@ const OTPVerify = () => {
             setExpiryTimer(OTP_EXPIRY_TIME);
             inputRefs.current[0]?.focus();
         } catch (error) {
-            console.error('Resend OTP error:', error);
             toast.error(error.message || 'Failed to send new OTP. Please try again.');
         } finally {
             setIsVerifying(false);

@@ -6,6 +6,7 @@ import { DownloadIcon, ChevronDownIcon } from 'lucide-react'
 import AnnualGoalService from '../../services/annualGoalService'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+import TransactionService from '../../services/transactionService'
 
 export const Report = () => {
     const [dateRange, setDateRange] = useState('month')
@@ -36,6 +37,70 @@ export const Report = () => {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
+
+    const ReportsSkeleton = () => (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center xs:mt-14 xss:mt-14 xsss:mt-14">
+                <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
+                <div className="h-10 bg-gray-200 rounded w-36 animate-pulse" />
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex flex-col xsss:flex-col xs:flex-row justify-between items-center mb-6 gap-3 xs:gap-2">
+                    <div className="h-6 bg-gray-200 rounded w-40 animate-pulse" />
+                    <div className="h-10 bg-gray-200 rounded w-48 animate-pulse" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="h-5 bg-gray-200 rounded w-40 mb-4 animate-pulse" />
+                        <div className="h-64 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="h-5 bg-gray-200 rounded w-40 mb-4 animate-pulse" />
+                        <div className="h-64 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 bg-gray-50 p-4 rounded-lg">
+                        <div className="h-5 bg-gray-200 rounded w-48 mb-4 animate-pulse" />
+                        <div className="h-80 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                    <div className="space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="h-5 bg-gray-200 rounded w-32 mb-4 animate-pulse" />
+                            <div className="space-y-4">
+                                {[...Array(5)].map((_, index) => (
+                                    <div key={index}>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse" />
+                                        <div className="h-6 bg-gray-200 rounded w-32 animate-pulse" />
+                                    </div>
+                                ))}
+                                <div className="pt-4 border-t border-gray-200">
+                                    <div className="h-4 bg-gray-200 rounded w-36 mb-2 animate-pulse" />
+                                    <div className="h-5 bg-gray-200 rounded w-48 animate-pulse" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="h-5 bg-gray-200 rounded w-32 mb-4 animate-pulse" />
+                            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                                <div className="h-5 bg-gray-200 rounded w-40 mb-3 animate-pulse" />
+                                <div className="space-y-2">
+                                    {[...Array(3)].map((_, index) => (
+                                        <div key={index} className="flex items-start">
+                                            <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 
     useEffect(() => {
         const fetchData = async () => {
@@ -232,12 +297,10 @@ export const Report = () => {
         })
     }
 
-    if (loading) {
-        return <div className="text-center py-8">Loading...</div>
-    }
-
-    if (error) {
-        return <div className="text-center py-8 text-red-600">Error: {error}</div>
+    if (loading || error) {
+        return (
+            <ReportsSkeleton />
+        )
     }
 
     return (

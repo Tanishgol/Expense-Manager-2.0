@@ -27,6 +27,7 @@ const MonthlyBudgets = () => {
     const [allMessages, setAllMessages] = useState([])
     const [totalBudget, setTotalBudget] = useState(0)
     const [monthlyIncome, setMonthlyIncome] = useState(0)
+    const [isDataLoaded, setIsDataLoaded] = useState(false)
 
     const defaultCategories = [
         'Food',
@@ -48,11 +49,8 @@ const MonthlyBudgets = () => {
             return
         }
         initializeBudgets()
-    }, [navigate])
-
-    useEffect(() => {
         fetchAnnualGoals()
-    }, [])
+    }, [navigate])
 
     const calculateMonthlyIncome = (transactions) => {
         const currentMonth = new Date().getMonth();
@@ -84,7 +82,8 @@ const MonthlyBudgets = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch transactions');
+                setIsLoading(true)
+                return [];
             }
 
             const transactions = await response.json();
@@ -92,7 +91,7 @@ const MonthlyBudgets = () => {
             setMonthlyIncome(income);
             return transactions;
         } catch (error) {
-            console.error('Error fetching transactions:', error);
+            setIsLoading(true)
             setMonthlyIncome(0);
             return [];
         }
@@ -117,20 +116,21 @@ const MonthlyBudgets = () => {
 
     const initializeBudgets = async () => {
         try {
-            setIsLoading(true);
+            setIsLoading(true)
+            setIsDataLoaded(false)
 
-            const totalBudgetData = await BudgetService.getTotalBudget();
+            const totalBudgetData = await BudgetService.getTotalBudget()
             if (totalBudgetData) {
-                setTotalBudget(totalBudgetData.amount);
-                setHasSetTotalBudget(true);
+                setTotalBudget(totalBudgetData.amount)
+                setHasSetTotalBudget(true)
             }
 
-            const budgets = await BudgetService.getAllBudgets('monthly');
-            const transactions = await fetchTransactions();
+            const budgets = await BudgetService.getAllBudgets('monthly')
+            const transactions = await fetchTransactions()
 
             if (budgets.length === 0) {
-                setHasSetTotalBudget(false);
-                setBudgetCategories([]);
+                setHasSetTotalBudget(false)
+                setBudgetCategories([])
             } else {
                 const updatedBudgets = budgets.map(budget => ({
                     ...budget,
@@ -138,29 +138,28 @@ const MonthlyBudgets = () => {
                     percentage: budget.limit > 0
                         ? (calculateCategorySpending(transactions, budget.category) / budget.limit) * 100
                         : 0
-                }));
+                }))
 
                 const uniqueBudgets = updatedBudgets.reduce((acc, current) => {
-                    const exists = acc.find(item => item.category === current.category);
+                    const exists = acc.find(item => item.category === current.category)
                     if (!exists) {
-                        acc.push(current);
+                        acc.push(current)
                     }
-                    return acc;
-                }, []);
-                setBudgetCategories(uniqueBudgets);
+                    return acc
+                }, [])
+                setBudgetCategories(uniqueBudgets)
             }
+            setIsDataLoaded(true)
         } catch (error) {
+            setIsLoading(true)
+            setIsDataLoaded(false)
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again');
-                navigate('/login');
-            } else {
-                toast.error('Failed to fetch budgets');
-                console.error('Error fetching budgets:', error);
+                navigate('/login')
             }
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
         const handleTransactionChange = () => {
@@ -175,6 +174,7 @@ const MonthlyBudgets = () => {
 
     const handleUpdateBudget = async (updatedBudget) => {
         try {
+            setIsLoading(true)
             const currentTotal = budgetCategories.reduce((sum, budget) => {
                 if (budget._id === selectedBudget._id) {
                     return sum + updatedBudget.limit;
@@ -196,18 +196,18 @@ const MonthlyBudgets = () => {
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget updated successfully');
         } catch (error) {
+            setIsLoading(true)
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again');
                 navigate('/login');
-            } else {
-                toast.error('Failed to update budget');
-                console.error('Error updating budget:', error);
             }
+        } finally {
+            setIsLoading(false)
         }
     };
 
     const handleAddBudget = async (budgetData) => {
         try {
+            setIsLoading(true)
             const currentTotal = budgetCategories.reduce((sum, budget) => sum + budget.limit, 0);
             const newTotal = currentTotal + budgetData.limit;
 
@@ -227,49 +227,45 @@ const MonthlyBudgets = () => {
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget created successfully');
         } catch (error) {
-            if (error.message === 'A budget for this category already exists') {
-                toast.error('A budget for this category already exists');
-            } else if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again');
+            setIsLoading(true)
+            if (error.message === 'Please authenticate') {
                 navigate('/login');
-            } else {
-                toast.error('Failed to create budget');
-                console.error('Error creating budget:', error);
             }
+        } finally {
+            setIsLoading(false)
         }
     };
 
     const handleDeleteBudget = async (budgetId) => {
         try {
+            setIsLoading(true)
             await BudgetService.deleteBudget(budgetId);
             window.dispatchEvent(new Event('budgetChange'));
             toast.success('Budget deleted successfully');
-            initializeBudgets();
+            await initializeBudgets();
         } catch (error) {
+            setIsLoading(true)
             if (error.message === 'Please authenticate') {
-                toast.error('Session expired. Please login again');
                 navigate('/login');
-            } else {
-                toast.error('Failed to delete budget');
-                console.error('Error deleting budget:', error);
             }
+        } finally {
+            setIsLoading(false)
         }
     };
 
     const fetchAnnualGoals = async () => {
         try {
             setIsLoading(true)
+            setIsDataLoaded(false)
             const goals = await AnnualGoalService.getAllGoals()
-            setAnnualGoals(goals || [])
+            setAnnualGoals(goals)
+            setIsDataLoaded(true)
         } catch (error) {
-            console.error('Error fetching annual goals:', error)
-            if (error.message === 'Please authenticate' || error.response?.status === 401) {
-                toast.error('Session expired. Please login again')
+            setIsLoading(true)
+            setIsDataLoaded(false)
+            if (error.message === 'Please authenticate') {
                 navigate('/login')
-            } else {
-                toast.error(error.message || 'Failed to fetch annual goals')
             }
-            setAnnualGoals([])
         } finally {
             setIsLoading(false)
         }
@@ -426,10 +422,39 @@ const MonthlyBudgets = () => {
         return Math.max(totalBudget - spent, 0);
     };
 
-    if (isLoading) {
+    if (isLoading || !isDataLoaded) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse" />
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex justify-between items-center border-b pb-2 mb-6">
+                        <div className="flex space-x-6">
+                            {[...Array(3)].map((_, idx) => (
+                                <div key={idx} className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
+                            ))}
+                        </div>
+                        <div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
+                    </div>
+
+                    <div className="space-y-4">
+                        {[...Array(5)].map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-gray-100 p-4 rounded-lg shadow-sm animate-pulse"
+                            >
+                                <div className="flex justify-between items-center mb-2">
+                                    <div className="h-4 w-1/4 bg-gray-300 rounded" />
+                                    <div className="h-4 w-1/6 bg-gray-300 rounded" />
+                                </div>
+                                <div className="h-2 w-full bg-gray-200 rounded mt-2" />
+                                <div className="h-2 w-2/3 bg-gray-200 rounded mt-1" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         )
     }

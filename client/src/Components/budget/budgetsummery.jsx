@@ -77,7 +77,6 @@ export const BudgetSummary = () => {
 
             setBudgetCategories(topBudgets);
         } catch (error) {
-            console.error('Error fetching budget summary:', error);
             toast.error('Failed to fetch budget summary');
         } finally {
             setIsLoading(false);

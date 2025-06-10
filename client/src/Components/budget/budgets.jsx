@@ -6,6 +6,7 @@ import MonthlyBudgets from './MonthlyBudgets'
 import AnnualGoals from './annualgoals'
 import SavingsGoals from './savingsgoals'
 import BudgetService from '../../services/budgetService'
+import GoalModal from '../modals/GoalModal';
 import toast from 'react-hot-toast'
 
 const Budgets = () => {
@@ -14,47 +15,107 @@ const Budgets = () => {
     const [showEditModal, setShowEditModal] = useState(false)
     const [showDetailsModal, setShowDetailsModal] = useState(false)
     const [showAddModal, setShowAddModal] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [budgets, setBudgets] = useState([])
 
+    const fetchBudgets = async () => {
+        try {
+            setLoading(true)
+            const data = await BudgetService.getAllBudgets()
+            setBudgets(data)
+        } catch (error) {
+            // Keep showing loading state on error
+            setLoading(true)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        let ignore = false;
+        let retryTimeout;
+
+        const attemptFetch = async () => {
+            if (!ignore) {
+                await fetchBudgets()
+                // Retry after 3 seconds if still loading
+                retryTimeout = setTimeout(attemptFetch, 3000)
+            }
+        }
+
+        attemptFetch()
+
+        return () => {
+            ignore = true
+            if (retryTimeout) {
+                clearTimeout(retryTimeout)
+            }
+        }
+    }, [activeSection])
 
     const handleAddBudget = async (budgetData) => {
         try {
-            await BudgetService.createBudget({
+            setLoading(true)
+            const newBudget = await BudgetService.createBudget({
                 ...budgetData,
                 type: activeSection
             })
+            setBudgets(prev => [...prev, newBudget])
             toast.success('Budget created successfully')
             setShowAddModal(false)
         } catch (error) {
-            toast.error('Failed to create budget')
-            console.error('Error creating budget:', error)
+            // Keep showing loading state on error
+            setLoading(true)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleUpdateBudget = async (updatedBudget) => {
+        try {
+            setLoading(true)
+            const updated = await BudgetService.updateBudget(updatedBudget)
+            setBudgets(prev => prev.map(budget =>
+                budget._id === updated._id ? updated : budget
+            ))
+            toast.success('Budget updated successfully')
+            setShowEditModal(false)
+            setSelectedBudget(null)
+        } catch (error) {
+            // Keep showing loading state on error
+            setLoading(true)
+        } finally {
+            setLoading(false)
         }
     }
 
     const renderActiveSection = () => {
         switch (activeSection) {
             case 'monthly':
-                return <MonthlyBudgets />
+                return <MonthlyBudgets budgets={budgets.filter(b => b.type === 'monthly')} />
             case 'annual':
-                return <AnnualGoals />
+                return <AnnualGoals budgets={budgets.filter(b => b.type === 'annual')} />
             case 'savings':
-                return <SavingsGoals />
+                return <SavingsGoals budgets={budgets.filter(b => b.type === 'savings')} />
             default:
-                return <MonthlyBudgets />
+                return <MonthlyBudgets budgets={budgets.filter(b => b.type === 'monthly')} />
         }
-    }
-
-    const handleUpdateBudget = (updatedBudget) => {
-        setShowEditModal(false)
-        setSelectedBudget(null)
     }
 
     const AddButton = () => (
         <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+                if (activeSection === 'monthly') {
+                    setShowAddModal(true);
+                } else {
+                    setIsModalOpen(true);
+                }
+            }}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors duration-200"
         >
             <PlusIcon className="w-5 h-5" />
-            <span>Add Budget</span>
+            <span>Add {activeSection === 'monthly' ? 'Budget' : 'Goal'}</span>
         </button>
     )
 
@@ -143,6 +204,17 @@ const Budgets = () => {
                     budget={selectedBudget}
                 />
             )}
+
+            <GoalModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                type={activeSection}
+                onSubmit={(goalData) => {
+                    console.log(goalData);
+                    // TODO: Implement goal creation logic
+                    setIsModalOpen(false);
+                }}
+            />
         </>
     )
 }

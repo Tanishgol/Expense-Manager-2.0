@@ -188,30 +188,38 @@ export const Transactions = () => {
         fetchTransactions();
     }, [token]);
 
-
-    if (loading) {
+    if (loading || error) {
         return (
-            <div className="flex items-center justify-center min-h-[400px] px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600 text-sm sm:text-base lg:text-lg">Loading transactions...</p>
+            <div className="space-y-8">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse" />
                 </div>
-            </div>
-        );
-    }
 
-    if (error) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px] px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <div className="text-red-600 text-xl sm:text-2xl mb-2">Error</div>
-                    <p className="text-gray-600 text-sm sm:text-base lg:text-lg">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm sm:text-base lg:text-lg"
-                    >
-                        Try Again
-                    </button>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex justify-between items-center border-b pb-2 mb-6">
+                        <div className="flex space-x-6">
+                            {[...Array(3)].map((_, idx) => (
+                                <div key={idx} className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
+                            ))}
+                        </div>
+                        <div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
+                    </div>
+
+                    <div className="space-y-4">
+                        {[...Array(5)].map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-gray-100 p-4 rounded-lg shadow-sm animate-pulse"
+                            >
+                                <div className="flex justify-between items-center mb-2">
+                                    <div className="h-4 w-1/4 bg-gray-300 rounded" />
+                                    <div className="h-4 w-1/6 bg-gray-300 rounded" />
+                                </div>
+                                <div className="h-2 w-full bg-gray-200 rounded mt-2" />
+                                <div className="h-2 w-2/3 bg-gray-200 rounded mt-1" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

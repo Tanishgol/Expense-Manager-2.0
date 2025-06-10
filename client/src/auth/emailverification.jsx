@@ -37,7 +37,6 @@ export function EmailVerification() {
             try {
                 data = await response.json();
             } catch (parseError) {
-                console.error('Error parsing response:', parseError);
                 toast.error('Invalid response from server');
                 return;
             }
@@ -55,7 +54,6 @@ export function EmailVerification() {
             toast.success('OTP sent successfully');
             navigate('/verify-otp', { state: { email } });
         } catch (error) {
-            console.error('Network or server error:', error);
             toast.error('Unable to connect to server. Please check your connection and try again.');
         } finally {
             setIsLoading(false);

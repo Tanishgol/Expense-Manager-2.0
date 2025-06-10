@@ -141,7 +141,6 @@ export function Register() {
             } else {
                 setError('An error occurred while registering. Please try again.');
             }
-            console.error('Error:', err);
         } finally {
             setLoading(false);
         }
@@ -167,7 +166,7 @@ export function Register() {
                 <Input
                     label="Full Name"
                     type="text"
-                    placeholder="Tanish gol"
+                    placeholder="User Name"
                     required
                     icon={<UserIcon className="h-5 w-5" />}
                     value={fullName}

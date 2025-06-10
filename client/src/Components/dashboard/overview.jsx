@@ -11,6 +11,7 @@ import TransactionService from '../../services/transactionService'
 
 const Overview = () => {
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [overviewData, setOverviewData] = useState({
         totalBalance: 0,
         totalIncome: 0,
@@ -60,12 +61,10 @@ const Overview = () => {
         data.totalBalance = data.totalIncome - data.totalExpenses;
         data.previousMonthBalance = data.previousMonthIncome - data.previousMonthExpenses;
 
-        // Calculate savings rate
         data.savingsRate = data.totalIncome > 0
             ? ((data.totalIncome - data.totalExpenses) / data.totalIncome) * 100
             : 0;
 
-        // Calculate previous month's savings rate
         data.previousMonthSavingsRate = data.previousMonthIncome > 0
             ? ((data.previousMonthIncome - data.previousMonthExpenses) / data.previousMonthIncome) * 100
             : 0;
@@ -92,6 +91,7 @@ const Overview = () => {
         const fetchTransactions = async () => {
             try {
                 setLoading(true);
+                setError(null);
                 const data = await TransactionService.getAllTransactions();
                 if (!ignore) {
                     const uniqueTransactions = Array.from(new Map(data.map(tx => [tx._id, tx])).values());
@@ -100,7 +100,7 @@ const Overview = () => {
                 }
             } catch (error) {
                 if (!ignore) {
-                    console.error('Error fetching transactions:', error);
+                    setError(error);
                     toast.error('Failed to fetch transactions');
                     setTransactions([]);
                 }
@@ -116,16 +116,47 @@ const Overview = () => {
         };
     }, [token, navigate]);
 
-    if (loading) {
+    if (loading || error) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(3)].map((_, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow p-6 animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                        <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            <div className="space-y-6">
+                <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, index) => (
+                        <div key={index} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                            <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-lg shadow-sm p-6 lg:col-span-2 animate-pulse">
+                        <div className="h-5 bg-gray-200 rounded w-1/3 mb-4"></div>
+                        <div className="h-64 bg-gray-200 rounded"></div>
                     </div>
-                ))}
+                    <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                        <div className="h-5 bg-gray-200 rounded w-1/2 mb-4"></div>
+                        <div className="space-y-2">
+                            {[...Array(11)].map((_, i) => (
+                                <div key={i} className="h-4 bg-gray-200 rounded w-full"></div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                    <div className="flex justify-between items-center mb-4">
+                        <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </div>
+                    <div className="space-y-4">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-4 bg-gray-200 rounded w-full"></div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }

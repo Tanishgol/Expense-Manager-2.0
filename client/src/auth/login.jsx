@@ -51,7 +51,6 @@ const Login = () => {
                 }
             }
         } catch (err) {
-            console.error(err);
             toast.error('Something went wrong. Please check your network or try again later.');
         }
     };
