@@ -48,34 +48,39 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
 
     if (isMobile) {
         return (
-            <div className={`p-4 rounded-lg border ${isIncome ? 'bg-green-50/50' : 'bg-white'}`}>
+            <div
+                className={`p-4 rounded-lg border 
+    ${isIncome
+                        ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700'
+                        : 'bg-dark dark:bg-dark-card border-gray-200 dark:border-gray-700'}`}
+            >
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
                         {getCategoryIcon(category)}
-                        <span className="font-medium text-gray-800">{title}</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-300">{title}</span>
                     </div>
-                    <span className={`font-medium ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`font-medium ${isIncome ? 'text-green-600 dark:text-lime-500' : 'text-red-600 dark:text-red-500'}`}>
                         {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
                     </span>
                 </div>
-                <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
+                <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300 mb-2">
                     <span className={`px-2 py-1 rounded-full ${category === 'Income'
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                         : category === 'Other'
-                            ? 'bg-gray-100 text-gray-700'
-                            : 'bg-blue-100 text-blue-700'
+                            ? 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                         }`}>
                         {category}
                     </span>
                     <span>{format(new Date(date), 'MMM dd, yyyy')}</span>
                 </div>
                 {description && (
-                    <p className="text-sm text-gray-600 mb-2">{description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{description}</p>
                 )}
                 <div className="flex justify-center gap-4 mt-4">
                     <button
                         onClick={() => onEdit(transaction)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 text-white hover:bg-indigo-100 rounded transition"
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 text-white hover:bg-indigo-100 rounded transition dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
                     >
                         <Edit size={16} />
                         <span>Edit</span>
@@ -83,7 +88,7 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
 
                     <button
                         onClick={() => onDelete(transaction._id)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-red-800 text-yellow-200 hover:bg-red-100 rounded transition"
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-red-800 text-yellow-200 hover:bg-red-100 rounded transition dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
                     >
                         <Trash2 size={16} />
                         <span>Delete</span>
@@ -94,33 +99,37 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
     }
 
     return (
-        <tr className={`border-b hover:bg-gray-50 ${isIncome ? 'bg-green-50/50' : ''}`}>
+        <tr
+            className={`border-b 
+              ${isIncome ? 'bg-green-50 dark:bg-green-900/30' : 'bg-dark dark:bg-dark'} 
+              hover:bg-gray-50 dark:hover:bg-gray-700`}
+        >
             <td className="py-4">
                 <div className="flex items-center gap-2">
                     {getCategoryIcon(category)}
-                    <span className="font-medium text-gray-800">{title}</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-300">{title}</span>
                 </div>
             </td>
             <td className="py-4">
-                <span className="text-gray-600">{description || 'NA'}</span>
+                <span className="text-gray-600 dark:text-gray-300">{description || 'NA'}</span>
             </td>
             <td className="py-4">
                 <span className={`px-2 py-1 text-sm rounded-full ${category === 'Income'
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                     : category === 'Other'
-                        ? 'bg-gray-100 text-gray-700'
-                        : 'bg-blue-100 text-blue-700'
+                        ? 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                     }`}>
                     {category}
                 </span>
             </td>
-            <td className="py-4 text-gray-600">
+            <td className="py-4 text-gray-600 dark:text-gray-300">
                 {format(new Date(date), 'MMM dd, yyyy')}
             </td>
             <td className="py-4 text-right">
                 <span className={`font-medium ${isIncome
-                    ? 'text-green-600 bg-green-50 px-2 py-1 rounded'
-                    : 'text-red-600'
+                    ? 'text-green-600 bg-green-50 px-2 py-1 rounded dark:bg-green-900 dark:text-green-300'
+                    : 'text-red-600 dark:text-red-500'
                     }`}>
                     {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
                 </span>
@@ -129,13 +138,13 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                 <div className="inline-flex justify-center items-center gap-2">
                     <button
                         onClick={() => onEdit(transaction)}
-                        className="p-1  bg-gray-800 text-white rounded transition-colors"
+                        className="p-1  bg-gray-800 text-white rounded transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
                     >
                         <Edit size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(transaction._id)}
-                        className="p-1  bg-red-800 text-yellow-200 rounded transition-colors"
+                        className="p-1 bg-red-800 text-yellow-200 rounded transition-colors dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
                     >
                         <Trash2 size={16} />
                     </button>

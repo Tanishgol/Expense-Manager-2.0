@@ -107,7 +107,7 @@ export const BudgetSummary = () => {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                     </div>
                 ) : budgetCategories.length === 0 ? (
-                    <p className="text-gray-500 text-center">No budget data available</p>
+                    <p className="text-gray-500 dark:text-gray-300 text-center">No budget data available</p>
                 ) : (
                     <>
                         {budgetCategories.map((budget) => (

@@ -147,7 +147,7 @@ const BalanceChart = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
         </div>
     ) : (
-        <div className="h-72">
+        <div className="h-72 bg-white dark:bg-dark-card">   
             <canvas ref={chartRef}></canvas>
         </div>
     );

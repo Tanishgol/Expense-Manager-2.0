@@ -429,7 +429,7 @@ const MonthlyBudgets = () => {
                     <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse" />
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                     <div className="flex justify-between items-center border-b pb-2 mb-6">
                         <div className="flex space-x-6">
                             {[...Array(3)].map((_, idx) => (
@@ -443,7 +443,7 @@ const MonthlyBudgets = () => {
                         {[...Array(5)].map((_, idx) => (
                             <div
                                 key={idx}
-                                className="bg-gray-100 p-4 rounded-lg shadow-sm animate-pulse"
+                                className="bg-gray-100 dark:bg-dark-card p-4 rounded-lg shadow-sm animate-pulse"
                             >
                                 <div className="flex justify-between items-center mb-2">
                                     <div className="h-4 w-1/4 bg-gray-300 rounded" />
@@ -462,17 +462,17 @@ const MonthlyBudgets = () => {
     const progressHighlights = getProgressHighlights()
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 dark:bg-dark-card">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div>
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <h2 className="text-xl font-semibold text-gray-800">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                             Monthly Goals Overview
                         </h2>
 
                         {monthlyIncome > 0 ? (
                             <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded transition duration-200"
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-2 rounded transition duration-200"
                                 onClick={() => {
                                     setIsEditingTotal(true);
                                     setIsTargetModalOpen(true);
@@ -481,35 +481,44 @@ const MonthlyBudgets = () => {
                                 {totalBudget > 0 ? 'Edit Total Budget' : 'Set Total Budget'}
                             </button>
                         ) : (
-                            <div className="text-sm text-red-600">
+                            <div className="text-sm text-red-600 dark:text-red-400">
                                 No income recorded for this month
                             </div>
                         )}
                     </div>
 
-
-                    <div className="bg-gray-50 p-5 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg shadow-sm">
                         {monthlyIncome > 0 ? (
                             <>
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Total Income</span>
-                                    <span className="font-semibold">${monthlyIncome.toFixed(2)}</span>
+                                    <span className="text-gray-600 dark:text-gray-300">Total Income</span>
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                        ${monthlyIncome.toFixed(2)}
+                                    </span>
                                 </div>
+
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Total Target Budget of Spending</span>
-                                    <span className="font-semibold text-green-600">
+                                    <span className="text-gray-600 dark:text-gray-300">Total Target Budget of Spending</span>
+                                    <span className="font-semibold text-green-600 dark:text-green-400">
                                         ${Math.min(totalBudget, monthlyIncome).toFixed(2)}
                                     </span>
                                 </div>
+
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Remaining Budget</span>
-                                    <span className="font-semibold">${calculateRemainingBudget().toFixed(2)}</span>
+                                    <span className="text-gray-600 dark:text-gray-300">Remaining Budget</span>
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                        ${calculateRemainingBudget().toFixed(2)}
+                                    </span>
                                 </div>
+
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Total Spent</span>
-                                    <span className="font-semibold">${calculateTotalSpent().toFixed(2)}</span>
+                                    <span className="text-gray-600 dark:text-gray-300">Total Spent</span>
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                        ${calculateTotalSpent().toFixed(2)}
+                                    </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
                                     <div
                                         className={`h-2 rounded-full ${calculateProgressPercentage() > 100 ? 'bg-red-600' : 'bg-indigo-600'}`}
                                         style={{
@@ -519,40 +528,45 @@ const MonthlyBudgets = () => {
                                         }}
                                     ></div>
                                 </div>
+
                                 <div className="flex justify-between items-center mt-1">
-                                    <span className="text-xs text-gray-500">0%</span>
-                                    <span className="text-xs text-gray-500">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">0%</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
                                         {totalBudget > 0
                                             ? (calculateProgressPercentage() > 100
                                                 ? `${Math.round(calculateProgressPercentage())}% (Over Budget)`
                                                 : `${Math.round(calculateProgressPercentage())}% spent`)
                                             : `${Math.round((calculateTotalSpent() / monthlyIncome) * 100)}% spent`}
                                     </span>
-                                    <span className="text-xs text-gray-500">100%</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">100%</span>
                                 </div>
                             </>
                         ) : (
                             <div className="text-center py-4">
-                                <p className="text-gray-600 mb-2">No income recorded for this month</p>
-                                <p className="text-sm text-gray-500">Add income transactions to set your monthly budget</p>
+                                <p className="text-gray-600 dark:text-gray-300 mb-2">
+                                    No income recorded for this month
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Add income transactions to set your monthly budget
+                                </p>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div>
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">
                             Monthly Insights
                         </h2>
                         <button
                             onClick={() => setShowMessageModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded transition duration-200"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-2 rounded transition duration-200"
                         >
                             View all messages
                         </button>
                     </div>
-                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-5">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg shadow-sm">
                         <h3 className="font-medium text-blue-800 mb-3">
                             Progress Highlights
                         </h3>
@@ -586,30 +600,35 @@ const MonthlyBudgets = () => {
             {hasSetTotalBudget && monthlyIncome > 0 ? (
                 <div className="mt-10">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">
                             Monthly Budget Categories
                         </h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {budgetCategories.map((budget) => (
-                            <div key={budget._id} className="bg-gray-50 p-4 rounded-lg">
+                            <div
+                                key={budget._id}
+                                className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+                            >
                                 <CategoryBudget budget={budget} />
+
                                 <div className="mt-4 flex justify-end">
                                     <button
                                         onClick={() => {
                                             setSelectedBudget(budget);
                                             setShowEditModal(true);
                                         }}
-                                        className="text-xs text-indigo-600 hover:text-indigo-800 mr-3"
+                                        className="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3"
                                     >
                                         Edit
                                     </button>
+
                                     <button
                                         onClick={() => {
                                             setSelectedBudget(budget);
                                             setShowDetailsModal(true);
                                         }}
-                                        className="text-xs text-gray-500 hover:text-gray-700"
+                                        className="text-xs text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                                     >
                                         View Details
                                     </button>
@@ -619,23 +638,23 @@ const MonthlyBudgets = () => {
                     </div>
                 </div>
             ) : monthlyIncome > 0 ? (
-                <div className="mt-10 text-center p-8 bg-gray-50 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Set Your Monthly Budget First</h3>
-                    <p className="text-gray-600 mb-4">Please set your total monthly budget before managing individual categories.</p>
+                <div className="mt-10 text-center p-8 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-300 mb-2">Set Your Monthly Budget First</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">Please set your total monthly budget before managing individual categories.</p>
                     <button
                         onClick={() => {
                             setIsEditingTotal(false);
                             setIsTargetModalOpen(true);
                         }}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:text-gray-100"
                     >
                         Set Monthly Budget
                     </button>
                 </div>
             ) : (
-                <div className="mt-10 text-center p-8 bg-gray-50 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Income Recorded</h3>
-                    <p className="text-gray-600 mb-4">Please add income transactions for this month before setting up your budget.</p>
+                <div className="mt-10 text-center p-8 bg-gray-50 dark:bg-dark-card rounded-lg shadow-sm">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-300 mb-2">No Income Recorded</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">Please add income transactions for this month before setting up your budget.</p>
                 </div>
             )}
 

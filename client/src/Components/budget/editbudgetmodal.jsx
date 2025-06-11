@@ -87,12 +87,12 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Monthly Budget Limit
                     </label>
                     <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <span className="text-gray-500 sm:text-sm">$</span>
+                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
                         </div>
                         <input
                             type="number"
@@ -101,14 +101,16 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                             required
                             value={formData.limit}
                             onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
-                            className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1
-                                ${error
-                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
-                                } 
-                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                             disabled={loading}
+                            className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1
+        ${error
+                                    ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400'
+                                }
+        bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                         />
+
                     </div>
                     {error && (
                         <div className="mt-2 text-sm text-red-600">
@@ -118,27 +120,27 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                 </div>
 
                 {budget?.spent !== undefined && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Current Spending</span>
-                            <span className="font-medium">${budget.spent.toFixed(2)}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Current Spending</span>
+                            <span className="font-medium text-gray-600 dark:text-gray-300">${budget.spent.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Remaining</span>
-                            <span className="font-medium text-green-600">
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Remaining</span>
+                            <span className="font-medium text-green-600 dark:text-lime-500">
                                 ${(parseFloat(formData.limit) - (budget.spent || 0)).toFixed(2)}
                             </span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Total Budget</span>
-                            <span className="font-medium text-blue-600">
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Total Budget</span>
+                            <span className="font-medium text-blue-600 dark:text-cyan-500">
                                 ${(totalBudget ?? 0).toFixed(2)}
                             </span>
 
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Remaining Budget</span>
-                            <span className="font-medium text-red-600">${(totalBudget - currentTotal).toFixed(2)}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Remaining Budget</span>
+                            <span className="font-medium text-red-600 dark:text-red-500">${(totalBudget - currentTotal).toFixed(2)}</span>
                         </div>
                     </div>
                 )}
@@ -158,7 +160,7 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                     <button
                         type="button"
                         disabled={loading}
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto dark:bg-dark-card dark:text-gray-100 dark:hover:bg-gray-700 dark:ring-gray-600 dark:hover:ring-gray-600"
                         onClick={onClose}
                     >
                         Cancel

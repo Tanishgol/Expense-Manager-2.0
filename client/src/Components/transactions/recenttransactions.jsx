@@ -101,7 +101,7 @@ export const RecentTransactions = () => {
             <div className="flex items-center justify-center min-h-[200px]">
                 <div className="text-center">
                     <div className="text-red-600 text-sm mb-2">Error</div>
-                    <p className="text-gray-600 text-sm">{error}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">{error}</p>
                     <button
                         onClick={fetchTransactions}
                         className="mt-2 px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -117,7 +117,7 @@ export const RecentTransactions = () => {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
                 <div className="text-center">
-                    <p className="text-gray-600">No recent transactions found</p>
+                    <p className="text-gray-600 dark:text-gray-300">No recent transactions found</p>
                 </div>
             </div>
         );
@@ -126,9 +126,9 @@ export const RecentTransactions = () => {
     return (
         <div className="w-full">
             <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full text-sm text-gray-700">
+                <table className="w-full text-sm text-gray-700 dark:text-gray-300">
                     <thead>
-                        <tr className="text-left text-gray-500 border-b">
+                        <tr className="text-left text-gray-500 dark:text-gray-300 border-b">
                             <th className="pb-3 font-medium">Title</th>
                             <th className="pb-3 font-medium">Description</th>
                             <th className="pb-3 font-medium">Category</th>

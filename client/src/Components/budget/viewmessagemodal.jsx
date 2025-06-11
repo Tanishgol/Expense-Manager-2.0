@@ -33,20 +33,20 @@ const ViewMessageModal = ({ isOpen, onClose, messages }) => {
             <div className="space-y-6">
                 {Object.entries(groupedMessages).map(([type, typeMessages]) => (
                     <div key={type} className="space-y-3">
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-300">
                             {getTypeTitle(type)}
                         </h3>
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
                             <ul className="space-y-2">
                                 {typeMessages.map((message, index) => (
                                     <li key={index} className="flex items-start">
-                                        <span className="mr-2">•</span>
+                                        <span className="mr-2 text-gray-600 dark:text-gray-400">•</span>
                                         <span
                                             className={`font-semibold ${message.status === 'critical'
-                                                ? 'text-red-600'
-                                                : message.status === 'warning'
-                                                    ? 'text-orange-600'
-                                                    : 'text-blue-700'
+                                                    ? 'text-red-700 dark:text-red-400'
+                                                    : message.status === 'warning'
+                                                        ? 'text-yellow-700 dark:text-yellow-400'
+                                                        : 'text-blue-700 dark:text-cyan-300'
                                                 }`}
                                         >
                                             {message.message}

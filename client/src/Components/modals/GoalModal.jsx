@@ -38,7 +38,7 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
             Goal Name
           </label>
           <input
@@ -47,13 +47,13 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
             Description
           </label>
           <textarea
@@ -62,13 +62,13 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               Start Date
             </label>
             <input
@@ -77,13 +77,13 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
               name="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               End Date
             </label>
             <input
@@ -92,14 +92,14 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
               name="endDate"
               value={formData.endDate}
               onChange={handleChange}
-              className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
               required
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="targetAmount" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="targetAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
             Target Amount ($)
           </label>
           <input
@@ -108,7 +108,7 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="targetAmount"
             value={formData.targetAmount}
             onChange={handleChange}
-            className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
             required
             min="0"
             step="0.01"
@@ -116,7 +116,7 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
         </div>
 
         <div>
-          <label htmlFor="monthlyContribution" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="monthlyContribution" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
             Monthly Contribution ($)
           </label>
           <input
@@ -125,7 +125,7 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="monthlyContribution"
             value={formData.monthlyContribution}
             onChange={handleChange}
-            className="w-full pl-2 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
             required
             min="0"
             step="0.01"
@@ -136,13 +136,13 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-card border border-gray-300 dark:border-dark-border rounded-md hover:bg-gray-50 dark:hover:bg-dark-border focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-primary-light"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 dark:bg-primary-light border border-transparent rounded-md hover:bg-indigo-700 dark:hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-primary-light"
           >
             Create Goal
           </button>

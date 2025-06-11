@@ -270,7 +270,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Title
                     </label>
                     <input
@@ -283,20 +283,20 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                                 title: e.target.value,
                             })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100"
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Category
                         </label>
                         <select
                             value={formData.category}
                             onChange={(e) => handleCategoryChange(e.target.value)}
                             disabled={formData.type === 'income'}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 ${formData.type === 'income' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                         >
                             {formData.type === 'income' ? (
                                 <option value="Income">Income</option>
@@ -312,7 +312,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             )}
                         </select>
                         {formData.type === 'income' && (
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300 ">
                                 Category is locked to Income for Income type
                             </p>
                         )}
@@ -323,23 +323,23 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         )}
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Type
                         </label>
                         <select
                             value={formData.type}
                             onChange={(e) => handleTypeChange(e.target.value)}
                             disabled={formData.category === 'Income'}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${formData.type === 'income'
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 ${formData.type === 'income'
                                 ? 'border-green-300 bg-green-50'
                                 : 'border-gray-300'
-                                } ${formData.category === 'Income' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                } ${formData.category === 'Income' ? 'bg-gray-100 cursor-not-allowed' : ''} dark:bg-dark-card dark:text-gray-100`}
                         >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                         </select>
                         {formData.category === 'Income' && (
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
                                 Type is locked to Income for Income category
                             </p>
                         )}
@@ -347,7 +347,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Amount
                     </label>
                     <div className="relative">
@@ -357,15 +357,16 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             required
                             min="0"
                             step="0.01"
+                            placeholder='0.00'
                             value={formData.amount}
                             onChange={(e) => handleAmountChange(e.target.value)}
-                            className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Date
                     </label>
                     <input
@@ -378,12 +379,12 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                                 date: e.target.value,
                             })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 dark:[color-scheme:dark]"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Description (Optional)
                     </label>
                     <textarea
@@ -396,30 +397,28 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                         }
                         rows={3}
                         autoCorrect='on'
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100"
                     />
                 </div>
 
                 {budgetInfo && formData.type === 'expense' && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Budget Limit</span>
-                            <span className="font-medium">${budgetInfo.limit.toFixed(2)}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Budget Limit</span>
+                            <span className="font-medium text-black dark:text-gray-300">${budgetInfo.limit.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Spent</span>
-                            <span className="font-medium">${budgetInfo.spent.toFixed(2)}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Spent</span>
+                            <span className="font-medium text-black dark:text-gray-300">${budgetInfo.spent.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Remaining</span>
-                            <span className={`font-medium ${budgetInfo.remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                {/* remaining means the amount of money left in the budget */}
-                                {/* remaining = budget limit - spent */}
-                                ${budgetInfo.limit - budgetInfo.spent}
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Remaining</span>
+                            <span className={`font-medium ${budgetInfo.remaining < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-lime-500'}`}>
+                                <span className="text-black dark:text-green-600">${budgetInfo.limit - budgetInfo.spent}</span>
                             </span>
                         </div>
                         {showBudgetWarning && (
-                            <div className="mt-2 flex items-center text-red-600 text-sm">
+                            <div className="mt-2 flex items-center text-red-600 dark:text-red-500 text-sm">
                                 <AlertCircle size={16} className="mr-1" />
                                 <span>This transaction exceeds your budget limit</span>
                             </div>
@@ -441,7 +440,7 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                     <button
                         type="button"
                         disabled={isSubmitting}
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto dark:bg-dark-card dark:text-gray-100 dark:hover:bg-gray-700 dark:ring-gray-600 dark:hover:ring-gray-600"
                         onClick={onClose}
                     >
                         Cancel

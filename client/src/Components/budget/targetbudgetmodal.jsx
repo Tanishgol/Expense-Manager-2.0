@@ -124,23 +124,23 @@ export const TargetBudgetModal = ({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Monthly Budget Target" : "Set Monthly Budget Target"}>
             <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm text-gray-600">Monthly Income:</span>
-                        <span className="font-medium">${monthlyIncome.toLocaleString()}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Monthly Income:</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-300">${monthlyIncome.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Available to Budget:</span>
-                        <span className="font-medium text-green-600">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Available to Budget:</span>
+                        <span className="font-medium text-green-600 dark:text-lime-500">
                             ${(monthlyIncome - parseFloat(newTarget || '0')).toLocaleString()}
                         </span>
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Budget Target</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Budget Target</label>
                     <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <span className="text-gray-500 sm:text-sm">$</span>
+                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
                         </div>
                         <input
                             type="number"
@@ -151,12 +151,12 @@ export const TargetBudgetModal = ({
                                     handleSubmit();
                                 }
                             }}
-                            className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1
-                                ${error
-                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
-                                } 
-                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                            className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        ${error
+                                    ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400'
+                                }
+        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                             placeholder="0.00"
                             disabled={loading}
                         />
@@ -169,15 +169,15 @@ export const TargetBudgetModal = ({
                     )}
                 </div>
                 <div className="space-y-2">
-                    <div className="flex justify-between text-sm text-gray-600">
+                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                         <span>Budget Usage</span>
                         <span>
                             {Math.round((parseFloat(newTarget || '0') / monthlyIncome) * 100)}%
                         </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
-                            className={`h-2 rounded-full transition-all ${error ? 'bg-red-500' : 'bg-indigo-600'}`}
+                            className={`h-2 rounded-full transition-all ${error ? 'bg-red-500 dark:bg-red-500' : 'bg-indigo-600 dark:bg-indigo-600'}`}
                             style={{
                                 width: `${Math.min(
                                     (parseFloat(newTarget || '0') / monthlyIncome) * 100,

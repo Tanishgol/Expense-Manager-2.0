@@ -199,27 +199,27 @@ const Overview = () => {
                 />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow-sm p-6 lg:col-span-2">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 lg:col-span-2">   
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300 mb-4">
                         Monthly Balance
                     </h2>
                     <BalanceChart />
                 </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300 mb-4">
                         Budget Summary
                     </h2>
                     <BudgetSummary />
                 </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">
                         Recent Transactions
                     </h2>
                     <button
                         onClick={() => navigate('/transactions')}
-                        className="text-sm text-indigo-600 hover:text-indigo-800"
+                        className="text-sm text-indigo-600 font-medium hover:text-indigo-800 dark:text-indigo-600 dark:hover:text-indigo-800"
                     >
                         View All
                     </button>

@@ -206,7 +206,7 @@ export const Transactions = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {[...Array(5)].map((_, idx) => (
+                        {[...Array(7)].map((_, idx) => (
                             <div
                                 key={idx}
                                 className="bg-gray-100 p-4 rounded-lg shadow-sm animate-pulse"
@@ -226,35 +226,35 @@ export const Transactions = () => {
     }
 
     return (
-        <div className="space-y-6 md:mt-10">
+        <div className="space-y-6 mt-14">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-300">Transactions</h1>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                     <div className="relative w-full md:w-auto">
-                        <SearchIcon size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                        <SearchIcon size={18} className="absolute left-3 top-2.5 text-gray-400 dark:text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search transactions..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2 w-full md:w-[300px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="pl-10 pr-4 py-2 w-full md:w-[300px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100"
                         />
                     </div>
                     <div className="w-full flex flex-col xs:flex-row xs:items-center xs:justify-center xs:gap-3 gap-2">
                         <div className="flex gap-2 justify-center">
                             <button
                                 onClick={() => setShowFilter(!showFilter)}
-                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition dark:bg-dark-card dark:text-gray-100"
                             >
-                                <FilterIcon size={18} className="text-gray-600" />
+                                <FilterIcon size={18} className="text-gray-600 dark:text-gray-400" />
                             </button>
 
                             <button
                                 onClick={handleDownload}
-                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                                className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition dark:bg-dark-card dark:text-gray-100"
                             >
-                                <DownloadIcon size={18} className="text-gray-600" />
+                                <DownloadIcon size={18} className="text-gray-600 dark:text-gray-400" />
                             </button>
                         </div>
 
@@ -263,7 +263,7 @@ export const Transactions = () => {
                                 setEditingTransaction(null);
                                 setIsModalOpen(true);
                             }}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center shadow-sm transition w-full xs:w-auto"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm flex items-center justify-center shadow-sm transition w-full xs:w-auto dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:text-gray-100"
                         >
                             <PlusIcon size={18} className="mr-1" />
                             <span>Add Transaction</span>
@@ -273,16 +273,16 @@ export const Transactions = () => {
             </div>
 
             {showFilter && (
-                <div className="bg-white p-4 rounded-lg shadow">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Category</h3>
+                <div className="bg-white dark:bg-dark-card p-4 rounded-lg shadow">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filter by Category</h3>
                     <div className="flex flex-wrap gap-2">
                         {categories.map(category => (
                             <button
                                 key={category}
                                 onClick={() => toggleCategory(category)}
                                 className={`px-3 py-1 rounded-full text-sm ${selectedCategories.includes(category)
-                                    ? 'bg-indigo-100 text-indigo-800'
-                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100'
+                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 {category}
@@ -292,11 +292,11 @@ export const Transactions = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow p-4 md:p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow p-4 md:p-6">
                 <div className="hidden lg:block overflow-x-auto">
-                    <table className="w-full table-auto text-sm text-gray-700">
+                    <table className="w-full table-auto text-sm text-gray-700 dark:text-gray-300">
                         <thead>
-                            <tr className="border-b text-left text-gray-500">
+                            <tr className="border-b text-left text-gray-500 dark:text-gray-300">
                                 <th className="pb-3 font-medium">Title</th>
                                 <th className="pb-3 font-medium">Description</th>
                                 <th className="pb-3 font-medium">Category</th>
@@ -318,7 +318,7 @@ export const Transactions = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-8 text-gray-500">
+                                    <td colSpan="6" className="text-center py-8 text-gray-500 dark:text-gray-300">
                                         No transactions found
                                     </td>
                                 </tr>
@@ -339,7 +339,7 @@ export const Transactions = () => {
                             />
                         ))
                     ) : (
-                        <div className="text-center py-8 text-gray-500">
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-300">
                             No transactions found
                         </div>
                     )}
