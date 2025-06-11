@@ -121,9 +121,9 @@ const Budgets = () => {
 
     return (
         <>
-            <div className="space-y-8 mt-14">
+            <div className="space-y-6 mt-14">
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-300">Budget Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Budget Management</h1>
                 </div>
 
                 <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">

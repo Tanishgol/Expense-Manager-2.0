@@ -65,29 +65,33 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
             title={`${budget.category} Budget Details`}
         >
             <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                {/* Budget Summary */}
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">Monthly Limit</span>
-                        <span className="font-medium">${limit.toFixed(2)}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Monthly Limit</span>
+                        <span className="font-medium text-black dark:text-white">${limit.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">Spent</span>
-                        <span className="font-medium">${spent.toFixed(2)}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Spent</span>
+                        <span className="font-medium text-black dark:text-white">${spent.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Remaining</span>
-                        <span className={`font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Remaining</span>
+                        <span
+                            className={`font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                             ${remaining.toFixed(2)}
                         </span>
                     </div>
                 </div>
 
+                {/* Progress Bar */}
                 <div className="mt-4">
                     <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-gray-600">Progress</span>
-                        <span className="text-sm text-gray-600">{percentage.toFixed(1)}%</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Progress</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{percentage.toFixed(1)}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
                             className={`h-2 rounded-full ${percentage >= 100 ? 'bg-red-500' :
                                 percentage >= 80 ? 'bg-orange-500' :
@@ -101,13 +105,19 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                     </div>
                 </div>
 
+                {/* Status Message */}
                 <div className="mt-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Status</h3>
-                    <div className={`p-3 rounded-lg ${limit === 0 ? 'bg-blue-50 text-blue-700' :
-                        percentage >= 100 ? 'bg-red-50 text-red-700' :
-                            percentage >= 80 ? 'bg-yellow-50 text-yellow-700' :
-                                'bg-green-50 text-green-700'
-                        }`}>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Status</h3>
+                    <div
+                        className={`p-3 rounded-lg ${limit === 0
+                                ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                                : percentage >= 100
+                                    ? 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
+                                    : percentage >= 80
+                                        ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
+                                        : 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300'
+                            }`}
+                    >
                         {limit === 0 ? (
                             <p>Please set your budget limit first to start tracking your expenses.</p>
                         ) : percentage >= 100 ? (
@@ -120,27 +130,40 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                     </div>
                 </div>
 
+                {/* Recent Transactions */}
                 <div className="mt-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Recent Transactions - {format(new Date(), 'MMMM yyyy')}</h3>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                        Recent Transactions - {format(new Date(), 'MMMM yyyy')}
+                    </h3>
                     {recentTransactions.length > 0 ? (
                         <div className="space-y-2">
                             {recentTransactions.map((transaction) => (
-                                <div key={transaction._id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                                <div
+                                    key={transaction._id}
+                                    className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                >
                                     <div>
-                                        <p className="text-sm font-medium text-gray-800">{transaction.title}</p>
-                                        <p className="text-xs text-gray-500">{format(new Date(transaction.date), 'MMM dd, yyyy')}</p>
+                                        <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                            {transaction.title}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                                        </p>
                                     </div>
-                                    <span className="text-sm font-medium text-red-600">
+                                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
                                         ${Math.abs(transaction.amount).toFixed(2)}
                                     </span>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-500">No recent transactions in this category.</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            No recent transactions in this category.
+                        </p>
                     )}
                 </div>
             </div>
+
         </Modal>
     );
 };

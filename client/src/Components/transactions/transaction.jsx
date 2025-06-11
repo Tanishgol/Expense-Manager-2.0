@@ -228,7 +228,7 @@ export const Transactions = () => {
     return (
         <div className="space-y-6 mt-14">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-300">Transactions</h1>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Transactions</h1>
 
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                     <div className="relative w-full md:w-auto">

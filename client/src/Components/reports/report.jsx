@@ -304,7 +304,7 @@ export const Report = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-14">
             <div className="flex justify-between items-center xs:mt-14 xss:mt-14 xsss:mt-14">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Financial Reports</h1>
 
@@ -360,8 +360,8 @@ export const Report = () => {
                                     key={range}
                                     onClick={() => setDateRange(range)}
                                     className={`px-3 py-1 text-sm transition-colors duration-150 ${dateRange === range
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
                                 >
                                     {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -414,8 +414,8 @@ export const Report = () => {
                                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Net Savings</p>
                                     <p
                                         className={`text-xl font-semibold ${summary.netSavings >= 0
-                                                ? 'text-green-600 dark:text-green-400'
-                                                : 'text-red-600 dark:text-red-400'
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : 'text-red-600 dark:text-red-400'
                                             }`}
                                     >
                                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(summary.netSavings)}

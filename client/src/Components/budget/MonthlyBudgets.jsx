@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 import AnnualGoalService from '../../services/annualGoalService'
 import { TargetBudgetModal } from './targetbudgetmodal.jsx'
 import ViewMessageModal from './viewmessagemodal'
+import { Eye, SquarePen } from 'lucide-react';
 
 const MonthlyBudgets = () => {
     const navigate = useNavigate()
@@ -612,14 +613,15 @@ const MonthlyBudgets = () => {
                             >
                                 <CategoryBudget budget={budget} />
 
-                                <div className="mt-4 flex justify-end">
+                                <div className="mt-4 flex justify-end space-x-3">
                                     <button
                                         onClick={() => {
                                             setSelectedBudget(budget);
                                             setShowEditModal(true);
                                         }}
-                                        className="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3"
+                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
                                     >
+                                        <SquarePen className="w-4 h-4" />
                                         Edit
                                     </button>
 
@@ -628,11 +630,13 @@ const MonthlyBudgets = () => {
                                             setSelectedBudget(budget);
                                             setShowDetailsModal(true);
                                         }}
-                                        className="text-xs text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                                     >
+                                        <Eye className="w-4 h-4" />
                                         View Details
                                     </button>
                                 </div>
+
                             </div>
                         ))}
                     </div>

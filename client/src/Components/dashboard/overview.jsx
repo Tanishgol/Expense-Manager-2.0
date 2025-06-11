@@ -162,8 +162,8 @@ const Overview = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
+        <div className="space-y-6 mt-14">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Dashboard Overview</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <OverviewCard
                     title="Total Balance"
@@ -199,7 +199,7 @@ const Overview = () => {
                 />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 lg:col-span-2">   
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 lg:col-span-2">
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300 mb-4">
                         Monthly Balance
                     </h2>
