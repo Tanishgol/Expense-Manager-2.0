@@ -69,10 +69,9 @@ export function EmailVerification() {
                     <div className="mb-4">
                         <img src={emailverification} alt="Icon of emailverification" width={150} />
                     </div>
-                    <h2 className="mb-2 text-2xl font-bold">Secure Recovery</h2>
+                    <h2 className="mb-2 text-2xl font-bold text-white">Email Verification</h2>
                     <p className="text-center text-emerald-50">
-                        We'll help you reset your password safely and get back to managing
-                        your finances quickly.
+                        We'll send a verification code to your email address to ensure it's you.
                     </p>
                 </div>
             }
@@ -87,21 +86,22 @@ export function EmailVerification() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
+                    className="block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 dark:bg-dark-card"
                 />
                 <Button 
                     type="submit" 
                     fullWidth 
-                    className="flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600"
                     disabled={isLoading}
                 >
                     <MessageCircle className="h-5 w-5" />
-                    <span>{isLoading ? 'Verifying...' : 'Send OTP'}</span>
+                    <span>{isLoading ? 'Sending...' : 'Send Verification Code'}</span>
                 </Button>
-                <div className="text-center text-sm">
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                     Remember your password?{' '}
                     <Link
                         to="/login"
-                        className="font-medium text-emerald-600 hover:text-emerald-700"
+                        className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                     >
                         Back to login
                     </Link>

@@ -100,7 +100,7 @@ const ResetPassword = () => {
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
         setConfirmPassword(value);
-        setPasswordsMatch(password === value);
+        setPasswordsMatch(value === password);
     };
 
     useEffect(() => {
@@ -196,9 +196,9 @@ const ResetPassword = () => {
                     <div className="mb-4">
                         <img src={resetPasswordImage} alt="Reset Password" width={150} />
                     </div>
-                    <h2 className="mb-2 text-2xl font-bold">Secure Reset</h2>
+                    <h2 className="mb-2 text-2xl font-bold text-white">Secure Your Account</h2>
                     <p className="text-center text-emerald-50">
-                        Choose a strong password to keep your account secure.
+                        Choose a strong password to protect your account and keep your data safe.
                     </p>
                 </div>
             }
@@ -206,23 +206,27 @@ const ResetPassword = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                        <div className="relative">
+                        <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            New Password
+                        </label>
+                        <div className="relative mt-1">
                             <input
+                                id="password"
+                                name="password"
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder="••••••••"
+                                autoComplete="new-password"
                                 required
                                 value={password}
                                 onChange={handlePasswordChange}
-                                className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:outline-none ${passwordStrength >= 3 ? 'border-emerald-500 focus:ring-emerald-500' : 'border-slate-300 focus:ring-slate-300'}`}
-                                aria-describedby="passwordStrength"
+                                className="block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 dark:bg-dark-card"
                             />
-                            <span
+                            <button
+                                type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-slate-500"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500"
                             >
-                                {showPassword ? <EyeIcon size={18} /> : <EyeOffIcon size={18} />}
-                            </span>
+                                {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                            </button>
                         </div>
                         {password && (
                             <div className="mt-2">
@@ -230,13 +234,13 @@ const ResetPassword = () => {
                                     {[...Array(4)].map((_, i) => (
                                         <div
                                             key={i}
-                                            className={`h-1.5 w-full rounded ${i < passwordStrength ? getStrengthColor(passwordStrength) : 'bg-gray-300'}`}
+                                            className={`h-1.5 w-full rounded ${i < passwordStrength ? getStrengthColor(passwordStrength) : 'bg-gray-300 dark:bg-gray-600'}`}
                                         />
                                     ))}
                                 </div>
-                                <p className="text-xs text-slate-600" id="passwordStrength">
+                                <p className="text-xs text-slate-600 dark:text-slate-400" id="passwordStrength">
                                     {passwordStrength === 4 ? (
-                                        <span className="flex items-center text-emerald-600">
+                                        <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                                             <CheckIcon className="mr-1 h-3 w-3" /> {strengthFeedback}
                                         </span>
                                     ) : strengthFeedback}
@@ -246,38 +250,46 @@ const ResetPassword = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
-                        <div className="relative">
+                        <label
+                            htmlFor="confirm-password"
+                            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                        >
+                            Confirm New Password
+                        </label>
+                        <div className="relative mt-1">
                             <input
+                                id="confirm-password"
+                                name="confirm-password"
                                 type={showConfirmPassword ? 'text' : 'password'}
-                                placeholder="••••••••"
+                                autoComplete="new-password"
                                 required
                                 value={confirmPassword}
                                 onChange={handleConfirmPasswordChange}
-                                className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:outline-none ${confirmPassword && !passwordsMatch ? 'border-red-500 focus:ring-red-400' : 'border-slate-300 focus:ring-emerald-500'}`}
-                                aria-describedby="confirmPasswordError"
+                                className="block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald-400 dark:bg-dark-card"
                             />
-                            <span
+                            <button
+                                type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-slate-500"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500"
                             >
-                                {showConfirmPassword ? <EyeIcon size={18} /> : <EyeOffIcon size={18} />}
-                            </span>
+                                {showConfirmPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                            </button>
                         </div>
-                        {confirmPassword && !passwordsMatch && (
-                            <p className="text-xs text-red-600 mt-1" id="confirmPasswordError">
-                                <span className="flex items-center">
-                                    <CircleX className="mr-1 h-3 w-3" />
-                                    Passwords don't match
-                                </span>
-                            </p>
-                        )}
 
-                        {confirmPassword && passwordsMatch && (
-                            <p className="text-xs text-emerald-600 mt-1">
+                        {confirmPassword && (
+                            <p className={`text-xs mt-1 ${passwordsMatch ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                 <span className="flex items-center">
-                                    <CheckIcon className="mr-1 h-3 w-3" />
-                                    Passwords match
+                                    {passwordsMatch ? (
+                                        <>
+                                            <CheckIcon className="mr-1 h-3 w-3" />
+                                            Passwords match
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CircleX className="mr-1 h-3 w-3" />
+                                            Passwords don't match
+                                        </>
+                                    )}
                                 </span>
                             </p>
                         )}
@@ -288,9 +300,9 @@ const ResetPassword = () => {
                     type="submit"
                     fullWidth
                     disabled={isLoading || passwordStrength < 3 || !confirmPassword || !passwordsMatch}
-                    className="flex items-center justify-center gap-2"
+                    className="flex items-center justify-center space-x-2 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600"
                 >
-                    <ShieldCheckIcon className="h-5 w-5" />
+                    <LockIcon className="h-5 w-5" />
                     <span>{isLoading ? 'Resetting...' : 'Reset Password'}</span>
                 </Button>
             </form>

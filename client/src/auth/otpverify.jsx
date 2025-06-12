@@ -229,7 +229,7 @@ const OTPVerify = () => {
                     <div className="mb-4">
                         <img src={verifyImage} alt="Security Verification" width={150} />
                     </div>
-                    <h2 className="mb-2 text-2xl font-bold">Security First</h2>
+                    <h2 className="mb-2 text-2xl font-bold text-white">Security First</h2>
                     <p className="text-center text-emerald-50">
                         We've sent a 6-digit verification code to your email address to
                         ensure your account security.
@@ -240,10 +240,10 @@ const OTPVerify = () => {
             <div className="space-y-6 px-4 sm:px-6 md:px-8">
                 <div>
                     <div className="flex justify-between items-center mb-2">
-                        <label className="block text-sm font-medium text-slate-700">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                             Verification Code
                         </label>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm text-slate-500 dark:text-slate-400">
                             Expires in: {formatTimeRemaining(expiryTimer)}
                         </span>
                     </div>
@@ -252,7 +252,7 @@ const OTPVerify = () => {
                             <input
                                 key={index}
                                 ref={(el) => (inputRefs.current[index] = el)}
-                                className="w-12 h-12 text-center text-xl font-semibold border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                className="w-12 h-12 text-center text-xl font-semibold border border-slate-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-emerald-500 dark:focus:border-emerald-400 dark:bg-dark-card dark:text-white"
                                 type="text"
                                 maxLength={1}
                                 pattern="[0-9]"
@@ -269,13 +269,13 @@ const OTPVerify = () => {
                 </div>
 
                 <div className="text-center">
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                         Didn't receive the code?{' '}
                         <button
                             type="button"
                             onClick={handleResendCode}
                             disabled={!canResend || isVerifying}
-                            className={`font-medium ${canResend ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-400'}`}
+                            className={`font-medium ${canResend ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300' : 'text-slate-400 dark:text-slate-500'}`}
                         >
                             Resend {!canResend && (`${timer}s`)}
                         </button>
@@ -286,16 +286,16 @@ const OTPVerify = () => {
                     fullWidth
                     onClick={handleVerify}
                     disabled={otp.some((digit) => digit === '') || isVerifying || expiryTimer === 0}
-                    className="flex items-center justify-center space-x-2"
+                    className="flex items-center justify-center space-x-2 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600"
                 >
                     <ShieldCheckIcon className="h-5 w-5" />
                     <span>{isVerifying ? 'Verifying...' : 'Verify OTP'}</span>
                 </Button>
 
-                <div className="text-center text-sm">
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                     <Link
                         to="/login"
-                        className="font-medium text-emerald-600 hover:text-emerald-700"
+                        className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                     >
                         Back to login
                     </Link>

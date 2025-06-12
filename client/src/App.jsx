@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, Routes, Route } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
+import React from 'react';
 
 import PageTop from "./Components/main/pagetop";
 import Default from "./Pages/default";
@@ -20,6 +21,7 @@ import Profile from "./Pages/profilepage";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from "./Components/main/AppLayout";
+import ProtectedRoute from './Components/elements/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -36,8 +38,8 @@ function App() {
       <AuthProvider>
         <Toaster position="top-center" />
         <PageTop />
-
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Default />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -45,55 +47,67 @@ function App() {
           <Route path="/verify-otp" element={<Otpverify />} />
           <Route path="/email-verification" element={<EmailVerification />} />
 
+          {/* Protected Routes */}
           <Route
             path="/dashboard"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Dashboard />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/transactions"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Transactions />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Transactions />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/budgets"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Budgets />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Budgets />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reports"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Reports />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Reports />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/settings"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Settings />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Settings />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/profile"
             element={
-              <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-                <Profile />
-              </AppLayout>
+              <ProtectedRoute>
+                <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+                  <Profile />
+                </AppLayout>
+              </ProtectedRoute>
             }
           />
-
           <Route path="*" element={<Error404 />} />
         </Routes>
       </AuthProvider>

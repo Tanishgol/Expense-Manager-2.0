@@ -10,7 +10,7 @@ const Input = forwardRef(({
 }, ref) => {
     return (
         <div className="mb-4">
-            {label && <label className="mb-2 block text-sm font-medium text-navy-900">{label}</label>}
+            {label && <label className="mb-2 block text-sm font-medium text-navy-900 dark:text-white">{label}</label>}
 
             <div className="relative">
                 {icon && (
