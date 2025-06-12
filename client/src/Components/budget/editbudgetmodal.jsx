@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal } from '../modals/modal';
+import { Modal } from '../modals/Modal';
 import BudgetService from '../../services/budgetService';
 import toast from 'react-hot-toast';
 

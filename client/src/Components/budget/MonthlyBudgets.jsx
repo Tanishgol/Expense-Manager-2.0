@@ -556,7 +556,7 @@ const MonthlyBudgets = () => {
                 </div>
 
                 <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-300">
                             Monthly Insights
                         </h2>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
-import { Modal } from '../modals/Modal';
+import { Modal } from '../modals/modal';
 import { useAuth } from '../../context/AuthContext';
 import BudgetService from '../../services/budgetService';
 import toast from 'react-hot-toast';
@@ -191,7 +191,7 @@ export const TargetBudgetModal = ({
                     <button
                         onClick={onClose}
                         disabled={loading}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 dark:text-gray-200 dark:border-dark-border dark:hover:border-dark-border focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                     >
                         Cancel
                     </button>

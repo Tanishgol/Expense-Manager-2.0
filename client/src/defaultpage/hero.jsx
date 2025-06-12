@@ -1,7 +1,14 @@
 import React from 'react';
 import { ArrowRightIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const HeroSection = ({ onGetStarted }) => {
+const HeroSection = () => {
+    const navigate = useNavigate();
+
+    const handleGetStarted = () => {
+        navigate('/login');
+    };
+
     return (
         <div className="bg-gradient-to-b from-white to-blue-50 w-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
@@ -16,7 +23,8 @@ const HeroSection = ({ onGetStarted }) => {
                             expense management solution.
                         </p>
                         <button
-                            onClick={onGetStarted}
+                            type="button"
+                            onClick={handleGetStarted}
                             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition duration-150 ease-in-out"
                         >
                             Login to Get Started

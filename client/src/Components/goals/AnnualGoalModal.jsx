@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal } from '../modals/Modal';
+import { Modal } from '../modals/modal';
 
 export const AnnualGoalModal = ({ isOpen, onClose, goal, onSubmit }) => {
     const [formData, setFormData] = useState({
@@ -51,7 +51,8 @@ export const AnnualGoalModal = ({ isOpen, onClose, goal, onSubmit }) => {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                     />
                 </div>
 
@@ -101,7 +102,8 @@ export const AnnualGoalModal = ({ isOpen, onClose, goal, onSubmit }) => {
                         required
                         value={formData.deadline}
                         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                     />
                 </div>
 
@@ -113,7 +115,8 @@ export const AnnualGoalModal = ({ isOpen, onClose, goal, onSubmit }) => {
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                     />
                 </div>
 

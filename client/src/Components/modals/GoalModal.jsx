@@ -47,7 +47,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+            className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             required
           />
         </div>
@@ -62,7 +63,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+            className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
 
@@ -77,7 +79,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
               name="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+              className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
               required
             />
           </div>
@@ -92,7 +95,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
               name="endDate"
               value={formData.endDate}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+              className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
               required
             />
           </div>
@@ -108,7 +112,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="targetAmount"
             value={formData.targetAmount}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+            className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             required
             min="0"
             step="0.01"
@@ -125,7 +130,8 @@ const GoalModal = ({ isOpen, onClose, type = 'savings', onSubmit }) => {
             name="monthlyContribution"
             value={formData.monthlyContribution}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-primary-light dark:focus:ring-primary-light"
+            className="w-full pl-3 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1 bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+        border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             required
             min="0"
             step="0.01"
