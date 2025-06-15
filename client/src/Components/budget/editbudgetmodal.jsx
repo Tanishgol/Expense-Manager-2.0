@@ -9,6 +9,10 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [dynamicCalculations, setDynamicCalculations] = useState({
+        remaining: 0,
+        totalRemaining: 0
+    });
 
     useEffect(() => {
         if (budget) {
@@ -17,6 +21,32 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
             });
         }
     }, [budget]);
+
+    // Add new useEffect for dynamic calculations
+    useEffect(() => {
+        const numValue = parseFloat(formData.limit) || 0;
+        const currentSpent = budget?.spent || 0;
+
+        // Calculate new total budget
+        let newTotal;
+        if (budget?._id) {
+            newTotal = currentTotal - budget.limit + numValue;
+        } else {
+            newTotal = currentTotal + numValue;
+        }
+
+        setDynamicCalculations({
+            remaining: numValue - currentSpent,
+            totalRemaining: totalBudget - newTotal
+        });
+
+        // Update error state
+        if (newTotal > totalBudget) {
+            setError(`Total budget cannot exceed target budget of $${totalBudget.toLocaleString()}`);
+        } else {
+            setError('');
+        }
+    }, [formData.limit, budget, currentTotal, totalBudget]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -103,12 +133,12 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                             onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
                             disabled={loading}
                             className={`w-full pl-7 pr-12 px-3 py-2 border rounded-md focus:outline-none focus:ring-1
-        ${error
+                            ${error
                                     ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-500'
                                     : 'border-gray-300 dark:border-dark-border focus:border-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400'
                                 }
-        bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
-        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                             bg-white dark:bg-dark-card text-gray-900 dark:text-gray-100
+                            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                         />
 
                     </div>
@@ -128,7 +158,7 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600 dark:text-gray-300">Remaining</span>
                             <span className="font-medium text-green-600 dark:text-lime-500">
-                                ${(parseFloat(formData.limit) - (budget.spent || 0)).toFixed(2)}
+                                ${dynamicCalculations.remaining.toFixed(2)}
                             </span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
@@ -140,7 +170,9 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                         </div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600 dark:text-gray-300">Remaining Budget</span>
-                            <span className="font-medium text-red-600 dark:text-red-500">${(totalBudget - currentTotal).toFixed(2)}</span>
+                            <span className="font-medium text-red-600 dark:text-red-500">
+                                ${dynamicCalculations.totalRemaining.toFixed(2)}
+                            </span>
                         </div>
                     </div>
                 )}
@@ -148,7 +180,7 @@ export const EditBudgetModal = ({ isOpen, onClose, budget, onSubmit, totalBudget
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || error}
                         className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto
                             ${loading || error
                                 ? 'bg-gray-400 cursor-not-allowed'

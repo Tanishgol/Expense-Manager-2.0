@@ -110,20 +110,22 @@ const ViewBudgetDetailsModal = ({ isOpen, onClose, budget }) => {
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Status</h3>
                     <div
                         className={`p-3 rounded-lg ${limit === 0
-                                ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                                : percentage >= 100
-                                    ? 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
-                                    : percentage >= 80
-                                        ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
-                                        : 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300'
+                            ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                            : percentage >= 100
+                                ? 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
+                                : percentage >= 75
+                                    ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
+                                    : 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300'
                             }`}
                     >
                         {limit === 0 ? (
                             <p>Please set your budget limit first to start tracking your expenses.</p>
                         ) : percentage >= 100 ? (
                             <p>Budget exceeded! You've spent more than your monthly limit.</p>
-                        ) : percentage >= 80 ? (
+                        ) : percentage >= 75 ? (
                             <p>Warning: You're close to reaching your monthly budget limit.</p>
+                        ) : percentage >= 50 ? (
+                            <p>You're halfway through your budget. Keep an eye on your spending.</p>
                         ) : (
                             <p>You're within your budget. Keep up the good work!</p>
                         )}

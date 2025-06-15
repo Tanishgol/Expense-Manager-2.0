@@ -19,9 +19,23 @@ const Overview = () => {
         previousMonthIncome: 0,
         previousMonthExpenses: 0
     });
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
+    const [userName, setUserName] = useState('User');
+
+    useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            try {
+                const parsedUser = JSON.parse(userData);
+                setUserName(parsedUser.fullName || 'User');
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                setUserName('User');
+            }
+        }
+    }, []);
 
     const calculateOverviewData = (transactions) => {
         const data = {
@@ -163,7 +177,12 @@ const Overview = () => {
 
     return (
         <div className="space-y-6 mt-14">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Dashboard Overview</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 md:text-left xs:text-center xss:text-center xsss:text-center">
+                Dashboard, Welcome back{" "}
+                <span className="px-1 text-blue-700 dark:text-blue-400">
+                    {userName}
+                </span>
+            </h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <OverviewCard
                     title="Total Balance"

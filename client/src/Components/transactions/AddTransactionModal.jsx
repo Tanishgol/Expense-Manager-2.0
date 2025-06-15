@@ -19,6 +19,13 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [availableCategories, setAvailableCategories] = useState([]);
 
+    const [dynamicBudgetInfo, setDynamicBudgetInfo] = useState({
+        limit: 0,
+        spent: 0,
+        remaining: 0,
+        newTotal: 0
+    });
+
     // Fetch available categories with budgets
     useEffect(() => {
         const fetchAvailableCategories = async () => {
@@ -140,6 +147,29 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
             window.removeEventListener('transactionChange', handleTransactionChange);
         };
     }, [formData.category, formData.amount, formData.type]);
+
+    // Update dynamic calculations when amount or category changes
+    useEffect(() => {
+        if (formData.type === 'expense' && formData.category !== 'Select Category' && formData.category !== 'Income') {
+            const currentAmount = parseFloat(formData.amount) || 0;
+            const currentSpent = budgetInfo?.spent || 0;
+            const budgetLimit = budgetInfo?.limit || 0;
+
+            // For edits, subtract the old amount from currentSpent
+            const oldAmount = editTransaction ? Math.abs(editTransaction.amount) : 0;
+            const newTotal = (currentSpent - oldAmount) + currentAmount;
+
+            setDynamicBudgetInfo({
+                limit: budgetLimit,
+                spent: currentSpent,
+                remaining: budgetLimit - newTotal,
+                newTotal: newTotal
+            });
+
+            // Show warning if exceeding budget
+            setShowBudgetWarning(newTotal > budgetLimit);
+        }
+    }, [formData.amount, formData.category, formData.type, budgetInfo, editTransaction]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -408,19 +438,19 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                             <span className="font-medium text-black dark:text-gray-300">${budgetInfo.limit.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Spent</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Current Spent</span>
                             <span className="font-medium text-black dark:text-gray-300">${budgetInfo.spent.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Remaining</span>
-                            <span className={`font-medium ${budgetInfo.remaining < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-lime-500'}`}>
-                                <span className="text-black dark:text-green-600">${budgetInfo.limit - budgetInfo.spent}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Remaining Amount</span>
+                            <span className={`font-medium ${dynamicBudgetInfo.remaining < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-lime-500'}`}>
+                                ${dynamicBudgetInfo.remaining.toFixed(2)}
                             </span>
                         </div>
                         {showBudgetWarning && (
                             <div className="mt-2 flex items-center text-red-600 dark:text-red-500 text-sm">
                                 <AlertCircle size={16} className="mr-1" />
-                                <span>This transaction exceeds your budget limit</span>
+                                <span>This transaction would exceed your budget limit</span>
                             </div>
                         )}
                     </div>

@@ -71,8 +71,8 @@ export const TransactionList = ({ transactions, onEdit, onDelete }) => {
                             <td className="px-6 py-4 text-sm text-gray-500">
                                 {transaction.description || '-'}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div className="flex justify-end space-x-2">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                                <div className="flex justify-end items-center space-x-2">
                                     <button
                                         onClick={() => handleEdit(transaction)}
                                         className="text-indigo-600 hover:text-indigo-900 p-1 rounded-lg hover:rounded-none hover:bg-indigo-50"
@@ -89,6 +89,7 @@ export const TransactionList = ({ transactions, onEdit, onDelete }) => {
                                     </button>
                                 </div>
                             </td>
+
                         </tr>
                     ))}
                     {transactions.length === 0 && (

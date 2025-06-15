@@ -134,8 +134,8 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                     {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
                 </span>
             </td>
-            <td className="py-4 text-center">
-                <div className="inline-flex justify-center items-center gap-2">
+            <td className="py-4 text-right">
+                <div className="inline-flex justify-end items-center gap-2">
                     <button
                         onClick={() => onEdit(transaction)}
                         className="p-1  bg-gray-800 text-white rounded transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
