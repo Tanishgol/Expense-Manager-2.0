@@ -1,71 +1,71 @@
-import React from 'react'
-import {
-    WalletIcon,
-    BellIcon,
-    KeyIcon,
-    UserIcon,
-    SettingsIcon,
-} from 'lucide-react'
+import React from 'react';
+import { ClockIcon, AlertCircleIcon } from 'lucide-react';
 
 const ActivityLog = () => {
     const activities = [
         {
-            id: 1,
-            icon: <WalletIcon size={16} className="text-green-600" />,
-            action: 'Updated budget limits',
+            id: '1',
             date: 'Today at 2:34 PM',
-            category: 'Budget',
+            activity: 'Updated budget limits',
+            section: 'Budget',
         },
         {
-            id: 2,
-            icon: <BellIcon size={16} className="text-blue-600" />,
-            action: 'Changed notification settings',
+            id: '2',
             date: 'Yesterday at 11:15 AM',
-            category: 'Settings',
+            activity: 'Changed notification settings',
+            section: 'Settings',
         },
         {
-            id: 3,
-            icon: <KeyIcon size={16} className="text-indigo-600" />,
-            action: 'Changed account password',
+            id: '3',
             date: 'Jul 12, 2023',
-            category: 'Security',
+            activity: 'Changed account password',
+            section: 'Security',
         },
-        {
-            id: 4,
-            icon: <UserIcon size={16} className="text-purple-600" />,
-            action: 'Updated profile information',
-            date: 'Jul 10, 2023',
-            category: 'Profile',
-        },
-        {
-            id: 5,
-            icon: <SettingsIcon size={16} className="text-gray-600" />,
-            action: 'Modified account settings',
-            date: 'Jul 8, 2023',
-            category: 'Settings',
-        },
-    ]
+    ];
+
+    const getSectionColor = (section) => {
+        switch (section.toLowerCase()) {
+            case 'budget':
+                return 'bg-blue-100 text-blue-800';
+            case 'settings':
+                return 'bg-purple-100 text-purple-800';
+            case 'security':
+                return 'bg-red-100 text-red-800';
+            case 'profile':
+                return 'bg-green-100 text-green-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
     return (
-        <div className="space-y-4">
-            {activities.map((activity) => (
-                <div
-                    key={activity.id}
-                    className="flex items-center justify-between py-3 border-b last:border-0"
-                >
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gray-50 rounded-lg">{activity.icon}</div>
-                        <div>
-                            <p className="font-medium text-gray-800">{activity.action}</p>
-                            <p className="text-sm text-gray-500">{activity.date}</p>
-                        </div>
+        <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center dark:text-white">
+                <ClockIcon className="w-5 h-5 mr-2 text-green-600" />
+                Recent Activity Log
+            </h2>
+            <div className="space-y-4">
+                {activities.length === 0 ? (
+                    <div className="text-center py-6">
+                        <AlertCircleIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500">No recent activity found</p>
                     </div>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {activity.category}
-                    </span>
-                </div>
-            ))}
+                ) : (
+                    activities.map((item) => (
+                        <div key={item.id} className="border-l-2 border-gray-200 pl-4 py-1">
+                            <p className="text-sm text-gray-500 dark:text-white">{item.date}</p>
+                            <p className="font-medium dark:text-white">{item.activity}</p>
+                            <span
+                                className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${getSectionColor(item.section)}`}
+                            >
+                                {item.section}
+                            </span>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
-    )
-}
+    );
+};
 
 export default ActivityLog;

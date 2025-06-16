@@ -39,7 +39,7 @@ export const Report = () => {
     }, [])
 
     const ReportsSkeleton = () => (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-14">
             <div className="flex justify-between items-center xs:mt-14 xss:mt-14 xsss:mt-14">
                 <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
                 <div className="h-10 bg-gray-200 rounded w-36 animate-pulse" />
