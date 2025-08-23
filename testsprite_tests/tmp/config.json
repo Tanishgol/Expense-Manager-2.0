@@ -1,0 +1,17 @@
+{
+  "status": "init",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "backendAuthType": "Bearer token",
+  "backendCredential": "0bea52a019b91eb561dad6fbd9b7698de1d3c2fc6fcd18b0b2be8900e654cb20d319b7c96fc919ac720be888e73193aa36bcb14dfb6d8f191c7ee6b58714986c",
+  "executionArgs": {
+    "projectName": "Expense-Manager-2.0",
+    "projectPath": "d:/Coding/project/Full Stack apps/Expense-Manager-2.0",
+    "testIds": [],
+    "additionalInstruction": "Please thoroughly test all features including authentication, transactions, budgets, goals, dashboard, and profile management. Focus on identifying UI bugs, API integration issues, data validation problems, and user experience issues.",
+    "envs": {
+      "API_KEY": "sk-user-jnMc46D-9GAlc4krHwIM-pGGLSLnS87sJuu5ir_f1O93xFmy0w2AGgJU57EuDzHBdWdoQIjO5nHlkh5GcT26SY6N5MiCVdMcDXA3LSvN-z49oJOpk2kA316EFUN6ymMTb5o"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
@@ -8,6 +9,25 @@ export const AuthProvider = ({ children }) => {
         return savedUser ? JSON.parse(savedUser) : null;
     });
     const [token, setToken] = useState(localStorage.getItem('token'));
+
+    // Check token expiration
+    const isTokenExpired = (token) => {
+        if (!token) return true;
+        try {
+            const decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+            return decoded.exp < currentTime;
+        } catch (error) {
+            return true;
+        }
+    };
+
+    // Auto-logout when token expires
+    useEffect(() => {
+        if (token && isTokenExpired(token)) {
+            logout();
+        }
+    }, [token]);
 
     useEffect(() => {
         if (token) {
@@ -36,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, isTokenExpired }}>
             {children}
         </AuthContext.Provider>
     );

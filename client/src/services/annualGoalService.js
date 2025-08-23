@@ -25,9 +25,16 @@ const AnnualGoalService = {
     // Create a new annual goal
     createGoal: async (goalData) => {
         try {
+            console.log('API Service: Making POST request to:', API_URL);
+            console.log('API Service: Request data:', goalData);
+            console.log('API Service: Auth headers:', getAuthHeader());
+            
             const response = await axios.post(API_URL, goalData, getAuthHeader());
+            console.log('API Service: Response received:', response.data);
             return response.data;
         } catch (error) {
+            console.error('API Service: Error occurred:', error);
+            console.error('API Service: Error response:', error.response?.data);
             throw error.response?.data || error.message;
         }
     },

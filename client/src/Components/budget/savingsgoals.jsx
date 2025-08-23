@@ -42,20 +42,20 @@ const SavingsGoals = () => {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                         Savings Overview
                     </h2>
-                    <div className="bg-gray-50 p-5 rounded-lg">
+                    <div className="bg-gray-50 p-5 rounded-lg dark:bg-gray-800">    
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Total Target</span>
+                            <span className="text-gray-600 dark:text-gray-400">Total Target</span>
                             <span className="font-semibold">$105,000.00</span>
                         </div>
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Total Saved</span>
+                            <span className="text-gray-600 dark:text-gray-400">Total Saved</span>
                             <span className="font-semibold">$50,000.00</span>
                         </div>
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-gray-600">Monthly Target</span>
+                            <span className="text-gray-600 dark:text-gray-400">Monthly Target</span>
                             <span className="font-semibold">$2,300.00</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
@@ -67,21 +67,21 @@ const SavingsGoals = () => {
                             ></div>
                         </div>
                         <div className="flex justify-between items-center mt-1">
-                            <span className="text-xs text-gray-500">0%</span>
-                            <span className="text-xs text-gray-500">47.6% saved</span>
-                            <span className="text-xs text-gray-500">100%</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">0%</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">47.6% saved</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">100%</span>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                         Savings Insights
                     </h2>
-                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-5">
-                        <h3 className="font-medium text-blue-800 mb-3">
+                    <div className="bg-blue-50 rounded-lg p-5 dark:bg-gray-800">
+                        <h3 className="font-medium text-blue-800 mb-3 dark:text-gray-200">
                             Progress Highlights
                         </h3>
-                        <ul className="text-sm text-blue-700 space-y-2">
+                        <ul className="text-sm text-blue-700 space-y-2 dark:text-gray-300">
                             <li>• Emergency Fund is 66.7% complete</li>
                             <li>• Retirement Savings is halfway to target</li>
                             <li>• Down Payment needs 31 months at current rate</li>
@@ -89,26 +89,26 @@ const SavingsGoals = () => {
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div>  
 
             <div className="mt-10">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                     Savings Goals
-                </h2>
+                </h2>   
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {savingsGoals.map((goal, index) => (
-                        <div key={index} className="bg-gray-50 p-5 rounded-lg">
+                        <div key={index} className="bg-gray-50 p-5 rounded-lg dark:bg-gray-800">
                             <div className="flex items-start mb-4">
                                 <div className="flex-shrink-0">{goal.icon}</div>
                                 <div className="ml-4">
-                                    <h3 className="font-medium text-gray-800">{goal.title}</h3>
-                                    <p className="text-sm text-gray-500">{goal.category}</p>
+                                    <h3 className="font-medium text-gray-800 dark:text-gray-200">{goal.title}</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{goal.category}</p>
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Progress</span>
-                                    <span className="text-sm font-medium">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Progress</span>
+                                    <span className="text-sm font-medium dark:text-gray-200">
                                         ${goal.current.toLocaleString()} / ${goal.target.toLocaleString()}
                                     </span>
                                 </div>
@@ -120,18 +120,18 @@ const SavingsGoals = () => {
                                         }}
                                     ></div>
                                 </div>
-                                <div className="flex justify-between items-center text-xs text-gray-500">
+                                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                                     <span>0%</span>
                                     <span>{calculateProgress(goal.current, goal.target).toFixed(1)}% complete</span>
                                     <span>100%</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-600">Monthly Target</span>
-                                    <span className="font-medium">${goal.monthlyTarget.toLocaleString()}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Monthly Target</span>
+                                    <span className="font-medium dark:text-gray-200">${goal.monthlyTarget.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-600">Months Remaining</span>
-                                    <span className="font-medium">
+                                    <span className="text-gray-600 dark:text-gray-400">Months Remaining</span>
+                                    <span className="font-medium dark:text-gray-200">
                                         {calculateMonthsRemaining(goal.current, goal.target, goal.monthlyTarget)} months
                                     </span>
                                 </div>

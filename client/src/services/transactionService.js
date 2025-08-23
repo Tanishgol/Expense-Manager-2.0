@@ -35,7 +35,7 @@ const TransactionService = {
     // Update a transaction
     updateTransaction: async (transactionId, updateData) => {
         try {
-            const response = await axios.put(`${API_URL}/${transactionId}`, updateData, getAuthHeader());
+            const response = await axios.patch(`${API_URL}/${transactionId}`, updateData, getAuthHeader());
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

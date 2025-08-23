@@ -166,8 +166,10 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
                 newTotal: newTotal
             });
 
-            // Show warning if exceeding budget
-            setShowBudgetWarning(newTotal > budgetLimit);
+            // Show warning if exceeding budget (only for new transactions or when amount increases)
+            const shouldShowWarning = newTotal > budgetLimit && 
+                (!editTransaction || currentAmount > Math.abs(editTransaction.amount));
+            setShowBudgetWarning(shouldShowWarning);
         }
     }, [formData.amount, formData.category, formData.type, budgetInfo, editTransaction]);
 
@@ -185,6 +187,23 @@ export const AddTransactionModal = ({ isOpen, onClose, onAdd, editTransaction })
         const amount = parseFloat(formData.amount);
         if (isNaN(amount) || amount <= 0) {
             toast.error('Please enter a valid amount');
+            return;
+        }
+        
+        // Add maximum limit validation
+        const MAX_AMOUNT = 999999999999.99;
+        if (amount > MAX_AMOUNT) {
+            toast.error(`Amount cannot exceed $${MAX_AMOUNT.toLocaleString()}`);
+            return;
+        }
+
+        // Validate date - prevent future dates
+        const selectedDate = new Date(formData.date);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        
+        if (selectedDate > today) {
+            toast.error('Cannot add transactions with future dates');
             return;
         }
 

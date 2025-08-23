@@ -5,7 +5,7 @@ const transactionSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "registerusers",
       required: true,
     },
     title: {
@@ -16,11 +16,27 @@ const transactionSchema = new Schema(
     amount: {
       type: Number,
       required: [true, "Amount is required"],
+      min: [-999999999, "Amount cannot be less than -999,999,999"],
+      max: [999999999, "Amount cannot exceed 999,999,999"],
+      validate: {
+        validator: function(value) {
+          return value !== 0; // Prevent zero amounts
+        },
+        message: "Amount cannot be zero"
+      }
     },
     date: {
       type: Date,
       required: [true, "Date is required"],
       default: Date.now,
+      validate: {
+        validator: function(value) {
+          const now = new Date();
+          const maxFutureDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+          return value <= maxFutureDate;
+        },
+        message: "Date cannot be more than 1 year in the future"
+      }
     },
     category: {
       type: String,
@@ -49,5 +65,10 @@ const transactionSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Add indexes for better performance
+transactionSchema.index({ user: 1, date: -1 });
+transactionSchema.index({ user: 1, category: 1 });
+transactionSchema.index({ user: 1, type: 1 });
 
 module.exports = mongoose.model("Transaction", transactionSchema);

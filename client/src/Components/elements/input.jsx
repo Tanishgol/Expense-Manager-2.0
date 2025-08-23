@@ -6,11 +6,19 @@ const Input = forwardRef(({
     className = '',
     icon,
     success,
+    id,
     ...props
 }, ref) => {
     return (
         <div className="mb-4">
-            {label && <label className="mb-2 block text-sm font-medium text-navy-900 dark:text-white">{label}</label>}
+            {label && (
+                <label 
+                    htmlFor={id || props.name} 
+                    className="mb-2 block text-sm font-medium text-navy-900 dark:text-white"
+                >
+                    {label}
+                </label>
+            )}
 
             <div className="relative">
                 {icon && (
@@ -21,6 +29,9 @@ const Input = forwardRef(({
 
                 <input
                     ref={ref}
+                    id={id || props.name}
+                    aria-describedby={error ? `${id || props.name}-error` : undefined}
+                    aria-invalid={error ? 'true' : 'false'}
                     className={`w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none focus:ring-1 bg-white text-gray-900 
                     ${icon ? 'pl-10' : ''}
                     ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
@@ -40,7 +51,11 @@ const Input = forwardRef(({
                 )}
             </div>
 
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            {error && (
+                <p id={`${id || props.name}-error`} className="mt-1 text-sm text-red-600" role="alert">
+                    {error}
+                </p>
+            )}
         </div>
     );
 });

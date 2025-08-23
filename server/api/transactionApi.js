@@ -135,7 +135,7 @@ const exportTransactions = async (req, res) => {
 // Define routes
 router.get('/', verifyToken, getAllTransactions);
 router.post('/', verifyToken, createTransaction);
-router.put('/:id', verifyToken, updateTransaction);
+router.patch('/:id', verifyToken, updateTransaction);
 router.delete('/:id', verifyToken, deleteTransaction);
 router.get('/stats', verifyToken, getTransactionStats);
 router.get('/export', verifyToken, exportTransactions);

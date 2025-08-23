@@ -22,6 +22,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from "./Components/main/AppLayout";
 import ProtectedRoute from './Components/elements/ProtectedRoute';
+import ErrorBoundary from './Components/elements/ErrorBoundary';
 
 function App() {
   const location = useLocation();
@@ -34,11 +35,12 @@ function App() {
   const [activeTab, setActiveTab] = useState(getInitialTab());
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Toaster position="top-center" />
-        <PageTop />
-        <Routes>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <Toaster position="top-center" />
+          <PageTop />
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Default />} />
           <Route path="/login" element={<Login />} />
@@ -110,8 +112,9 @@ function App() {
           />
           <Route path="*" element={<Error404 />} />
         </Routes>
-      </AuthProvider>
-    </ThemeProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

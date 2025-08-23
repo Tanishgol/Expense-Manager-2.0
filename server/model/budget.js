@@ -52,4 +52,8 @@ budgetSchema.virtual('percentage').get(function() {
 budgetSchema.set('toJSON', { virtuals: true });
 budgetSchema.set('toObject', { virtuals: true });
 
+// Add indexes for better performance
+budgetSchema.index({ user: 1, category: 1 });
+budgetSchema.index({ user: 1, type: 1 });
+
 module.exports = mongoose.model("Budget", budgetSchema); 

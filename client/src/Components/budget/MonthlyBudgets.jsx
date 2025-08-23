@@ -568,7 +568,7 @@ const MonthlyBudgets = () => {
                         </button>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg shadow-sm">
-                        <h3 className="font-medium text-blue-800 mb-3">
+                        <h3 className="font-medium text-blue-800 mb-3 dark:text-gray-200">
                             Progress Highlights
                         </h3>
                         {progressHighlights.length > 0 ? (
@@ -580,8 +580,8 @@ const MonthlyBudgets = () => {
                                             className={`font-semibold ${insight.status === 'critical'
                                                 ? 'text-red-600'
                                                 : insight.status === 'warning'
-                                                    ? 'text-orange-600'
-                                                    : 'text-blue-700'
+                                                    ? 'text-orange-600 dark:text-orange-400'
+                                                    : 'text-blue-700 dark:text-sky-200'
                                                 }`}
                                         >
                                             {insight.message}

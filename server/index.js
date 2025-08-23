@@ -1,4 +1,17 @@
 require("dotenv").config();
+
+// Environment variable validation
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+  console.error('Please check your .env file and ensure all required variables are set.');
+  process.exit(1);
+}
+
+console.log('✅ All required environment variables are set');
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./DBconnection");
@@ -14,6 +27,10 @@ const nodemailer = require("nodemailer");
 const transactionApi = require("./api/transactionApi");
 const budgetRoutes = require("./routes/budgetRoutes");
 const annualGoalRoutes = require("./routes/annualGoalRoutes");
+const { sanitizeInput, validateRegistration, validateLogin, validatePasswordReset, handleValidationErrors } = require("./middleware/validation");
+const { apiLimiter, authLimiter } = require("./middleware/rateLimit");
+const { logger, errorLogger } = require("./middleware/logger");
+const { securityHeaders, additionalSecurity } = require("./middleware/security");
 
 const app = express();
 const router = express.Router();
@@ -22,10 +39,17 @@ connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true,
   })
 );
+
+// Apply security middleware
+app.use(securityHeaders);
+app.use(additionalSecurity);
+
+// Apply logging middleware
+app.use(logger);
 
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
@@ -47,20 +71,34 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Not an image! Please upload an image."), false);
+    // Check MIME type
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"), false);
     }
+    
+    // Check file extension
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    if (!allowedExtensions.includes(fileExtension)) {
+      return cb(new Error("Invalid file extension. Allowed: jpg, jpeg, png, gif, webp"), false);
+    }
+    
+    // Additional security checks
+    if (file.size > 5 * 1024 * 1024) {
+      return cb(new Error("File size too large. Maximum 5MB allowed"), false);
+    }
+    
+    cb(null, true);
   },
 });
 
-app.use("/api/transactions", transactionApi);
-app.use("/api/budgets", budgetRoutes);
-app.use("/api/annual-goals", annualGoalRoutes);
+// Apply rate limiting to all API routes
+app.use("/api/transactions", apiLimiter, transactionApi);
+app.use("/api/budgets", apiLimiter, budgetRoutes);
+app.use("/api/annual-goals", apiLimiter, annualGoalRoutes);
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -75,6 +113,7 @@ const transporter = nodemailer.createTransport({
 transporter.verify(function (error, success) {
   if (error) {
     console.error("Email configuration error:", error);
+    console.error("Please check your EMAIL_USER and EMAIL_PASS environment variables");
   } else {
     console.log("Email server is ready to send messages");
   }
@@ -263,7 +302,7 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", authLimiter, sanitizeInput, validatePasswordReset, handleValidationErrors, async (req, res) => {
   try {
     const { otp, newPassword } = req.body;
 
@@ -301,7 +340,7 @@ router.post("/reset-password", async (req, res) => {
 // Register the router
 app.use("/api", router);
 
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", authLimiter, sanitizeInput, validateRegistration, handleValidationErrors, async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
@@ -322,7 +361,7 @@ app.post("/api/register", async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || "your-secret-key",
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
@@ -340,7 +379,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", authLimiter, sanitizeInput, validateLogin, handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -356,7 +395,7 @@ app.post("/api/login", async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || "your-secret-key",
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
@@ -374,9 +413,61 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Apply error logging middleware
+app.use(errorLogger);
+
+// Global error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong!" });
+  console.error('Error:', err.message);
+  console.error('Stack:', err.stack);
+  
+  // Handle multer errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ 
+      message: 'File too large. Maximum size is 5MB' 
+    });
+  }
+  
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ 
+      message: 'Unexpected file field' 
+    });
+  }
+  
+  // Handle validation errors
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ 
+      message: 'Validation failed',
+      errors: Object.values(err.errors).map(e => e.message)
+    });
+  }
+  
+  // Handle JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({ 
+      message: 'Invalid token' 
+    });
+  }
+  
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({ 
+      message: 'Token expired' 
+    });
+  }
+  
+  // Handle MongoDB errors
+  if (err.code === 11000) {
+    return res.status(400).json({ 
+      message: 'Duplicate field value' 
+    });
+  }
+  
+  // Default error response
+  res.status(500).json({ 
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message 
+  });
 });
 
 const PORT = process.env.PORT || 9000;

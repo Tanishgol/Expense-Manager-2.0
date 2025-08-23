@@ -7,11 +7,23 @@ const verifyToken = (req, res, next) => {
         if (!token) {
             return res.status(401).json({ message: 'Please authenticate' });
         }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Check if token is expired
+        if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+            return res.status(401).json({ message: 'Token expired' });
+        }
+        
         req.userId = decoded.userId;
         next();
     } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token expired' });
+        }
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
         return res.status(401).json({ message: 'Please authenticate' });
     }
 };

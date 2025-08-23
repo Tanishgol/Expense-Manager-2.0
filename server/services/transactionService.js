@@ -7,13 +7,47 @@ const TransactionService = {
         return await transaction.save();
     },
 
-    // Get all transactions for a user
-    getAllTransactions: async (userId, limit = null) => {
-        const query = Transaction.find({ user: userId }).sort({ date: -1 });
-        if (limit) {
-            query.limit(limit);
+    // Get all transactions for a user with pagination
+    getAllTransactions: async (userId, page = 1, limit = 20, filters = {}) => {
+        const skip = (page - 1) * limit;
+        
+        // Build query with filters
+        const query = { user: userId };
+        
+        if (filters.category) {
+            query.category = filters.category;
         }
-        return await query.exec();
+        
+        if (filters.startDate && filters.endDate) {
+            query.date = {
+                $gte: new Date(filters.startDate),
+                $lte: new Date(filters.endDate)
+            };
+        }
+        
+        if (filters.minAmount !== undefined || filters.maxAmount !== undefined) {
+            query.amount = {};
+            if (filters.minAmount !== undefined) query.amount.$gte = filters.minAmount;
+            if (filters.maxAmount !== undefined) query.amount.$lte = filters.maxAmount;
+        }
+        
+        const transactions = await Transaction.find(query)
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit)
+            .exec();
+            
+        const total = await Transaction.countDocuments(query);
+        
+        return {
+            transactions,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalItems: total,
+                itemsPerPage: limit
+            }
+        };
     },
 
     // Get a specific transaction

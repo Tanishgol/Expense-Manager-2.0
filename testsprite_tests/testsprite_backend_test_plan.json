@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "user registration functionality",
+    "description": "Test the /api/register endpoint to ensure new users can register successfully with valid fullName, email, and password, and that invalid or missing data is handled properly."
+  },
+  {
+    "id": "TC002",
+    "title": "user login functionality",
+    "description": "Test the /api/login endpoint to verify users can log in with correct email and password, and that incorrect credentials are rejected with appropriate error messages."
+  },
+  {
+    "id": "TC003",
+    "title": "password reset otp sending",
+    "description": "Test the /api/verify-email endpoint to confirm that a password reset OTP is sent to the provided email if it exists, and proper error handling for invalid or unregistered emails."
+  },
+  {
+    "id": "TC004",
+    "title": "password reset otp verification",
+    "description": "Test the /api/verify-otp endpoint to verify that the OTP provided for password reset is validated correctly for the given email, including handling of expired or incorrect OTPs."
+  },
+  {
+    "id": "TC005",
+    "title": "password reset functionality",
+    "description": "Test the /api/reset-password endpoint to ensure users can reset their password using a valid OTP and new password, and that invalid OTPs or weak passwords are rejected."
+  },
+  {
+    "id": "TC006",
+    "title": "transaction creation",
+    "description": "Test the POST /api/transactions endpoint to verify that authenticated users can create new financial transactions with valid amount, category, description, and date."
+  },
+  {
+    "id": "TC007",
+    "title": "transaction retrieval",
+    "description": "Test the GET /api/transactions endpoint to ensure authenticated users can retrieve all their transactions and that the response data is accurate and complete."
+  },
+  {
+    "id": "TC008",
+    "title": "transaction update and deletion",
+    "description": "Test the PATCH and DELETE /api/transactions/{id} endpoints to verify that authenticated users can update and delete specific transactions by ID, with proper authorization and error handling."
+  },
+  {
+    "id": "TC009",
+    "title": "transaction export functionality",
+    "description": "Test the GET /api/transactions/export endpoint to confirm that authenticated users can export their transactions in CSV, PDF, and Excel formats, and that the exported files are correctly formatted."
+  },
+  {
+    "id": "TC010",
+    "title": "budget management operations",
+    "description": "Test the /api/budgets endpoints (GET, POST, PUT, DELETE) to verify that authenticated users can create, retrieve, update, and delete budgets, including category budgets and total budget limits."
+  }
+]

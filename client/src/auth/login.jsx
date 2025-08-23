@@ -43,15 +43,9 @@ const Login = () => {
                 const from = location.state?.from?.pathname || '/dashboard';
                 navigate(from, { replace: true });
             } else {
-                if (data?.message === 'Email not found') {
-                    toast.error('Email not found');
-                } else if (data?.message === 'Invalid credentials') {
-                    toast.error('Invalid credentials');
-                } else if (data?.message === 'Password is incorrect') {
-                    toast.error('Password is incorrect');
-                } else {
-                    toast.error(data.message || 'Login failed, please try again');
-                }
+                // Standardize error handling
+                const errorMessage = data?.message || 'Login failed, please try again';
+                toast.error(errorMessage);
             }
         } catch (err) {
             toast.error('Something went wrong. Please check your network or try again later.');

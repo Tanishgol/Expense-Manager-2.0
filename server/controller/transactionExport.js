@@ -21,6 +21,14 @@ exports.exportReport = async (req, res, { format, transactions, summary }) => {
         }
 
         if (format === 'xlsx') {
+            // Limit export size to prevent memory issues
+            const maxExportSize = 10000;
+            if (transactions.length > maxExportSize) {
+                return res.status(400).json({ 
+                    message: `Export too large. Maximum ${maxExportSize} transactions allowed. Please use filters to reduce the dataset.` 
+                });
+            }
+            
             const ws = XLSX.utils.json_to_sheet(transactions);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Transactions');

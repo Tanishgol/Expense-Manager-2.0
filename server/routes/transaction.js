@@ -1,22 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Transaction = require('../model/transaction');
-const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../middleware/auth');
 const { exportReport } = require('../controller/transactionExport');
-
-const auth = async (req, res, next) => {
-    try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.userId;
-        next();
-    } catch (error) {
-        res.status(401).json({ message: 'Please authenticate' });
-    }
-};
+const { sanitizeInput, validateTransaction, handleValidationErrors } = require('../middleware/validation');
 
 // Export transactions - must be before /:id route
-router.get('/export', auth, async (req, res) => {
+router.get('/export', verifyToken, async (req, res) => {
     try {
         const format = req.query.format || 'csv';
         const transactions = await Transaction.find({ user: req.userId })
@@ -62,7 +52,7 @@ router.get('/export', auth, async (req, res) => {
     }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', verifyToken, sanitizeInput, validateTransaction, handleValidationErrors, async (req, res) => {
     try {
         const transaction = new Transaction({
             ...req.body,
@@ -76,7 +66,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Get all transactions for the authenticated user
-router.get('/', auth, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     try {
         const transactions = await Transaction.find({ user: req.userId })
             .sort({ date: -1 });
@@ -87,7 +77,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get a specific transaction
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
     try {
         const transaction = await Transaction.findOne({
             _id: req.params.id,
@@ -103,7 +93,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Update a transaction
-router.patch('/:id', auth, async (req, res) => {
+router.put('/:id', verifyToken, sanitizeInput, validateTransaction, handleValidationErrors, async (req, res) => {
     try {
         const transaction = await Transaction.findOneAndUpdate(
             { _id: req.params.id, user: req.userId },
@@ -120,7 +110,7 @@ router.patch('/:id', auth, async (req, res) => {
 });
 
 // Delete a transaction
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
     try {
         const transaction = await Transaction.findOneAndDelete({
             _id: req.params.id,
