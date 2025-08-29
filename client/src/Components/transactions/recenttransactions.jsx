@@ -28,7 +28,7 @@ export const RecentTransactions = () => {
             }
 
             const url = isDashboard
-                ? 'http://localhost:9000/api/transactions?limit=5'
+                ? 'http://localhost:9000/api/transactions?limit=2000'
                 : 'http://localhost:9000/api/transactions';
 
             const response = await fetch(url, {
