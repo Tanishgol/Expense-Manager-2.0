@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:9000/api/annual-goals';
+const API_URL = 'http://localhost:9000/api/savings-goals';
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');
@@ -11,8 +11,8 @@ const getAuthHeader = () => {
     };
 };
 
-const AnnualGoalService = {
-    // Create a new goal
+const SavingsGoalService = {
+    // Create a new savings goal
     createGoal: async (goalData) => {
         try {
             const response = await axios.post(API_URL, goalData, getAuthHeader());
@@ -22,7 +22,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Get all goals
+    // Get all savings goals
     getAllGoals: async () => {
         try {
             const response = await axios.get(API_URL, getAuthHeader());
@@ -32,7 +32,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Get active goals
+    // Get active savings goals
     getActiveGoals: async () => {
         try {
             const response = await axios.get(`${API_URL}/active`, getAuthHeader());
@@ -42,7 +42,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Get a specific goal
+    // Get a specific savings goal
     getGoalById: async (goalId) => {
         try {
             const response = await axios.get(`${API_URL}/${goalId}`, getAuthHeader());
@@ -52,7 +52,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Update a goal
+    // Update a savings goal
     updateGoal: async (goalId, updateData) => {
         try {
             const response = await axios.put(`${API_URL}/${goalId}`, updateData, getAuthHeader());
@@ -62,7 +62,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Delete a goal
+    // Delete a savings goal
     deleteGoal: async (goalId) => {
         try {
             const response = await axios.delete(`${API_URL}/${goalId}`, getAuthHeader());
@@ -72,7 +72,7 @@ const AnnualGoalService = {
         }
     },
 
-    // Add funds to a goal
+    // Add funds to a savings goal
     addFunds: async (goalId, amount) => {
         try {
             const response = await axios.post(`${API_URL}/${goalId}/add-funds`, { amount }, getAuthHeader());
@@ -93,4 +93,4 @@ const AnnualGoalService = {
     }
 };
 
-export default AnnualGoalService; 
+export default SavingsGoalService;

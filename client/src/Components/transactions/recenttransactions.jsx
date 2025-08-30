@@ -134,7 +134,9 @@ export const RecentTransactions = () => {
                             <th className="pb-3 font-medium">Category</th>
                             <th className="pb-3 font-medium">Date</th>
                             <th className="pb-3 font-medium text-right">Amount</th>
-                            <th className="pb-3 font-medium text-right">Actions</th>
+                            {!isDashboard && (
+                                <th className="pb-3 font-medium text-right">Actions</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
@@ -145,6 +147,7 @@ export const RecentTransactions = () => {
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 isMobile={false}
+                                isDashboard={isDashboard}
                             />
                         ))}
                     </tbody>
@@ -159,6 +162,7 @@ export const RecentTransactions = () => {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         isMobile={true}
+                        isDashboard={isDashboard}
                     />
                 ))}
             </div>

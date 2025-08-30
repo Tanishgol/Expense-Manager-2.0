@@ -27,6 +27,8 @@ const nodemailer = require("nodemailer");
 const transactionApi = require("./api/transactionApi");
 const budgetRoutes = require("./routes/budgetRoutes");
 const annualGoalRoutes = require("./routes/annualGoalRoutes");
+const savingsGoalRoutes = require("./routes/savingsGoalRoutes");
+const incomeRoutes = require("./routes/incomeRoutes");
 const { sanitizeInput, validateRegistration, validateLogin, validatePasswordReset, handleValidationErrors } = require("./middleware/validation");
 const { apiLimiter, authLimiter } = require("./middleware/rateLimit");
 const { logger, errorLogger } = require("./middleware/logger");
@@ -99,6 +101,8 @@ const upload = multer({
 app.use("/api/transactions", apiLimiter, transactionApi);
 app.use("/api/budgets", apiLimiter, budgetRoutes);
 app.use("/api/annual-goals", apiLimiter, annualGoalRoutes);
+app.use("/api/savings-goals", apiLimiter, savingsGoalRoutes);
+app.use("/api/income", apiLimiter, incomeRoutes);
 
 const transporter = nodemailer.createTransport({
   service: "gmail",

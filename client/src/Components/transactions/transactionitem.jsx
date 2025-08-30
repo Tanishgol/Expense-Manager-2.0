@@ -15,7 +15,7 @@ import {
     Trash2,
 } from 'lucide-react';
 
-const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
+const TransactionItem = ({ transaction, onEdit, onDelete, isMobile, isDashboard = false }) => {
     const { title, description, category, date, amount } = transaction;
     const isIncome = amount > 0;
 
@@ -77,23 +77,25 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                 {description && (
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{description}</p>
                 )}
-                <div className="flex justify-center gap-4 mt-4">
-                    <button
-                        onClick={() => onEdit(transaction)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 text-white hover:bg-indigo-100 rounded transition dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
-                    >
-                        <Edit size={16} />
-                        <span>Edit</span>
-                    </button>
+                {!isDashboard && (
+                    <div className="flex justify-center gap-4 mt-4">
+                        <button
+                            onClick={() => onEdit(transaction)}
+                            className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-800 text-white hover:bg-indigo-100 rounded transition dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
+                        >
+                            <Edit size={16} />
+                            <span>Edit</span>
+                        </button>
 
-                    <button
-                        onClick={() => onDelete(transaction._id)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm bg-red-800 text-yellow-200 hover:bg-red-100 rounded transition dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
-                    >
-                        <Trash2 size={16} />
-                        <span>Delete</span>
-                    </button>
-                </div>
+                        <button
+                            onClick={() => onDelete(transaction._id)}
+                            className="flex items-center gap-1 px-3 py-1 text-sm bg-red-800 text-yellow-200 hover:bg-red-100 rounded transition dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
+                        >
+                            <Trash2 size={16} />
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                )}
             </div>
         );
     }
@@ -134,22 +136,24 @@ const TransactionItem = ({ transaction, onEdit, onDelete, isMobile }) => {
                     {isIncome ? '+' : '-'}${Math.abs(amount).toFixed(2)}
                 </span>
             </td>
-            <td className="py-4 text-right">
-                <div className="inline-flex justify-end items-center gap-2">
-                    <button
-                        onClick={() => onEdit(transaction)}
-                        className="p-1  bg-gray-800 text-white rounded transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
-                    >
-                        <Edit size={16} />
-                    </button>
-                    <button
-                        onClick={() => onDelete(transaction._id)}
-                        className="p-1 bg-red-800 text-yellow-200 rounded transition-colors dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
-                    >
-                        <Trash2 size={16} />
-                    </button>
-                </div>
-            </td>
+            {!isDashboard && (
+                <td className="py-4 text-right">
+                    <div className="inline-flex justify-end items-center gap-2">
+                        <button
+                            onClick={() => onEdit(transaction)}
+                            className="p-1  bg-gray-800 text-white rounded transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-indigo-100"
+                        >
+                            <Edit size={16} />
+                        </button>
+                        <button
+                            onClick={() => onDelete(transaction._id)}
+                            className="p-1 bg-red-800 text-yellow-200 rounded transition-colors dark:bg-red-800 dark:text-yellow-200 dark:hover:bg-red-100"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </td>
+            )}
         </tr>
     );
 };

@@ -438,23 +438,6 @@ export const Report = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {annualGoals.length > 0 && (
-                            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <h3 className="text-md font-medium text-gray-700 dark:text-gray-200 mb-4">Goal Insights</h3>
-                                <div className="bg-blue-50 dark:bg-blue-900 border border-blue-100 dark:border-blue-700 rounded-lg p-4">
-                                    <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-3">Progress Highlights</h4>
-                                    <ul className="text-sm text-blue-700 dark:text-blue-200 space-y-2">
-                                        {getGoalInsights().map((insight, index) => (
-                                            <li key={index} className="flex items-start">
-                                                <span className="mr-2">•</span>
-                                                <span>{insight.message}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

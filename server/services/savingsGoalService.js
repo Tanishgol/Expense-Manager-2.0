@@ -1,27 +1,27 @@
-const AnnualGoal = require('../model/annualGoal');
+const SavingsGoal = require('../model/savingsGoal');
 
-const AnnualGoalService = {
-    // Get all annual goals for a user
+const SavingsGoalService = {
+    // Get all savings goals for a user
     getAllGoals: async (userId) => {
-        const goals = await AnnualGoal.find({ user: userId });
+        const goals = await SavingsGoal.find({ user: userId });
         return goals;
     },
 
-    // Get active annual goals for a user
+    // Get active savings goals for a user
     getActiveGoals: async (userId) => {
-        const goals = await AnnualGoal.find({ user: userId, isActive: true });
+        const goals = await SavingsGoal.find({ user: userId, isActive: true });
         return goals;
     },
 
-    // Create a new annual goal
+    // Create a new savings goal
     createGoal: async (goalData) => {
-        const goal = new AnnualGoal(goalData);
+        const goal = new SavingsGoal(goalData);
         return await goal.save();
     },
 
-    // Update an annual goal
+    // Update a savings goal
     updateGoal: async (goalId, userId, updateData) => {
-        const goal = await AnnualGoal.findOneAndUpdate(
+        const goal = await SavingsGoal.findOneAndUpdate(
             { _id: goalId, user: userId },
             updateData,
             { new: true }
@@ -29,15 +29,15 @@ const AnnualGoalService = {
         return goal;
     },
 
-    // Delete an annual goal
+    // Delete a savings goal
     deleteGoal: async (goalId, userId) => {
-        const goal = await AnnualGoal.findOneAndDelete({ _id: goalId, user: userId });
+        const goal = await SavingsGoal.findOneAndDelete({ _id: goalId, user: userId });
         return goal;
     },
 
-    // Add funds to a goal
+    // Add funds to a savings goal
     addFunds: async (goalId, userId, amount) => {
-        const goal = await AnnualGoal.findOne({ _id: goalId, user: userId });
+        const goal = await SavingsGoal.findOne({ _id: goalId, user: userId });
         if (!goal) {
             throw new Error('Goal not found');
         }
@@ -52,7 +52,7 @@ const AnnualGoalService = {
 
     // Toggle goal active status
     toggleGoalStatus: async (goalId, userId) => {
-        const goal = await AnnualGoal.findOne({ _id: goalId, user: userId });
+        const goal = await SavingsGoal.findOne({ _id: goalId, user: userId });
         if (!goal) {
             throw new Error('Goal not found');
         }
@@ -62,4 +62,4 @@ const AnnualGoalService = {
     }
 };
 
-module.exports = AnnualGoalService; 
+module.exports = SavingsGoalService;

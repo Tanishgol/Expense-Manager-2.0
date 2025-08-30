@@ -6,6 +6,8 @@ import MonthlyBudgets from './MonthlyBudgets'
 import AnnualGoals from './annualgoals'
 import SavingsGoals from './savingsgoals'
 import BudgetService from '../../services/budgetService'
+import AnnualGoalService from '../../services/annualGoalService'
+import SavingsGoalService from '../../services/savingsGoalService'
 import GoalModal from '../modals/GoalModal';
 import toast from 'react-hot-toast'
 
@@ -18,6 +20,8 @@ const Budgets = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [loading, setLoading] = useState(true)
     const [budgets, setBudgets] = useState([])
+    const [annualGoals, setAnnualGoals] = useState([])
+    const [savingsGoals, setSavingsGoals] = useState([])
 
     const fetchBudgets = async () => {
         try {
@@ -32,6 +36,24 @@ const Budgets = () => {
         }
     }
 
+    const fetchAnnualGoals = async () => {
+        try {
+            const data = await AnnualGoalService.getAllGoals()
+            setAnnualGoals(data)
+        } catch (error) {
+            console.error('Error fetching annual goals:', error)
+        }
+    }
+
+    const fetchSavingsGoals = async () => {
+        try {
+            const data = await SavingsGoalService.getAllGoals()
+            setSavingsGoals(data)
+        } catch (error) {
+            console.error('Error fetching savings goals:', error)
+        }
+    }
+
     useEffect(() => {
         let ignore = false;
         let retryTimeout;
@@ -39,6 +61,11 @@ const Budgets = () => {
         const attemptFetch = async () => {
             if (!ignore) {
                 await fetchBudgets()
+                if (activeSection === 'annual') {
+                    await fetchAnnualGoals()
+                } else if (activeSection === 'savings') {
+                    await fetchSavingsGoals()
+                }
                 // Retry after 3 seconds if still loading
                 retryTimeout = setTimeout(attemptFetch, 3000)
             }
@@ -90,14 +117,36 @@ const Budgets = () => {
         }
     }
 
+    const handleCreateGoal = async (goalData) => {
+        try {
+            setLoading(true)
+            let newGoal;
+            if (activeSection === 'annual') {
+                newGoal = await AnnualGoalService.createGoal(goalData)
+                setAnnualGoals(prev => [...prev, newGoal])
+                toast.success('Annual goal created successfully')
+            } else if (activeSection === 'savings') {
+                newGoal = await SavingsGoalService.createGoal(goalData)
+                setSavingsGoals(prev => [...prev, newGoal])
+                toast.success('Savings goal created successfully')
+            }
+            setIsModalOpen(false)
+        } catch (error) {
+            console.error('Error creating goal:', error)
+            toast.error('Failed to create goal')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const renderActiveSection = () => {
         switch (activeSection) {
             case 'monthly':
                 return <MonthlyBudgets budgets={budgets.filter(b => b.type === 'monthly')} />
             case 'annual':
-                return <AnnualGoals budgets={budgets.filter(b => b.type === 'annual')} />
+                return <AnnualGoals goals={annualGoals} onGoalUpdate={fetchAnnualGoals} />
             case 'savings':
-                return <SavingsGoals budgets={budgets.filter(b => b.type === 'savings')} />
+                return <SavingsGoals goals={savingsGoals} onGoalUpdate={fetchSavingsGoals} />
             default:
                 return <MonthlyBudgets budgets={budgets.filter(b => b.type === 'monthly')} />
         }
@@ -105,17 +154,11 @@ const Budgets = () => {
 
     const AddButton = () => (
         <button
-            onClick={() => {
-                if (activeSection === 'monthly') {
-                    setShowAddModal(true);
-                } else {
-                    setIsModalOpen(true);
-                }
-            }}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors duration-200"
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
         >
-            <PlusIcon className="w-5 h-5" />
-            <span>Add {activeSection === 'monthly' ? 'Budget' : 'Goal'}</span>
+            <PlusIcon size={16} />
+            Add {activeSection === 'annual' ? 'Annual Goal' : 'Savings Goal'}
         </button>
     )
 
@@ -209,11 +252,7 @@ const Budgets = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 type={activeSection}
-                onSubmit={(goalData) => {
-                    console.log(goalData);
-                    // TODO: Implement goal creation logic
-                    setIsModalOpen(false);
-                }}
+                onSubmit={handleCreateGoal}
             />
         </>
     )
